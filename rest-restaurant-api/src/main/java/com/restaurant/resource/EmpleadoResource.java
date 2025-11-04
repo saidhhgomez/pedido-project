@@ -25,7 +25,7 @@ public class EmpleadoResource {
 
             if (idGenerado > 0) {
                 String json = String.format(
-                    "{\"mensaje\": \"Conductor registrado exitosamente\", \"idGenerado\": %d}", 
+                    "{\"mensaje\": \"Empleado registrado exitosamente\", \"idGenerado\": %d}", 
                     idGenerado
                 );
                 return Response.status(Response.Status.CREATED).entity(json).build();
