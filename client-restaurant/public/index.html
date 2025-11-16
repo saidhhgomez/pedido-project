@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Crear Empleado</title>
+</head>
+<body>
+  <h1>Crear Empleado</h1>
+  <form action="/empleados" method="POST">
+    <h3>Credenciales</h3>
+    Usuario: <input type="text" name="usuario" required><br>
+    Contraseña: <input type="password" name="contrasena" required><br>
+
+    <h3>Persona</h3>
+    Nombres: <input type="text" name="nombres" required><br>
+    Apellido Paterno: <input type="text" name="apPaterno" required><br>
+    Apellido Materno: <input type="text" name="apMaterno" required><br>
+    Género: 
+    <select name="genero" required>
+      <option value="M">Masculino</option>
+      <option value="F">Femenino</option>
+    </select><br>
+    Tipo Documento: <input type="text" name="tipoDocumento" required><br>
+    N° Documento: <input type="text" name="numDocumento" required><br>
+    Teléfono: <input type="text" name="telefono" required><br>
+    Correo: <input type="email" name="correo" required><br>
+    Fecha Nacimiento: <input type="date" name="fechaNacimiento" required><br>
+
+    <h3>Empleado</h3>
+    Dirección: <input type="text" name="direccion" required><br>
+    Estado: <input type="text" name="estadoEmpleado" value="activo" required><br>
+    Imagen URL: <input type="text" name="imagenConductor_url"><br><br>
+
+    <button type="submit">Crear Empleado</button>
+  </form>
+</body>
+</html>
