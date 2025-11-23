@@ -41,10 +41,14 @@ export default function RegistrarEmpleado() {
   });
 
   const onSubmit = (data: RegistrarEmpleadoDTO) => {
+    console.log("Datos a enviar:", data); // <-- Aquí ves lo que se envía
     mutate(data, {
       onSuccess: () => {
         alert("Empleado registrado correctamente");
         navigate("/");
+      },
+      onError: (error) => {
+        console.error("Error al registrar empleado:", error);
       },
     });
   };
@@ -65,10 +69,7 @@ export default function RegistrarEmpleado() {
       <Typography variant="h4">Registrar Empleado</Typography>
 
       {/* --- CREDENCIALES --- */}
-      <TextField
-        label="Usuario"
-        {...register("credenciales.usuario")}
-      />
+      <TextField label="Usuario" {...register("credenciales.usuario")} />
       {errors.credenciales?.usuario && (
         <Typography color="error">
           {errors.credenciales.usuario.message}
