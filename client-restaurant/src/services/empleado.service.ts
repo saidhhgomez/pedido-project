@@ -1,4 +1,4 @@
-import axiosClient from "./api.serviceRestaurant";
+import axiosClient from "./api.service";
 import { useMutation } from "@tanstack/react-query";
 import type { RegistrarEmpleadoDTO } from "../types/empleado.types";
 
