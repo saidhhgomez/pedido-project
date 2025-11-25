@@ -21,20 +21,27 @@ export default function Login() {
 
   const doLogin = ({
     usuario,
-    contraseña,
+    contrasena,
   }: {
     usuario: string;
-    contraseña: string;
+    contrasena: string;
   }) => {
     mutate(
       {
         usuario,
-        contraseña,
+        contrasena,
       },
       {
         onSuccess: (data) => {
-          dispatch(login({ token: data?.data?.token,rol:data?.data?.rol,nombre:data?.data?.nombre}));
-        },onError: (error:{message:string})=> {
+dispatch(
+  login({
+    token: data?.data?.token,
+    rol: data?.data?.usuario?.rol,
+    nombre: data?.data?.usuario?.nombre,
+    tipoId: data?.data?.usuario?.tipoId,
+    id: data?.data?.usuario?.id
+  })
+);        },onError: (error:{message:string})=> {
             console.log(" Error en iniciar session",error.message)             
         },
       },    
@@ -59,13 +66,13 @@ export default function Login() {
         <Typography color="error">{errors.usuario.message}</Typography>
       )}
       <TextField
-        {...register("contraseña")}
+        {...register("contrasena")}
         type="password"
         label="Contraseña"
         variant="outlined"
       />
-      {errors.contraseña && (
-        <Typography color="error">{errors.contraseña.message}</Typography>
+      {errors.contrasena && (
+        <Typography color="error">{errors.contrasena.message}</Typography>
       )}
       <Button variant="contained" type="submit">
         Iniciar sesión
