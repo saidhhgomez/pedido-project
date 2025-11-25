@@ -1,5 +1,6 @@
 import { Box, Grid } from "@mui/material";
 import { Outlet } from "react-router";
+import logo from "../assets/react.svg"
 
 export default function AuthLayout() {
   return (
@@ -7,7 +8,7 @@ export default function AuthLayout() {
       <Grid size={6}>
         <Box
           sx={{
-            backgroundImage: `url(/fondo.avif)`,
+            backgroundImage: `url(${logo})`,
             backgroundRepeat: "no-repeat",
             backgroundSize: "cover",
             height: "100vh",
