@@ -48,6 +48,7 @@ export default function Register() {
   const doRegister = (data: RegistrarClienteDTO) => {
     mutate(data, {
       onSuccess: () => {
+        
         alert("Tu cuenta ha sido creada, puedes iniciar sesión");
         navigate("/");
       },

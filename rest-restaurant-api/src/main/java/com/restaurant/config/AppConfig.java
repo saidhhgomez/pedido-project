@@ -6,6 +6,7 @@ import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
 
 import com.restaurant.resource.ClienteResource;
+import com.restaurant.resource.DireccionClienteResource;
 import com.restaurant.resource.EmpleadoResource;
 import com.restaurant.resource.LoginResource;
 
@@ -20,6 +21,7 @@ public class AppConfig extends Application {
         resources.add(EmpleadoResource.class);
         resources.add(ClienteResource.class);
         resources.add(LoginResource.class);
+        resources.add(DireccionClienteResource.class);
         return resources;
     }
 }
