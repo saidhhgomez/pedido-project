@@ -1,16 +1,26 @@
+import type { DireccionForm } from "../types/direction.type";
 import axiosClient from "./api.service";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
-const PATH="http://localhost:8080/rest-restaurant-api/api/direccion"
+const PATH="/rest-restaurant-api/api/direccion"
 
 function getAllDirecciones(idCliente: number) {
   return axiosClient.get(`${PATH}/cliente/${idCliente}`);
 }
 
 function deleteDireccion(id:string){
-
 return axiosClient.delete(`${PATH}/eliminar/${id}`);
 }
+
+ function createDireccion(payload: DireccionForm) {
+  return axiosClient.post(
+    "rest-restaurant-api/api/direccion/registrar",
+    payload
+  );
+}
+
+
+
 
 export function useGetDirecciones(idCliente?: number | null) {
   return useQuery({
@@ -27,4 +37,14 @@ export function useRemoveDireccion(){
     mutationKey:["deleteDireccion"]
   }
   );
+}
+
+
+export function useCreateDirection(){
+  return useMutation(
+    {
+      mutationFn:createDireccion,
+      mutationKey:["createDireccion"],
+    }
+  )
 }

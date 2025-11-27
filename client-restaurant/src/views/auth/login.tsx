@@ -10,7 +10,7 @@ import { loginSchema } from "../../validators/login.schema";
 export default function Login() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { mutate, } = useLogin();
+  const { mutate } = useLogin();
   const {
     register,
     handleSubmit,
@@ -42,7 +42,7 @@ dispatch(
     id: data?.data?.usuario?.id
   })
 );        },onError: (error:{message:string})=> {
-            console.log(" Error en iniciar session",error.message)             
+            alert(` Error en iniciar session,${error.message}`);            
         },
       },    
     );
