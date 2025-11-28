@@ -23,7 +23,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import IconLogout from '@mui/icons-material/Logout';
 import HomeIcon from '@mui/icons-material/Home';
 import {logout}  from "../../src/store/slices/auth.slice";
-
+import EditSquareIcon from '@mui/icons-material/EditSquare';
 
 
 const drawerWidth = 240;
@@ -175,6 +175,16 @@ export default function PersistentDrawerLeft() {
               </ListItemButton>
             </ListItem>
           </Link>
+          <Link to={"/catalogo"}>
+                                <ListItem  disablePadding>
+              <ListItemButton>
+                <ListItemIcon>
+                  <EditSquareIcon />
+                </ListItemIcon>
+                <ListItemText primary={"Catalogo"} />
+              </ListItemButton>
+            </ListItem>
+            </Link>
         </List>
         <Divider />
         <List>

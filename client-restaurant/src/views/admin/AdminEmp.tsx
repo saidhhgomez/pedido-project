@@ -1,4 +1,4 @@
-import { Box, Typography, TextField, Button } from "@mui/material";
+import { Box, Typography, TextField, Button, MenuItem } from "@mui/material";
 import { useNavigate } from "react-router";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -9,6 +9,45 @@ import type { RegistrarEmpleadoDTO } from "../../types/empleado.types";
 export default function RegistrarEmpleado() {
   const navigate = useNavigate();
   const { mutate } = useCrearEmpleado();
+
+  const tipo_documento = [
+  {
+    value: 'DNI',
+    label: 'DNI',
+  },
+  {
+    value: 'Passaporte',
+    label: 'Pasaporte',
+  },
+  {
+    value: 'Carnet de Extranjeria',
+    label: 'Carnet de Extranjeria',
+  }
+];
+
+  const estados = [
+  {
+    value: 'Activo',
+    label: 'Activo',
+  },
+  {
+    value: 'No Activo',
+    label: 'No Activo',
+  }
+];
+
+  const Genero = [
+  {
+    value: 'M',
+    label: 'M',
+  },
+  {
+    value: 'F',
+    label: 'F',
+  }
+];
+
+
 
   const {
     register,
@@ -80,6 +119,7 @@ export default function RegistrarEmpleado() {
         label="Contraseña"
         type="password"
         {...register("credenciales.contrasena")}
+
       />
       {errors.credenciales?.contrasena && (
         <Typography color="error">
@@ -88,14 +128,62 @@ export default function RegistrarEmpleado() {
       )}
 
       {/* --- PERSONA --- */}
-      <TextField label="Nombres" {...register("persona.nombres")} />
-      <TextField label="Apellido paterno" {...register("persona.apPaterno")} />
+      <TextField label="Nombres" {...register("persona.nombres")}  
+      error={!!errors.persona?.apMaterno}
+            helperText={errors.persona?.apMaterno?.message}/>
+      <TextField label="Apellido paterno" {...register("persona.apPaterno") }
+          error={!!errors.persona?.apPaterno}
+            helperText={errors.persona?.apPaterno?.message} />
+
       <TextField label="Apellido materno" {...register("persona.apMaterno")} />
-      <TextField label="Género" {...register("persona.genero")} />
-      <TextField label="Tipo documento" {...register("persona.tipoDocumento")} />
-      <TextField label="Nro documento" {...register("persona.numDocumento")} />
-      <TextField label="Teléfono" {...register("persona.telefono")} />
-      <TextField label="Correo" {...register("persona.correo")} />
+
+
+               <TextField
+          id="outlined-select-currency"
+          select
+          label="Genero"
+          defaultValue=""
+            {...register("persona.genero")}
+            error={!!errors.persona?.genero}
+            helperText={errors.persona?.genero?.message}
+        >
+          {Genero.map((option) => (
+            <MenuItem key={option.value} value={option.value}>
+              {option.label}
+            </MenuItem>
+          ))}
+        </TextField>
+
+
+           <TextField
+          id="outlined-select-currency"
+          select
+          label="Tipo de Documento"
+          defaultValue=""
+            {...register("persona.tipoDocumento")}
+            error={!!errors.persona?.tipoDocumento}
+            helperText={errors.persona?.tipoDocumento?.message}
+        >
+          {tipo_documento.map((option) => (
+            <MenuItem key={option.value} value={option.value}>
+              {option.label}
+            </MenuItem>
+          ))}
+        </TextField>
+        
+ 
+
+      
+      <TextField label="Nro documento" {...register("persona.numDocumento")} 
+      error={!!errors.persona?.numDocumento}
+            helperText={errors.persona?.numDocumento?.message}/>
+      <TextField label="Teléfono" {...register("persona.telefono")} 
+      error={!!errors.persona?.telefono}
+            helperText={errors.persona?.telefono?.message}/>
+      <TextField label="Correo" {...register("persona.correo")} 
+      error={!!errors.persona?.correo}
+            helperText={errors.persona?.correo?.message}
+      />
 
       <TextField
         type="date"
@@ -104,12 +192,32 @@ export default function RegistrarEmpleado() {
         {...register("persona.fechaNacimiento")}
       />
 
-      {/* --- EMPLEADO --- */}
-      <TextField label="Dirección" {...register("empleado.direccion")} />
-      <TextField label="Estado" {...register("empleado.estadoEmpleado")} />
+      {/* --- Estado --- */}
+      <TextField label="Direccion" {...register("empleado.direccion")} 
+      error={!!errors.empleado?.direccion}
+            helperText={errors.empleado?.direccion?.message}/>
+
+             <TextField
+          id="outlined-select-currency"
+          select
+          label="Estado"
+          defaultValue=""
+            {...register("empleado.estadoEmpleado")}
+            error={!!errors.empleado?.estadoEmpleado}
+            helperText={errors.empleado?.estadoEmpleado?.message}
+        >
+          {estados.map((option) => (
+            <MenuItem key={option.value} value={option.value}>
+              {option.label}
+            </MenuItem>
+          ))}
+        </TextField>
+
       <TextField
         label="Imagen (URL)"
         {...register("empleado.imagenConductor_url")}
+        error={!!errors.empleado?.imagenConductor_url}
+            helperText={errors.empleado?.imagenConductor_url?.message}
       />
 
       <Button variant="contained" type="submit">

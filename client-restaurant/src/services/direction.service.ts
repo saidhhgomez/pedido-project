@@ -1,4 +1,4 @@
-import type { DireccionForm } from "../types/direction.type";
+import type { DireccionPayload } from "../types/direction.type";
 import axiosClient from "./api.service";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
@@ -12,7 +12,7 @@ function deleteDireccion(id:string){
 return axiosClient.delete(`${PATH}/eliminar/${id}`);
 }
 
- function createDireccion(payload: DireccionForm) {
+ function createDireccion(payload:DireccionPayload ) {
   return axiosClient.post(
     "rest-restaurant-api/api/direccion/registrar",
     payload

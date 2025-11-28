@@ -2,8 +2,8 @@
 import { Box, Button, Modal, TextField, Typography } from "@mui/material";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import type { DireccionForm } from "../types/direction.type";
-import { directionSchema } from "../validators/direction.schema";
+import type { DireccionForm } from "../../types/direction.type";
+import { directionSchema } from "../../validators/direction.schema";
 
 interface Props {
   open: boolean;
@@ -24,6 +24,10 @@ const style = {
 };
 
 export default function FormModal({ open, onClose, onSubmit }: Props) {
+
+
+
+
   const {
     register,
     handleSubmit,

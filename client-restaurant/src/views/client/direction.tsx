@@ -5,7 +5,7 @@ import { Link, useNavigate } from "react-router";
 import { useCreateDirection, useGetDirecciones } from "../../services/direction.service";
 import MediaCard from "../../components/RenderDire";
 import {  Button } from "@mui/material";
-import FormModal from "../../components/ModalDirection";
+import FormModal from "../../components/Modals/ModalDirection";
 import { useState } from "react";
 import type { DireccionForm } from "../../types/direction.type";
 
@@ -30,7 +30,7 @@ export default function MyDirection() {
 
 
 
-      const handleSubmit = (data: DireccionForm) => {
+      const Submit = (data: DireccionForm) => {
     mutate({...data,
       idCliente:idcliente,
     },{
@@ -40,10 +40,6 @@ export default function MyDirection() {
       }
     }); 
   };
-
-
-
-
 
 
   const doLogout = () => {
@@ -78,7 +74,7 @@ export default function MyDirection() {
           <FormModal
         open={open}
         onClose={() => setOpen(false)}
-        onSubmit={handleSubmit}
+        onSubmit={Submit}
       />
   
   </>;
