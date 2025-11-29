@@ -90,7 +90,8 @@ CREATE TABLE TipoContrato (
 CREATE TABLE Roles (
 	idRol INT AUTO_INCREMENT PRIMARY KEY,
 	nombre VARCHAR(80),
-	descripcion VARCHAR(255)
+	descripcion VARCHAR(255),
+    estadoRol VARCHAR(50) DEFAULT 'activo'
 );
 
 -- Tabla: Contrato (Datos personales del cliente)
