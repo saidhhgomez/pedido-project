@@ -16,7 +16,5 @@ export default function Navigation() {
   if (token && (tipo==="empleado")) {
     return <AdminRoutes/>;
   }
-
-
   return <AuthRoutes />;
 }
