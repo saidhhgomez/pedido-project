@@ -1,16 +1,9 @@
 package com.restaurant.model;
 
-public class EmpleadoCompletoRequest {
-    private Credenciales credenciales;
+public class EmpleadoExisteCompletoRequest {
     private Persona persona;
     private Empleado empleado;
     private Contrato contrato;
-	public Credenciales getCredenciales() {
-		return credenciales;
-	}
-	public void setCredenciales(Credenciales credenciales) {
-		this.credenciales = credenciales;
-	}
 	public Persona getPersona() {
 		return persona;
 	}
