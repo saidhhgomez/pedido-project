@@ -15,11 +15,9 @@ import { selectIdCliente } from '../store/slices/auth.slice';
 
 export default function MediaCard({Direccion}: {Direccion : Direccion}) {
   const { mutate} =useRemoveDireccion();
-    const idcliente=useSelector(selectIdCliente);
-
-    const {refetch}=useGetDirecciones(idcliente);
+  const idcliente=useSelector(selectIdCliente);
+  const {refetch}=useGetDirecciones(idcliente);
   
-
   const DoRemoveDireccion= ()=>{
     mutate(Direccion.idDireccion, {
       onSuccess: ()=>{

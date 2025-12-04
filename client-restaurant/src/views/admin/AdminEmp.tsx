@@ -49,35 +49,35 @@ export default function RegistrarEmpleado() {
 
 
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<RegistrarEmpleadoDTO>({
-    resolver: yupResolver(registrarEmpleadoSchema),
-    defaultValues: {
-      credenciales: {
-        usuario: "",
-        contrasena: "",
+    const {
+      register,
+      handleSubmit,
+      formState: { errors },
+    } = useForm<RegistrarEmpleadoDTO>({
+      resolver: yupResolver(registrarEmpleadoSchema),
+      defaultValues: {
+        credenciales: {
+          usuario: "",
+          contrasena: "",
+        },
+        persona: {
+          nombres: "",
+          apPaterno: "",
+          apMaterno: "",
+          genero: "",
+          tipoDocumento: "",
+          numDocumento: "",
+          telefono: "",
+          correo: "",
+          fechaNacimiento: "",
+        },
+        empleado: {
+          direccion: "",
+          estadoEmpleado: "",
+          imagenConductor_url: "",
+        },
       },
-      persona: {
-        nombres: "",
-        apPaterno: "",
-        apMaterno: "",
-        genero: "",
-        tipoDocumento: "",
-        numDocumento: "",
-        telefono: "",
-        correo: "",
-        fechaNacimiento: "",
-      },
-      empleado: {
-        direccion: "",
-        estadoEmpleado: "",
-        imagenConductor_url: "",
-      },
-    },
-  });
+    });
 
   const onSubmit = (data: RegistrarEmpleadoDTO) => {
     console.log("Datos a enviar:", data); // <-- Aquí ves lo que se envía
