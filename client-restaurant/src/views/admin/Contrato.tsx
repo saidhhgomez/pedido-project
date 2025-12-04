@@ -12,16 +12,7 @@ export default function ContratoAdmin() {
     console.log("Jornada registrada:", data);
   };
 
-              const Submit = (data: PlateEit) => {
-            mutate(data
-            ,{
-              onSuccess: ()=>{
-                console.log("registro exisamente")
-                refetch();
-                alert("Registro exitosamente");
-              }
-            }); 
-          };
+  
 
   return (
     <>
