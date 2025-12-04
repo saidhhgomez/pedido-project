@@ -186,6 +186,41 @@ export default function PersistentDrawerLeft() {
             </ListItem>
             </Link>
         </List>
+
+
+                  <Link to={"/sucursal"}>
+                      <ListItem  disablePadding>
+              <ListItemButton>
+                <ListItemIcon>
+                  <HomeIcon />
+                </ListItemIcon>
+                <ListItemText primary={"sucursal"} />
+              </ListItemButton>
+            </ListItem>
+          </Link>
+
+
+          <Link to={"/Rol"}>
+                      <ListItem  disablePadding>
+              <ListItemButton>
+                <ListItemIcon>
+                  <HomeIcon />
+                </ListItemIcon>
+                <ListItemText primary={"Rol"} />
+              </ListItemButton>
+            </ListItem>
+          </Link>
+
+          <Link to={"/Contrato"}>
+                      <ListItem  disablePadding>
+              <ListItemButton>
+                <ListItemIcon>
+                  <HomeIcon />
+                </ListItemIcon>
+                <ListItemText primary={"Contrato"} />
+              </ListItemButton>
+            </ListItem>
+          </Link>
         <Divider />
         <List>
           <Link to={""}>

@@ -15,6 +15,7 @@ export default function Catalogo() {
           mutate(data
           ,{
             onSuccess: ()=>{
+              console.log("registro exisamente")
               refetch();
               alert("Registro exitosamente");
             }
