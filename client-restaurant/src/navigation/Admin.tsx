@@ -7,6 +7,7 @@ import Catalogo from "../views/admin/Catalogo";
 import RolAdmin from "../views/admin/Rol";
 import ContratoAdmin from "../views/admin/Contrato";
 import SucusalAdmin from "../views/admin/Sucursal";
+import MetodoPagoAdmin from "../views/admin/MetodoPago";
 
 export default function AdminRoutes() {
   return (
@@ -17,6 +18,8 @@ export default function AdminRoutes() {
         <Route path="/sucursal" element={<SucusalAdmin/>} />
         <Route path="/Contrato" element={<ContratoAdmin/>} />
         <Route path="/catalogo" element={<Catalogo />} />
+        <Route path="/MetodoPago" element={<MetodoPagoAdmin />} />
+
         <Route path="/AdminEmp" element={<AdminEmp/>} />
         <Route path="*" element={<Page404 />} />
       </Route>

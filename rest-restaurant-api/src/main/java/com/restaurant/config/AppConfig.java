@@ -10,6 +10,10 @@ import com.restaurant.resource.ClienteResource;
 import com.restaurant.resource.DireccionClienteResource;
 import com.restaurant.resource.EmpleadoResource;
 import com.restaurant.resource.LoginResource;
+import com.restaurant.resource.MetodoPagoResource;
+import com.restaurant.resource.RolResource;
+import com.restaurant.resource.SucursalResource;
+import com.restaurant.resource.TipoContratoResource;
 
 @ApplicationPath("/api")
 public class AppConfig extends Application {
@@ -24,6 +28,10 @@ public class AppConfig extends Application {
         resources.add(LoginResource.class);
         resources.add(DireccionClienteResource.class);
         resources.add(CatalogoComidaResource.class);
+        resources.add(TipoContratoResource.class);
+        resources.add(SucursalResource.class);
+        resources.add(RolResource.class);
+        resources.add(MetodoPagoResource.class);
         return resources;
     }
 }

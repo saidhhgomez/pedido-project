@@ -24,15 +24,18 @@ const style = {
 
 export default function FormModalEditRol({ open, onClose, onSubmit, initialData }: Props) {
   const { register, handleSubmit, control, reset } = useForm<Rol>({
-    defaultValues: initialData,
+    defaultValues: {
+      nombre: "",
+      descripcion: "",
+      estadoRol: "activo",
+    },
   });
 
-  // ✅ FIX: Cargar los datos cuando cambie initialData
   useEffect(() => {
-    if (initialData) {
+    if (open && initialData) {
       reset(initialData);
     }
-  }, [initialData, reset]);
+  }, [open, initialData, reset]);
 
   const enviar = (data: Rol) => {
     onSubmit(data);
@@ -46,17 +49,17 @@ export default function FormModalEditRol({ open, onClose, onSubmit, initialData 
 
         <form onSubmit={handleSubmit(enviar)}>
           <TextField
-            label="Nombre"
             fullWidth
+            label="Nombre"
             {...register("nombre", { required: true })}
             sx={{ mt: 2 }}
           />
 
           <TextField
-            label="Descripción"
             fullWidth
             multiline
             rows={3}
+            label="Descripción"
             {...register("descripcion", { required: true })}
             sx={{ mt: 2 }}
           />
@@ -64,12 +67,11 @@ export default function FormModalEditRol({ open, onClose, onSubmit, initialData 
           <Controller
             name="estadoRol"
             control={control}
-            defaultValue={initialData?.estadoRol}
             render={({ field }) => (
               <TextField
                 select
-                label="Estado"
                 fullWidth
+                label="Estado"
                 {...field}
                 sx={{ mt: 2 }}
               >

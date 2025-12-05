@@ -9,7 +9,11 @@ function getAllContratoId(id: number) {
 }
 
 function deleteContrato(id:number){
-return axiosClient.delete(`${PATH}/eliminar/${id}`);
+return axiosClient.delete(`${PATH}/${id}`);
+}
+
+function updateContrato({ id, data }: { id: number; data: Partial<TipoJornada> }) {
+  return axiosClient.put(`${PATH}/${id}`, data);
 }
 
  function createContrato(payload:TipoJornada ) {
@@ -58,4 +62,11 @@ export function useCreateContrato(){
       mutationKey:["createContrato"],
     }
   )
+}
+
+export function useUpdateContrato() {
+  return useMutation({
+    mutationFn: updateContrato,
+    mutationKey: ["updateContrato"],
+  });
 }

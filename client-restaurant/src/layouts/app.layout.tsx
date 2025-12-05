@@ -221,6 +221,18 @@ export default function PersistentDrawerLeft() {
               </ListItemButton>
             </ListItem>
           </Link>
+
+          <Link to={"/MetodoPago"}>
+                      <ListItem  disablePadding>
+              <ListItemButton>
+                <ListItemIcon>
+                  <HomeIcon />
+                </ListItemIcon>
+                <ListItemText primary={"Metodo De Pago"} />
+              </ListItemButton>
+            </ListItem>
+          </Link>
+
         <Divider />
         <List>
           <Link to={""}>

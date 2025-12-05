@@ -2,7 +2,7 @@ import Card from '@mui/material/Card';
 import CardActions from '@mui/material/CardActions';
 import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
-import type {   Plate, PlateUpdate } from '../types/Plate.type';
+import type {   Plate } from '../types/Plate.type';
 import { Box, Button, CardActionArea } from '@mui/material';
 import { selectRol } from '../store/slices/auth.slice';
 import { useSelector } from 'react-redux';
