@@ -24,13 +24,13 @@ public class ClienteResource {
 
             if (idGenerado > 0) {
                 String json = String.format(
-                    "{\"mensaje\": \"Empleado registrado exitosamente\", \"idGenerado\": %d}", 
+                    "{\"mensaje\": \"Cliente registrado exitosamente\", \"idGenerado\": %d}", 
                     idGenerado
                 );
                 return Response.status(Response.Status.CREATED).entity(json).build();
             } else {
                 return Response.status(Response.Status.BAD_REQUEST)
-                        .entity("{\"error\": \"No se pudo registrar el empleado\"}")
+                        .entity("{\"error\": \"No se pudo registrar el cliente\"}")
                         .build();
             }
 
