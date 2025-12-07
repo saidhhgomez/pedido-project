@@ -6,6 +6,7 @@ import { registrarEmpleadoSchema } from "../../validators/Cliente.schema";
 import MenuItem from "@mui/material/MenuItem";
 import type { RegistrarClienteDTO } from "../../types/cliente.types";
 import { useRegisterCliente } from "../../services/cliente.service";
+import Swal from "sweetalert2";
 
 export default function Register() {
   const tiposDocumento = [
@@ -48,12 +49,22 @@ export default function Register() {
   const doRegister = (data: RegistrarClienteDTO) => {
     mutate(data, {
       onSuccess: () => {
-        alert("Tu cuenta ha sido creada, puedes iniciar sesión");
-        navigate("/");
+Swal.fire({
+  position: "center",
+  icon: "success",
+  title: "Rol registrado",
+  showConfirmButton: false,
+  timer: 1500
+});        navigate("/");
       },
       onError: () => {
-        alert("Ocurrió un error al registrar");
-      },
+Swal.fire({
+  position: "center",
+  icon: "error",
+  title: "Rol registrado",
+  showConfirmButton: false,
+  timer: 1500
+});      },
     });
   };
 

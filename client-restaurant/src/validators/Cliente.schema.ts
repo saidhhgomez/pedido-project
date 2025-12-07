@@ -13,8 +13,10 @@ export const registrarEmpleadoSchema = yup.object({
     genero: yup.string().required("Seleccione su Genero"),
     tipoDocumento: yup.string().required("Seleccione su Tipo de documento"),
     numDocumento: yup.string().required("Ingrese su numero de Documento"),
-    telefono: yup.string().required("Ingrese su numero de telefono"),
-    correo: yup
+telefono: yup
+  .string()
+  .required("Ingrese su número de teléfono")
+  .matches(/^[0-9]+$/, "El teléfono solo puede contener números"),    correo: yup
       .string()
       .required("Ingrese correo")
       .email("Correo inválido"),
