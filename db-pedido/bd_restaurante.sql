@@ -105,10 +105,26 @@ CREATE TABLE Contrato (
 	fechaFin DATETIME,
     salario DECIMAL(10,2),
     estadoContrato VARCHAR(100) DEFAULT 'activo',
+	pdf_generado_key VARCHAR(512) NULL,
+	pdf_firmado_key VARCHAR(512) NULL,
 	FOREIGN KEY (idEmpleado) REFERENCES Empleado(idEmpleado),
 	FOREIGN KEY (idSucursal) REFERENCES Sucursal(idSucursal),
 	FOREIGN KEY (idTipoContrato) REFERENCES TipoContrato(idTipoContrato),
 	FOREIGN KEY (idRol) REFERENCES Roles(idRol)
+);
+
+-- Tabla para registrar cualquier archivo almacenado en Backblaze B2 (S3)
+CREATE TABLE storage_file (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  bucket VARCHAR(255) NOT NULL,
+  object_key VARCHAR(1024) NOT NULL,
+  filename VARCHAR(512) NOT NULL,
+  content_type VARCHAR(100),
+  size BIGINT,
+  uploaded_by INT, -- idEmpleado u otro usuario
+  related_table VARCHAR(100),     -- Ej: Contrato
+  related_id INT,                 -- Ej: idContrato
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Tabla: Proveedor (Tipo Producto, Servicio)
