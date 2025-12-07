@@ -1,6 +1,6 @@
 import { useState } from "react";
 import FormModalPlate from "../../components/Modals/ModalProducto";
-import { Button } from "@mui/material";
+import { Box, Button } from "@mui/material";
 import type { Plate, PlateEit } from "../../types/Plate.type";
 import { useCreatePlate, useGetPlate } from "../../services/plate.service";
 import CardPlate from "../../components/RendeProducto";
@@ -45,6 +45,7 @@ Swal.fire({
     <Button variant="contained" onClick={() => setOpen(true)}>
         Agregar plato
     </Button>
+            <Box sx={{ mt: 2, display: "flex", gap: 2, flexWrap: "wrap" }}>
 
                     {
               data?.data?.map((el:Plate)=>(
@@ -54,6 +55,7 @@ Swal.fire({
               )
     
             }
+            </Box>
       
       <FormModalPlate         
         open={open}
