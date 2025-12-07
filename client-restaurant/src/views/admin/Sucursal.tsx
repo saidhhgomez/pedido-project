@@ -4,6 +4,7 @@ import FormModalSucursal from "../../components/Modals/FormModalSucursal";
 import CardSucursal from "../../components/RenderSucursales";
 import { useGetAllSucursales, useCreateSucursal, useUpdateSucursal } from "../../services/sucursales.service";
 import type { Sucursal } from "../../types/sucursales.type";
+import Swal from "sweetalert2";
 
 export default function RenderSucursal() {
   const { data, refetch } = useGetAllSucursales();
@@ -17,8 +18,23 @@ export default function RenderSucursal() {
     if (editingSucursal) {
       // Editar
       updateSucursal({ id: editingSucursal.idSucursal!, data: sucursal }, {
-        onSuccess: () => { refetch(); setEditingSucursal(undefined); alert("Sucursal actualizada correctamente"); },
-        onError: () => alert("Error al actualizar la sucursal"),
+        onSuccess: () => { refetch(); 
+          setEditingSucursal(undefined); 
+       Swal.fire({
+  position: "center",
+  icon: "success",
+  title: "Sucursal Registrada",
+  showConfirmButton: false,
+  timer: 1500
+}); },
+        onError: () => 
+          Swal.fire({
+  position: "center",
+  icon: "error",
+  title: "Sucursal No registrada",
+  showConfirmButton: false,
+  timer: 1500
+}),
       });
     } else {
       // Crear

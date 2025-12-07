@@ -1,13 +1,12 @@
-  import { useDispatch, useSelector } from "react-redux";
-
-  import { logout, selectIdCliente } from "../../store/slices/auth.slice";
-  import { Link, useNavigate } from "react-router";
-  import { useCreateDirection, useGetDirecciones } from "../../services/direction.service";
-  import MediaCard from "../../components/RenderDire";
-  import {  Button } from "@mui/material";
-  import FormModal from "../../components/Modals/ModalDirection";
-  import { useState } from "react";
-  import type { DireccionForm } from "../../types/direction.type";
+import { useCreateDirection, useGetDirecciones } from "../../services/direction.service";
+import MediaCard from "../../components/RenderDire";
+import {  Box, Button, Typography } from "@mui/material";
+import FormModal from "../../components/Modals/ModalDirection";
+import { useState } from "react";
+import type { DireccionForm } from "../../types/direction.type";
+import Swal from "sweetalert2";
+import { selectIdCliente } from "../../store/slices/auth.slice";
+import { useSelector } from "react-redux";
 
   export interface Direccion {
     idDireccion:string,
@@ -20,9 +19,7 @@
 
 
   export default function MyDirection() {
-    const dispatch = useDispatch();
     const idcliente=useSelector(selectIdCliente);
-    const navigate = useNavigate();
     const [open, setOpen] = useState(false);
     const {mutate}=useCreateDirection();
 
@@ -36,26 +33,54 @@
       },{
         onSuccess: ()=>{
           refetch();
-          alert("Registro exitosamente");
-        }
+Swal.fire({
+  position: "center",
+  icon: "success",
+  title: "Registro Direccion Exitoso",
+  showConfirmButton: false,
+  timer: 1200
+});        }, onError:()=>{
+
+Swal.fire({
+  position: "center",
+  icon: "error",
+  title: "No se registro Direccion",
+  showConfirmButton: false,
+  timer: 1500
+}); 
+
+}
       }); 
     };
 
 
 
 
-    const doLogout = () => {
-      dispatch(logout());
-      navigate("/");
 
-    };
 
     return <> 
       
-        <h1>Bienvenido Direccion</h1>
-        <button onClick={doLogout}>Logout</button>
+    <Box    alignItems="center"
+   sx={{    m: 1,   // margin en todos los lados
+}}>
+<Typography
+  sx={{
+    fontSize: "2rem",
+    m:2 // tamaño más grande, ajusta a tu gusto
+  }}
+>
+Direccion 
+</Typography>
+<Box 
+>
+          <Button   variant="contained" onClick={() => setOpen(true)}>
+          Nueva Dirección
+        </Button>
+</Box>
 
-        <Link to="/">Go Home</Link>
+
+</Box>
+
 
         <div className="grid grid-cols-3 gap-x-8 gap-y-4">
                 {
@@ -68,9 +93,7 @@
     
         </div>
 
-        <Button variant="contained" onClick={() => setOpen(true)}>
-          Nueva Dirección
-        </Button>
+
 
 
             <FormModal

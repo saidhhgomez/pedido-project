@@ -6,6 +6,7 @@ import FormModalCreateRol from "../../components/Modals/FormModalRoleCrear";
 import CardRol from "../../components/RenderRole";
 
 import type { Rol } from "../../types/role.type";
+import Swal from "sweetalert2";
 
 export default function RenderRol() {
   const { data, refetch } = useGetAllRoles();
@@ -17,8 +18,21 @@ export default function RenderRol() {
     create(data, {
       onSuccess: () => {
         refetch();
-        alert("Rol creado correctamente");
-      },
+Swal.fire({
+  position: "center",
+  icon: "success",
+  title: "Rol registrado",
+  showConfirmButton: false,
+  timer: 1500
+});      },onError: ()=>{
+  Swal.fire({
+  position: "center",
+  icon: "error",
+  title: "Rol No Registrado",
+  showConfirmButton: false,
+  timer: 1500
+});
+}
     });
   };
 

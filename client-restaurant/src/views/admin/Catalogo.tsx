@@ -4,6 +4,7 @@ import { Button } from "@mui/material";
 import type { Plate, PlateEit } from "../../types/Plate.type";
 import { useCreatePlate, useGetPlate } from "../../services/plate.service";
 import CardPlate from "../../components/RendeProducto";
+import Swal from "sweetalert2";
 
 export default function Catalogo() {
         const { data,refetch } = useGetPlate();
@@ -15,9 +16,24 @@ export default function Catalogo() {
           mutate(data
           ,{
             onSuccess: ()=>{
-              console.log("registro exisamente")
+Swal.fire({
+  position: "center",
+  icon: "success",
+  title: "Plato registrado",
+  showConfirmButton: false,
+  timer: 1500
+});
               refetch();
               alert("Registro exitosamente");
+            },onError:()=>{
+              Swal.fire({
+  position: "center",
+  icon: "error",
+  title: "Plato no registrado",
+  showConfirmButton: false,
+  timer: 1500
+});
+
             }
           }); 
         };

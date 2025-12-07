@@ -24,6 +24,7 @@ import IconLogout from '@mui/icons-material/Logout';
 import HomeIcon from '@mui/icons-material/Home';
 import {logout}  from "../../src/store/slices/auth.slice";
 import EditSquareIcon from '@mui/icons-material/EditSquare';
+import letras from "../assets/letra.png"; // 👈 TU LOGO
 
 
 const drawerWidth = 240;
@@ -113,7 +114,7 @@ export default function PersistentDrawerLeft() {
   return (
     <Box sx={{ display: 'flex' }}>
       <CssBaseline />
-      <AppBar position="fixed" open={open}>
+      <AppBar position="fixed" open={open} sx={{ backgroundColor: "#c0392b" }}>
         <Toolbar>
           <IconButton
             color="inherit"
@@ -129,9 +130,22 @@ export default function PersistentDrawerLeft() {
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" noWrap component="div">
-            Bienvenido {nombres}
-          </Typography>
+                    {/* LOGO + NOMBRE */}
+          <Box sx={{ display: "flex", alignItems: "center", flexGrow: 1, gap: 1 }}>
+            <Box
+              component="img"
+              src={letras}
+              alt="logo"
+              sx={{
+                width: 120,
+                height: 50,
+              }}
+            />
+            <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+              Cliente {nombres}
+            </Typography>
+          </Box>
+
         </Toolbar>
       </AppBar>
       <Drawer

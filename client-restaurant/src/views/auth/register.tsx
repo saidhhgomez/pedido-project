@@ -48,7 +48,6 @@ export default function Register() {
   const doRegister = (data: RegistrarClienteDTO) => {
     mutate(data, {
       onSuccess: () => {
-        
         alert("Tu cuenta ha sido creada, puedes iniciar sesión");
         navigate("/");
       },
@@ -66,6 +65,9 @@ export default function Register() {
         display: "flex",
         justifyContent: "center",
         alignItems: "flex-start",
+        backgroundColor: "#e74c3c", // 🔴 COLOR ROJO CORRECTO
+        p: 4,
+        overflowY: "auto",
       }}
     >
       <Box
@@ -73,11 +75,11 @@ export default function Register() {
         onSubmit={handleSubmit(doRegister)}
         sx={{
           width: "100%",
-          maxWidth: "850px",      // 👈 MÁS ANCHO COMO PEDISTE
+          maxWidth: "850px",
           background: "#fff",
-    p: 2,
-    pt:4,
-
+          p: 4,
+          borderRadius: "12px",
+          boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
           display: "flex",
           flexDirection: "column",
         }}
@@ -85,15 +87,16 @@ export default function Register() {
         <Typography
           variant="h4"
           textAlign="center"
-          sx={{ mb: 1, fontWeight: "bold" }}
+          sx={{ mb: 1, fontWeight: "bold", color: "#e74c3c" }}
         >
           Registrarse
         </Typography>
 
+        {/* GRID DEL FORMULARIO */}
         <Box
           sx={{
             display: "grid",
-            gap:1,
+            gap: 2,
             gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
           }}
         >
@@ -212,6 +215,7 @@ export default function Register() {
           />
         </Box>
 
+        {/* BOTÓN PRINCIPAL */}
         <Button
           fullWidth
           variant="contained"
@@ -221,17 +225,29 @@ export default function Register() {
             fontSize: "1rem",
             fontWeight: "bold",
             borderRadius: "10px",
+            backgroundColor: "#e74c3c",
+            "&:hover": { backgroundColor: "#d8433c" }, // tono más oscuro
           }}
           type="submit"
         >
           Registrarse
         </Button>
 
+        {/* BOTÓN OUTLINED */}
         <Button
           fullWidth
           variant="outlined"
-          sx={{ mt: 2, py: 1.2, borderRadius: "10px" }}
-          onClick={() => navigate("/")} type="button"
+          sx={{
+            mt: 2,
+            py: 1.2,
+            borderRadius: "10px",
+            borderColor: "#e74c3c",
+            color: "#e74c3c",
+            fontWeight: "bold",
+            "&:hover": { borderColor: "#d8433c", color: "#d8433c" },
+          }}
+          onClick={() => navigate("/")}
+          type="button"
         >
           Iniciar sesión
         </Button>

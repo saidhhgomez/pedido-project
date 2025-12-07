@@ -60,7 +60,7 @@ export default function MediaCard({Direccion}: {Direccion : Direccion}) {
         </CardContent>
       </CardActionArea>
       <CardActions>
-        <Button size="small" color="primary" onClick={DoRemoveDireccion}>
+        <Button size="small" color="error" onClick={DoRemoveDireccion}>
           Eliminar
         </Button>
       </CardActions>

@@ -2,15 +2,17 @@ import { useDispatch } from "react-redux";
 import { login } from "../../store/slices/auth.slice";
 import { useLogin } from "../../services/auth.service";
 import { useNavigate } from "react-router";
-import { Box, TextField, Button, Typography } from "@mui/material";
+import { Box, TextField, Button, Typography, Card } from "@mui/material";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { loginSchema } from "../../validators/login.schema";
+import Swal from "sweetalert2";
 
 export default function Login() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { mutate } = useLogin();
+
   const {
     register,
     handleSubmit,
@@ -33,57 +35,110 @@ export default function Login() {
       },
       {
         onSuccess: (data) => {
-dispatch(
-  login({
-    token: data?.data?.token,
-    rol: data?.data?.usuario?.rol,
-    nombre: data?.data?.usuario?.nombre,
-    tipoId: data?.data?.usuario?.tipoId,
-    id: data?.data?.usuario?.id
-  })
-);        },onError: (error:{message:string})=> {
-            alert(` Error en iniciar session,${error.message}`);            
+          dispatch(
+            login({
+              token: data?.data?.token,
+              rol: data?.data?.usuario?.rol,
+              nombre: data?.data?.usuario?.nombre,
+              tipoId: data?.data?.usuario?.tipoId,
+              id: data?.data?.usuario?.id,
+            })
+          );
         },
-      },    
+        onError: () => {
+          Swal.fire({
+            position: "center",
+            icon: "error",
+            title: "Usuario y/o Contraseña Incorrecta",
+            showConfirmButton: false,
+            timer: 1200,
+          });
+        },
+      }
     );
   };
+
   return (
-    <Box
+    <Card
       sx={{
         width: "400px",
-        display: "flex",
-        flexDirection: "column",
-        gap: 2,
-        justifyContent: "center",
-        textAlign: "center",
+        padding: 4,
+        borderRadius: 4,
+        boxShadow: "0 8px 20px rgba(0,0,0,0.3)", 
+        backgroundColor: "white", 
       }}
-      component="form"
-      onSubmit={handleSubmit(doLogin)}
     >
-      <Typography variant="h4">Iniciar sesión</Typography>
-      <TextField {...register("usuario")} label="Usuario" variant="outlined" />
-      {errors.usuario && (
-        <Typography color="error">{errors.usuario.message}</Typography>
-      )}
-      <TextField
-        {...register("contrasena")}
-        type="password"
-        label="Contraseña"
-        variant="outlined"
-      />
-      {errors.contrasena && (
-        <Typography color="error">{errors.contrasena.message}</Typography>
-      )}
-      <Button variant="contained" type="submit">
-        Iniciar sesión
-      </Button>
-      <Button
-        color="primary"
-        variant="outlined"
-        onClick={() => navigate("/register")}
+      <Box
+        component="form"
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          gap: 2,
+          textAlign: "center",
+        }}
+        onSubmit={handleSubmit(doLogin)}
       >
-        Registrarse
-      </Button>
-    </Box>
+        <Typography variant="h4" sx={{ fontWeight: "bold", color: "#d32f2f" }}>
+          Iniciar sesión
+        </Typography>
+
+        <TextField
+          {...register("usuario")}
+          label="Usuario"
+          variant="outlined"
+          sx={{
+            backgroundColor: "#fff",
+            borderRadius: 1,
+          }}
+        />
+        {errors.usuario && (
+          <Typography color="error">{errors.usuario.message}</Typography>
+        )}
+
+        <TextField
+          {...register("contrasena")}
+          type="password"
+          label="Contraseña"
+          variant="outlined"
+          sx={{
+            backgroundColor: "#fff",
+            borderRadius: 1,
+          }}
+        />
+        {errors.contrasena && (
+          <Typography color="error">{errors.contrasena.message}</Typography>
+        )}
+
+        <Button
+          variant="contained"
+          type="submit"
+          sx={{
+            backgroundColor: "#d32f2f",
+            "&:hover": { backgroundColor: "#b71c1c" },
+            paddingY: 1.2,
+            fontWeight: "bold",
+          }}
+        >
+          Iniciar sesión
+        </Button>
+
+        <Button
+          variant="outlined"
+          onClick={() => navigate("/register")}
+          sx={{
+            borderColor: "#d32f2f",
+            color: "#d32f2f",
+            "&:hover": {
+              borderColor: "#b71c1c",
+              color: "#b71c1c",
+            },
+            paddingY: 1.2,
+            fontWeight: "bold",
+          }}
+        >
+          Registrarse
+        </Button>
+      </Box>
+    </Card>
   );
 }

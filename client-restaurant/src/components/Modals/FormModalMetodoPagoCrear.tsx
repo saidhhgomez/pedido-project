@@ -1,6 +1,6 @@
 import { Box, Button, Modal, TextField, Typography } from "@mui/material";
 import { useForm } from "react-hook-form";
-import type { MetodoPago } from "../../types/metodopago.type";
+import type { MetodoPago } from "../../types/metodoPago.type";
 
 interface Props {
   open: boolean;

@@ -4,8 +4,7 @@ import FormModalJornada from "../../components/Modals/FormModalContrato";
 import type { TipoContrato, TipoJornada } from "../../types/contrato.type";
 import { useCreateContrato, useGetAllContrato } from "../../services/contrato.service";
 import CardContrato from "../../components/RenderContrato";
-import CardSucursal from "../../components/RenderSucursales";
-import type { Sucursal } from "../../types/sucursales.type";
+import Swal from "sweetalert2";
 
 export default function ContratoAdmin() {
 
@@ -21,10 +20,23 @@ export default function ContratoAdmin() {
           mutate(data
           ,{
             onSuccess: ()=>{
-              console.log("registro exisamente")
+
               refetch();
-              alert("Registro exitosamente");
-            }
+Swal.fire({
+  position: "center",
+  icon: "success",
+  title: "Nuva Jornada registrada",
+  showConfirmButton: false,
+  timer: 1500
+});            },onError: ()=>{
+  Swal.fire({
+  position: "center",
+  icon: "error",
+  title: "Jornada no registrada",
+  showConfirmButton: false,
+  timer: 1500
+});
+}
           }); 
         };
   

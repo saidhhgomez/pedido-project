@@ -11,6 +11,7 @@ import com.restaurant.resource.DireccionClienteResource;
 import com.restaurant.resource.EmpleadoResource;
 import com.restaurant.resource.LoginResource;
 import com.restaurant.resource.MetodoPagoResource;
+import com.restaurant.resource.PedidoResource;
 import com.restaurant.resource.RolResource;
 import com.restaurant.resource.SucursalResource;
 import com.restaurant.resource.TipoContratoResource;
@@ -32,6 +33,7 @@ public class AppConfig extends Application {
         resources.add(SucursalResource.class);
         resources.add(RolResource.class);
         resources.add(MetodoPagoResource.class);
+        resources.add(PedidoResource.class);
         return resources;
     }
 }

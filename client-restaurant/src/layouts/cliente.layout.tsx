@@ -1,199 +1,84 @@
-import * as React from 'react';
-import { styled, useTheme } from '@mui/material/styles';
+import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
-import Drawer from '@mui/material/Drawer';
-import CssBaseline from '@mui/material/CssBaseline';
-import MuiAppBar, { type AppBarProps as MuiAppBarProps } from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
-import List from '@mui/material/List';
 import Typography from '@mui/material/Typography';
-import Divider from '@mui/material/Divider';
+import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
-import MenuIcon from '@mui/icons-material/Menu';
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import ListItem from '@mui/material/ListItem';
-import ListItemButton from '@mui/material/ListItemButton';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import ListItemText from '@mui/material/ListItemText';
-import MailIcon from '@mui/icons-material/Mail';
 import { Link, Outlet } from 'react-router';
-import { selectNombre } from '../store/slices/auth.slice';
 import { useDispatch, useSelector } from 'react-redux';
-import IconLogout from '@mui/icons-material/Logout';
-import HomeIcon from '@mui/icons-material/Home';
-import {logout}  from "../store/slices/auth.slice";
+import { logout, selectNombre } from '../store/slices/auth.slice';
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+import Badge, { type BadgeProps } from '@mui/material/Badge';
+import { styled } from '@mui/material/styles';
+import { useState } from 'react';
+import RightDrawer from '../components/Drawer';
+import { selectCart } from '../store/slices/cart.slice';
+import letras from "../assets/letra.png"; // 👈 TU LOGO
 
 
-
-const drawerWidth = 240;
-
-const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })<{
-  open?: boolean;
-}>(({ theme }) => ({
-  flexGrow: 1,
-  padding: theme.spacing(3),
-  transition: theme.transitions.create('margin', {
-    easing: theme.transitions.easing.sharp,
-    duration: theme.transitions.duration.leavingScreen,
-  }),
-  marginLeft: `-${drawerWidth}px`,
-  variants: [
-    {
-      props: ({ open }) => open,
-      style: {
-        transition: theme.transitions.create('margin', {
-          easing: theme.transitions.easing.easeOut,
-          duration: theme.transitions.duration.enteringScreen,
-        }),
-        marginLeft: 0,
-      },
-    },
-  ],
+const StyledBadge = styled(Badge)<BadgeProps>(({ theme }) => ({
+  '& .MuiBadge-badge': {
+    right: 2,
+    top: 13,
+    border: `2px solid ${(theme.vars ?? theme).palette.background.paper}`,
+    padding: '0 4px',
+  },
 }));
 
-interface AppBarProps extends MuiAppBarProps {
-  open?: boolean;
-}
+export default function ButtonAppBar() {
+  const dispatch = useDispatch();
+  const nombres = useSelector(selectNombre);
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
-const AppBar = styled(MuiAppBar, {
-  shouldForwardProp: (prop) => prop !== 'open',
-})<AppBarProps>(({ theme }) => ({
-  transition: theme.transitions.create(['margin', 'width'], {
-    easing: theme.transitions.easing.sharp,
-    duration: theme.transitions.duration.leavingScreen,
-  }),
-  variants: [
-    {
-      props: ({ open }) => open,
-      style: {
-        width: `calc(100% - ${drawerWidth}px)`,
-        marginLeft: `${drawerWidth}px`,
-        transition: theme.transitions.create(['margin', 'width'], {
-          easing: theme.transitions.easing.easeOut,
-          duration: theme.transitions.duration.enteringScreen,
-        }),
-      },
-    },
-  ],
-}));
-
-const DrawerHeader = styled('div')(({ theme }) => ({
-  display: 'flex',
-  alignItems: 'center',
-  padding: theme.spacing(0, 1),
-  // necessary for content to be below app bar
-  ...theme.mixins.toolbar,
-  justifyContent: 'flex-end',
-}));
-
-export default function PersistentDrawerLeft() {
-
-  const nombres=useSelector(selectNombre);
-
-
-  const theme = useTheme();
-  const [open, setOpen] = React.useState(false);
-
-
-    const dispatch = useDispatch();
+  const cartItems = useSelector(selectCart);
+  const totalItems = cartItems.reduce((acc, item) => acc + item.cantidad, 0);
 
   const doLogout = () => {
     dispatch(logout());
   };
 
-  const handleDrawerOpen = () => {
-    setOpen(true);
-  };
-
-  const handleDrawerClose = () => {
-    setOpen(false);
-  };
-
   return (
-    <Box sx={{ display: 'flex' }}>
-      <CssBaseline />
-      <AppBar position="fixed" open={open}>
+    <Box sx={{ flexGrow: 1 }}>
+      <AppBar position="static" sx={{ backgroundColor: "#b93434ff" }}>
         <Toolbar>
-          <IconButton
-            color="inherit"
-            aria-label="open drawer"
-            onClick={handleDrawerOpen}
-            edge="start"
-            sx={[
-              {
-                mr: 2,
-              },
-              open && { display: 'none' },
-            ]}
-          >
-            <MenuIcon />
+
+          {/* LOGO + NOMBRE */}
+          <Box sx={{ display: "flex", alignItems: "center", flexGrow: 1, gap: 1 }}>
+            <Box
+              component="img"
+              src={letras}
+              alt="logo"
+              sx={{
+                width: 120,
+                height: 50,
+              }}
+            />
+            <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+              Cliente {nombres}
+            </Typography>
+          </Box>
+
+          <IconButton onClick={() => setDrawerOpen(true)} aria-label="cart">
+            <StyledBadge badgeContent={totalItems} color="secondary">
+              <ShoppingCartIcon />
+            </StyledBadge>
           </IconButton>
-          <Typography variant="h6" noWrap component="div">
-            Bienvenido {nombres}
-          </Typography>
+
+          <Link to={"/"}>
+            <Button color="inherit">Home</Button>
+          </Link>
+          <Link to={"/direction"}>
+            <Button color="inherit">Direccion</Button>
+          </Link>
+
+          <Button onClick={doLogout} color="inherit">Cerrar Session</Button>
         </Toolbar>
       </AppBar>
-      <Drawer
-        sx={{
-          width: drawerWidth,
-          flexShrink: 0,
-          '& .MuiDrawer-paper': {
-            width: drawerWidth,
-            boxSizing: 'border-box',
-          },
-        }}
-        variant="persistent"
-        anchor="left"
-        open={open}
-      >
-        <DrawerHeader>
-          <IconButton onClick={handleDrawerClose}>
-            {theme.direction === 'ltr' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
-          </IconButton>
-        </DrawerHeader>
-        <Divider />
-        <List>
-          <Link to={"/"}>
-                      <ListItem  disablePadding>
-              <ListItemButton>
-                <ListItemIcon>
-                  <HomeIcon />
-                </ListItemIcon>
-                <ListItemText primary={"Home"} />
-              </ListItemButton>
-            </ListItem>
-          </Link>
 
-                    <Link to={"/direction"}>
-                      <ListItem  disablePadding>
-              <ListItemButton>
-                <ListItemIcon>
-                  <MailIcon />
-                </ListItemIcon>
-                <ListItemText primary={"Direccion"} />
-              </ListItemButton>
-            </ListItem>
-          </Link>
-        </List>
-        <Divider />
-        <List>
-          <Link to={""}>
-                      <ListItem onClick={doLogout}  disablePadding>
-              <ListItemButton>
-                <ListItemIcon>
-                    <IconLogout />
-                </ListItemIcon>
-                <ListItemText primary={"Cerrar Session"} />
-              </ListItemButton>
-            </ListItem>
-        </Link>
-        </List>
-      </Drawer>
-      <Main open={open}>
-        <DrawerHeader />
-          <Outlet/>
-      </Main>
+      <Box sx={{ p: 2 }}>
+        <RightDrawer open={drawerOpen} setOpen={setDrawerOpen} />
+        <Outlet />
+      </Box>
     </Box>
   );
 }
