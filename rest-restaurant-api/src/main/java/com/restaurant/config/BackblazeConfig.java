@@ -23,6 +23,14 @@ public class BackblazeConfig {
             throw new RuntimeException("Error cargando backblaze.properties", e);
         }
     }
+    
+    public static String getPublicFileEndpoint() {
+        String endpoint = props.getProperty("b2.publicFileEndpoint");
+        if (endpoint == null || endpoint.isEmpty()) {
+            throw new RuntimeException("Falta la propiedad 'b2.publicFileEndpoint' en backblaze.properties.");
+        }
+        return endpoint;
+    }
 
     public static String getKeyId() {
         return props.getProperty("b2.keyId");
