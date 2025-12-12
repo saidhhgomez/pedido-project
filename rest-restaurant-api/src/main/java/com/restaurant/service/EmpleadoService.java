@@ -223,30 +223,31 @@ public class EmpleadoService {
         }
         
         Empleado empleado = request.getEmpleado();
-        
         empleado.setImagenConductor_url(imagenB2KeyCompleta); 
         
         Contrato contrato = request.getContrato();
         contrato.setPdfFirmadoKey(pdfB2KeyCompleta); 
         
-        StorageFile pdfStorageFile = new StorageFile();
-        pdfStorageFile.setBucket(BackblazeConfig.getBucketName());
-        pdfStorageFile.setObjectKey(pdfB2KeyCompleta);
-        pdfStorageFile.setFilename(pdfUniqueName);
-        pdfStorageFile.setContentType(pdfFileDetail.getType());
-        pdfStorageFile.setSize(pdfTempFile.length());
-        pdfStorageFile.setUploadedBy(idAdmin);
+        StorageFile pdfStorageFile = prepareStorageFile(
+            pdfB2KeyCompleta, 
+            pdfUniqueName, 
+            pdfFileDetail, 
+            pdfTempFile, 
+            "Contrato", 
+            idAdmin
+        );
         
-        StorageFile imagenStorageFile = new StorageFile();
-        imagenStorageFile.setBucket(BackblazeConfig.getBucketName());
-        imagenStorageFile.setObjectKey(imagenB2KeyCompleta);
-        imagenStorageFile.setFilename(imagenUniqueName);
-        imagenStorageFile.setContentType(imagenFileDetail.getType());
-        imagenStorageFile.setSize(imagenTempFile.length());
-        imagenStorageFile.setUploadedBy(idAdmin);
+        StorageFile imagenStorageFile = prepareStorageFile(
+            imagenB2KeyCompleta, 
+            imagenUniqueName, 
+            imagenFileDetail, 
+            imagenTempFile, 
+            "Empleado", 
+            idAdmin
+        );
         
         List<StorageFile> storageFiles = Arrays.asList(pdfStorageFile, imagenStorageFile);
-        
+
         int idEmpleadoGenerado = 0;
         try {
             idEmpleadoGenerado = empleadoDAO.registrarEmpleadoExisteCompleto(
