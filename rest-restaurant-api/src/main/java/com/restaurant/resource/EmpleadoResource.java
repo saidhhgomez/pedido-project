@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -19,6 +20,7 @@ import java.io.IOException;
 
 import com.restaurant.model.EmpleadoCompletoRequest;
 import com.restaurant.model.EmpleadoExisteCompletoRequest;
+import com.restaurant.model.Persona;
 import com.restaurant.service.EmpleadoService;
 
 import org.glassfish.jersey.media.multipart.FormDataParam;
@@ -42,6 +44,30 @@ public class EmpleadoResource {
             }
         }
     }
+	
+	@PUT
+	@Path("/actualizar/{idPersona}")
+	public Response actualizarPersona(
+	        @PathParam("idPersona") int idPersona, Persona persona) {
+
+	    try {
+	        boolean ok = empleadoService.actualizarPersona(idPersona, persona);
+
+	        if (ok) {
+	            return Response.ok("{\"mensaje\": \"Persona actualizada correctamente\"}").build();
+	        } else {
+	            return Response.status(Response.Status.BAD_REQUEST)
+	                    .entity("{\"error\": \"No se pudo actualizar la persona\"}")
+	                    .build();
+	        }
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+	                .entity("{\"error\": \"Error interno: " + e.getMessage() + "\"}")
+	                .build();
+	    }
+	}
 
 	@POST
     @Path("/registrar")

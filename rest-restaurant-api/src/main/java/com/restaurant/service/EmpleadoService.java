@@ -58,6 +58,31 @@ public class EmpleadoService {
 
         return data;
     }
+    
+    public boolean actualizarPersona(int idPersona, Persona persona) {
+
+        if (persona == null) {
+            System.out.println("Error: Persona nula");
+            return false;
+        }
+
+        if (persona.getNombres() == null || persona.getNombres().trim().isEmpty()) {
+            System.out.println("Error: Nombre vacío");
+            return false;
+        }
+
+        if (persona.getNumDocumento() == null || persona.getNumDocumento().trim().isEmpty()) {
+            System.out.println("Error: Numero documento vacío");
+            return false;
+        }
+
+        if (persona.getCorreo() != null && !persona.getCorreo().contains("@")) {
+            System.out.println("Error: Correo inválido");
+            return false;
+        }
+
+        return empleadoDAO.actualizarPersona(idPersona, persona);
+    }
 
     public int registrarEmpleadoCompleto(
             EmpleadoCompletoRequest request, 

@@ -193,7 +193,6 @@ public class RegistroDAO {
 	            psPersona.setString(8, persona.getTelefono());
 	            psPersona.setString(9, persona.getCorreo());
 
-
 	            if (persona.getFechaNacimiento() != null) {
 	                java.time.LocalDate localDate = persona.getFechaNacimiento()
 	                    .toInstant()
@@ -299,6 +298,41 @@ public class RegistroDAO {
         }
 
         return null;
+    }
+    
+    public boolean actualizarPersona(int idPersona, Persona persona) {
+        String sql = "UPDATE Persona SET nombres=?, apPaterno=?, apMaterno=?, genero=?, tipoDocumento=?, numDocumento=?, telefono=?, correo=?, fechaNacimiento=? WHERE idPersona=?";
+
+        try (Connection cn = DBConnection.getConnection();
+             PreparedStatement ps = cn.prepareStatement(sql)) {
+
+            ps.setString(1, persona.getNombres());
+            ps.setString(2, persona.getApPaterno());
+            ps.setString(3, persona.getApMaterno());
+            ps.setString(4, String.valueOf(persona.getGenero()));
+            ps.setString(5, persona.getTipoDocumento());
+            ps.setString(6, persona.getNumDocumento());
+            ps.setString(7, persona.getTelefono());
+            ps.setString(8, persona.getCorreo());
+
+            if (persona.getFechaNacimiento() != null) {
+                LocalDate localDate = persona.getFechaNacimiento()
+                        .toInstant()
+                        .atZone(ZoneId.systemDefault())
+                        .toLocalDate();
+                ps.setDate(9, java.sql.Date.valueOf(localDate));
+            } else {
+                ps.setNull(9, java.sql.Types.DATE);
+            }
+
+            ps.setInt(10, idPersona);
+
+            return ps.executeUpdate() > 0;
+
+        } catch (Exception e) {
+            System.out.println("Error al actualizar persona: " + e.getMessage());
+            return false;
+        }
     }
 
     public int registrarEmpleadoExisteCompleto(
