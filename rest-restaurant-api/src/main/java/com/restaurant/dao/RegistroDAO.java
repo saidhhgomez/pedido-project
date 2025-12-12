@@ -6,6 +6,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.HashMap;
+import java.util.List;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -290,7 +291,12 @@ public class RegistroDAO {
         return null;
     }
 
-    public int registrarEmpleadoExisteCompleto(Empleado empleado, Contrato contrato, int idPersona, StorageFile storageFileMetadata) {
+    public int registrarEmpleadoExisteCompleto(
+            Empleado empleado, 
+            Contrato contrato, 
+            int idPersona, 
+            List<StorageFile> storageFiles
+    ) {
         Connection conn = null;
 
         try {
@@ -305,7 +311,7 @@ public class RegistroDAO {
             try (PreparedStatement psEmp = conn.prepareStatement(sqlEmpleado, Statement.RETURN_GENERATED_KEYS)) {
                 psEmp.setInt(1, idPersona);
                 psEmp.setString(2, empleado.getDireccion());
-                psEmp.setString(3, empleado.getImagenConductor_url());
+                psEmp.setString(3, empleado.getImagenConductor_url()); 
 
                 int rowsEmp = psEmp.executeUpdate();
                 if (rowsEmp == 0) {
@@ -327,14 +333,18 @@ public class RegistroDAO {
             int idContratoGenerado = 0; 
             
             try (PreparedStatement psCon = conn.prepareStatement(sqlContrato, Statement.RETURN_GENERATED_KEYS)) {
-
                 psCon.setInt(1, idEmpleadoGenerado);
                 psCon.setInt(2, contrato.getIdSucursal());
                 psCon.setInt(3, contrato.getIdTipoContrato());
                 psCon.setInt(4, contrato.getIdRol());
-
                 psCon.setTimestamp(5, new java.sql.Timestamp(contrato.getFechaInicio().getTime()));
-                psCon.setTimestamp(6, new java.sql.Timestamp(contrato.getFechaFin().getTime()));
+                
+                if (contrato.getFechaFin() != null) {
+                    psCon.setTimestamp(6, new java.sql.Timestamp(contrato.getFechaFin().getTime()));
+                } else {
+                    psCon.setNull(6, java.sql.Types.TIMESTAMP);
+                }
+                
                 psCon.setBigDecimal(7, contrato.getSalario());
                 psCon.setString(8, contrato.getPdfFirmadoKey());
 
@@ -352,10 +362,20 @@ public class RegistroDAO {
                 }
             }
 
-            storageFileMetadata.setRelatedTable("Contrato");
-            storageFileMetadata.setRelatedId(idContratoGenerado);
-            
-            storageFileDAO.insertFileMetadata(conn, storageFileMetadata);
+            for (StorageFile metadata : storageFiles) {
+                
+                if (metadata.getObjectKey().contains("contratos/firmados")) {
+                    metadata.setRelatedTable("Contrato");
+                    metadata.setRelatedId(idContratoGenerado);
+                } else if (metadata.getObjectKey().contains("imagen_empleado")) {
+                    metadata.setRelatedTable("Empleado");
+                    metadata.setRelatedId(idEmpleadoGenerado);
+                } else {
+                    System.err.println("ADVERTENCIA: Key de B2 no reconocida, no se pudo asignar relación: " + metadata.getObjectKey());
+                    continue; 
+                }
+                storageFileDAO.insertFileMetadata(conn, metadata);
+            }
             
             conn.commit();
             return idEmpleadoGenerado;

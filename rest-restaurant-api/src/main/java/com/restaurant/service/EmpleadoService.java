@@ -17,9 +17,27 @@ import com.restaurant.model.StorageFile;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 
 import java.io.File;
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
+import java.util.Date;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 
 public class EmpleadoService {
 	private final RegistroDAO empleadoDAO = new RegistroDAO();
+	
+	private static final List<String> ALLOWED_IMAGE_EXTENSIONS = Arrays.asList("png", "jpg", "jpeg", "webp");
+    
+    private String generateUniqueFileName(String originalFileName, String numDocumento) {
+        String baseName = originalFileName.substring(0, originalFileName.lastIndexOf('.'));
+        String extension = originalFileName.substring(originalFileName.lastIndexOf('.') + 1).toLowerCase();
+        
+        String timestamp = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
+        String uniqueId = UUID.randomUUID().toString().substring(0, 8);
+        
+        return numDocumento + "_" + uniqueId + "_" + timestamp + "." + extension;
+    }
 
     public HashMap<String, Object> buscarPorDni(String dni) {
 
@@ -91,51 +109,89 @@ public class EmpleadoService {
     public int registrarEmpleadoExisteCompleto(
             EmpleadoExisteCompletoRequest request, 
             File pdfTempFile, 
-            FormDataContentDisposition fileDetail,
-            int idAdmin
-    ) throws Exception {
+            FormDataContentDisposition pdfFileDetail,
+            File imagenTempFile,
+            FormDataContentDisposition imagenFileDetail,
+            int idAdmin) throws Exception {
 
-        if (request == null || pdfTempFile == null || fileDetail == null) {
-             throw new Exception("Datos de empleado o archivo PDF incompletos.");
-        }
-        if (idAdmin <= 0) {
-            throw new Exception("El ID del administrador que registra es inválido.");
+        if (request == null || pdfTempFile == null || imagenTempFile == null || idAdmin <= 0) {
+             throw new Exception("Datos incompletos o ID de administrador inválido.");
         }
         
         String numDocumento = request.getPersona().getNumDocumento();
         if (numDocumento == null || numDocumento.isEmpty()) {
-            throw new Exception("El número de documento (numDocumento) de la Persona es obligatorio para la Key de B2.");
+            throw new Exception("El número de documento (numDocumento) de la Persona es obligatorio para las Keys de B2.");
         }
         
-        String originalFileName = fileDetail.getFileName();
-        String keyPath = "firmados/" + numDocumento; 
-        String b2KeyCompleta = "";
+        List<String> b2KeysToRollback = new ArrayList<>();
+        
+        String imagenOriginalName = imagenFileDetail.getFileName();
+        String imagenExtension = imagenOriginalName.substring(imagenOriginalName.lastIndexOf('.') + 1).toLowerCase();
+        
+        if (!ALLOWED_IMAGE_EXTENSIONS.contains(imagenExtension)) {
+            throw new Exception("Tipo de archivo de imagen no soportado. Tipos permitidos: " + String.join(", ", ALLOWED_IMAGE_EXTENSIONS));
+        }
+        
+        String imagenUniqueName = generateUniqueFileName(imagenOriginalName, numDocumento);
+        
+        String imagenKeyPath = "imagen_empleado/" + numDocumento;
+        String imagenB2KeyCompleta = "";
         
         try {
-            b2KeyCompleta = BackblazeUtil.uploadFile(keyPath + "/" + originalFileName, pdfTempFile);
+            imagenB2KeyCompleta = BackblazeUtil.uploadFile(imagenKeyPath + "/" + imagenUniqueName, imagenTempFile);
+            b2KeysToRollback.add(imagenB2KeyCompleta);
             
         } catch (Exception e) {
+            throw new Exception("Fallo al subir la Imagen del Empleado a Backblaze B2: " + e.getMessage());
+        }
+        
+        String pdfOriginalFileName = pdfFileDetail.getFileName();
+        String pdfKeyPath = "contratos/firmados/" + numDocumento; 
+        String pdfB2KeyCompleta = "";
+        
+        String pdfUniqueName = generateUniqueFileName(pdfOriginalFileName, numDocumento);
+
+        try {
+            pdfB2KeyCompleta = BackblazeUtil.uploadFile(pdfKeyPath + "/" + pdfUniqueName, pdfTempFile);
+            b2KeysToRollback.add(pdfB2KeyCompleta);
+            
+        } catch (Exception e) {
+            BackblazeUtil.deleteFile(imagenB2KeyCompleta);
             throw new Exception("Fallo al subir el Contrato PDF a Backblaze B2: " + e.getMessage());
         }
         
-        Contrato contrato = request.getContrato();
-        contrato.setPdfFirmadoKey(b2KeyCompleta); 
+        Empleado empleado = request.getEmpleado();
         
-        StorageFile storageFileMetadata = new StorageFile();
-        storageFileMetadata.setBucket(BackblazeConfig.getBucketName());
-        storageFileMetadata.setObjectKey(b2KeyCompleta);
-        storageFileMetadata.setFilename(originalFileName);
-        storageFileMetadata.setContentType(fileDetail.getType());
-        storageFileMetadata.setSize(pdfTempFile.length());
-        storageFileMetadata.setUploadedBy(idAdmin);
+        empleado.setImagenConductor_url(imagenB2KeyCompleta); 
+        
+        Contrato contrato = request.getContrato();
+        contrato.setPdfFirmadoKey(pdfB2KeyCompleta); 
+        
+        StorageFile pdfStorageFile = new StorageFile();
+        pdfStorageFile.setBucket(BackblazeConfig.getBucketName());
+        pdfStorageFile.setObjectKey(pdfB2KeyCompleta);
+        pdfStorageFile.setFilename(pdfUniqueName);
+        pdfStorageFile.setContentType(pdfFileDetail.getType());
+        pdfStorageFile.setSize(pdfTempFile.length());
+        pdfStorageFile.setUploadedBy(idAdmin);
+        
+        StorageFile imagenStorageFile = new StorageFile();
+        imagenStorageFile.setBucket(BackblazeConfig.getBucketName());
+        imagenStorageFile.setObjectKey(imagenB2KeyCompleta);
+        imagenStorageFile.setFilename(imagenUniqueName);
+        imagenStorageFile.setContentType(imagenFileDetail.getType());
+        imagenStorageFile.setSize(imagenTempFile.length());
+        imagenStorageFile.setUploadedBy(idAdmin);
+        
+        List<StorageFile> storageFiles = Arrays.asList(pdfStorageFile, imagenStorageFile);
         
         int idEmpleadoGenerado = 0;
         try {
             idEmpleadoGenerado = empleadoDAO.registrarEmpleadoExisteCompleto(
-                    request.getEmpleado(),
+                    empleado,
                     contrato,
                     request.getPersona().getIdPersona(),
-                    storageFileMetadata 
+                    storageFiles
             );
 
             if (idEmpleadoGenerado <= 0) {
@@ -147,11 +203,13 @@ public class EmpleadoService {
         } catch (Exception e) {
             System.out.println("Error fatal en EmpleadoService durante la transacción: " + e.getMessage());
             
-            try {
-                BackblazeUtil.deleteFile(b2KeyCompleta);
-                System.out.println("Archivo huérfano eliminado de B2: " + b2KeyCompleta);
-            } catch (Exception ex) {
-                System.err.println("ADVERTENCIA: No se pudo limpiar el archivo huérfano de B2: " + ex.getMessage());
+            for (String key : b2KeysToRollback) {
+                try {
+                    BackblazeUtil.deleteFile(key);
+                    System.out.println("Archivo huérfano eliminado de B2: " + key);
+                } catch (Exception ex) {
+                    System.err.println("ADVERTENCIA: No se pudo limpiar el archivo huérfano de B2: " + ex.getMessage());
+                }
             }
             
             throw e; 

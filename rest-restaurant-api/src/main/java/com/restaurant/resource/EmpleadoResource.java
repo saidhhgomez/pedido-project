@@ -15,6 +15,7 @@ import javax.ws.rs.core.Response;
 import java.io.InputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 
 import com.restaurant.model.EmpleadoCompletoRequest;
 import com.restaurant.model.EmpleadoExisteCompletoRequest;
@@ -30,6 +31,17 @@ public class EmpleadoResource {
 	
 	private final EmpleadoService empleadoService = new EmpleadoService();
 	private final ObjectMapper objectMapper = new ObjectMapper();
+	private static final long MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;
+	
+	private void copyStreamToFile(InputStream in, File file) throws IOException {
+        try (FileOutputStream out = new FileOutputStream(file)) {
+            byte[] buffer = new byte[4096];
+            int bytesRead;
+            while ((bytesRead = in.read(buffer)) != -1) {
+                out.write(buffer, 0, bytesRead);
+            }
+        }
+    }
 
     @POST
     @Path("/registrar")
@@ -93,10 +105,13 @@ public class EmpleadoResource {
             @QueryParam("idAdmin") int idAdmin, 
             @FormDataParam("data") String requestJsonString,
             @FormDataParam("pdfFirmado") InputStream pdfInputStream,
-            @FormDataParam("pdfFirmado") FormDataContentDisposition fileDetail
+            @FormDataParam("pdfFirmado") FormDataContentDisposition pdfFileDetail,
+            @FormDataParam("imagenEmpleado") InputStream imagenInputStream,
+            @FormDataParam("imagenEmpleado") FormDataContentDisposition imagenFileDetail
     ) {
         
-        File tempFile = null;
+        File pdfTempFile = null;
+        File imagenTempFile = null;
         EmpleadoExisteCompletoRequest request = null; 
 
         try {
@@ -109,25 +124,46 @@ public class EmpleadoResource {
             
             request = objectMapper.readValue(requestJsonString, EmpleadoExisteCompletoRequest.class);
             
-            String fileName = fileDetail.getFileName();
-            if (pdfInputStream == null || fileDetail == null || fileName == null || fileName.isEmpty() || !fileName.toLowerCase().endsWith(".pdf")) {
-                return Response.status(Response.Status.BAD_REQUEST).entity("{\"message\":\"El archivo PDF firmado es obligatorio y debe ser un PDF válido.\"}").build();
+            if (pdfInputStream == null || pdfFileDetail == null) {
+                return Response.status(Response.Status.BAD_REQUEST).entity("{\"message\":\"El archivo PDF firmado es obligatorio.\"}").build();
             }
+            String pdfFileName = pdfFileDetail.getFileName();
+            if (pdfFileName == null || pdfFileName.isEmpty() || !pdfFileName.toLowerCase().endsWith(".pdf")) {
+                return Response.status(Response.Status.BAD_REQUEST).entity("{\"message\":\"El archivo debe ser de tipo PDF válido.\"}").build();
+            }
+            long pdfFileSize = pdfFileDetail.getSize();
+            if (pdfFileSize > MAX_FILE_SIZE_BYTES) {
+                 String errorMessage = String.format("El PDF excede el tamaño máximo permitido de 10 MB. Tamaño actual: %.2f MB", 
+                                                    pdfFileSize / (1024.0 * 1024.0));
+                 return Response.status(Response.Status.BAD_REQUEST).entity("{\"message\":\"" + errorMessage + "\"}").build();
+            }
+            
+            if (imagenInputStream == null || imagenFileDetail == null) {
+                return Response.status(Response.Status.BAD_REQUEST).entity("{\"message\":\"La imagen del empleado es obligatoria.\"}").build();
+            }
+            String imagenFileName = imagenFileDetail.getFileName();
+            if (imagenFileName == null || imagenFileName.isEmpty()) {
+                 return Response.status(Response.Status.BAD_REQUEST).entity("{\"message\":\"La imagen del empleado debe tener un nombre de archivo.\"}").build();
+            }
+            long imagenFileSize = imagenFileDetail.getSize();
+            if (imagenFileSize > MAX_FILE_SIZE_BYTES) {
+                 String errorMessage = String.format("La Imagen excede el tamaño máximo permitido de 10 MB. Tamaño actual: %.2f MB", 
+                                                    imagenFileSize / (1024.0 * 1024.0));
+                 return Response.status(Response.Status.BAD_REQUEST).entity("{\"message\":\"" + errorMessage + "\"}").build();
+            }
+            
+            pdfTempFile = File.createTempFile("pdf_contrato_", "_" + pdfFileName);
+            copyStreamToFile(pdfInputStream, pdfTempFile);
+            
+            imagenTempFile = File.createTempFile("img_empleado_", "_" + imagenFileName);
+            copyStreamToFile(imagenInputStream, imagenTempFile);
 
-            tempFile = File.createTempFile("pdf_contrato_", "_" + fileName);
-            
-            try (FileOutputStream out = new FileOutputStream(tempFile)) {
-                byte[] buffer = new byte[4096];
-                int bytesRead;
-                while ((bytesRead = pdfInputStream.read(buffer)) != -1) {
-                    out.write(buffer, 0, bytesRead);
-                }
-            }
-            
             int idEmpleadoGenerado = empleadoService.registrarEmpleadoExisteCompleto(
                     request, 
-                    tempFile, 
-                    fileDetail,
+                    pdfTempFile, 
+                    pdfFileDetail,
+                    imagenTempFile,
+                    imagenFileDetail,
                     idAdmin
             );
 
@@ -144,8 +180,11 @@ public class EmpleadoResource {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .entity("{\"message\":\"Error interno del servidor durante el registro: " + e.getMessage() + "\"}").build();
         } finally {
-            if (tempFile != null && tempFile.exists()) {
-                tempFile.delete();
+            if (pdfTempFile != null && pdfTempFile.exists()) {
+                pdfTempFile.delete();
+            }
+            if (imagenTempFile != null && imagenTempFile.exists()) {
+                imagenTempFile.delete();
             }
         }
     }
