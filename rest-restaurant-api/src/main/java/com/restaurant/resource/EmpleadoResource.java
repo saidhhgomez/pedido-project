@@ -43,33 +43,76 @@ public class EmpleadoResource {
         }
     }
 
-    @POST
+	@POST
     @Path("/registrar")
-    public Response registrarEmpleadoCompleto(EmpleadoCompletoRequest request) {
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    public Response registrarEmpleadoCompleto(
+            @QueryParam("idAdmin") int idAdmin, 
+            @FormDataParam("data") String requestJsonString,
+            @FormDataParam("pdfFirmado") InputStream pdfInputStream,
+            @FormDataParam("pdfFirmado") FormDataContentDisposition pdfFileDetail,
+            @FormDataParam("imagenEmpleado") InputStream imagenInputStream,
+            @FormDataParam("imagenEmpleado") FormDataContentDisposition imagenFileDetail
+    ) {
+        
+        File pdfTempFile = null;
+        File imagenTempFile = null;
+        EmpleadoCompletoRequest request = null; 
+
         try {
-            int idGenerado = empleadoService.registrarEmpleadoCompleto(request);
+            if (requestJsonString == null || requestJsonString.trim().isEmpty()) {
+                return Response.status(Response.Status.BAD_REQUEST).entity("{\"message\":\"Datos JSON del empleado obligatorios.\"}").build();
+            }
+            request = objectMapper.readValue(requestJsonString, EmpleadoCompletoRequest.class);
+
+            if (pdfInputStream == null || pdfFileDetail == null || pdfFileDetail.getFileName().isEmpty() || !pdfFileDetail.getFileName().toLowerCase().endsWith(".pdf")) {
+                return Response.status(Response.Status.BAD_REQUEST).entity("{\"message\":\"El archivo PDF firmado es obligatorio y debe ser un PDF válido.\"}").build();
+            }
+            if (pdfFileDetail.getSize() > MAX_FILE_SIZE_BYTES) {
+                 return Response.status(Response.Status.BAD_REQUEST).entity("{\"message\":\"El PDF excede el tamaño máximo permitido de 10 MB.\"}").build();
+            }
+            
+            if (imagenInputStream == null || imagenFileDetail == null || imagenFileDetail.getFileName().isEmpty()) {
+                return Response.status(Response.Status.BAD_REQUEST).entity("{\"message\":\"La imagen del empleado es obligatoria.\"}").build();
+            }
+            if (imagenFileDetail.getSize() > MAX_FILE_SIZE_BYTES) {
+                 return Response.status(Response.Status.BAD_REQUEST).entity("{\"message\":\"La Imagen excede el tamaño máximo permitido de 10 MB.\"}").build();
+            }
+            
+            pdfTempFile = File.createTempFile("pdf_contrato_", "_" + pdfFileDetail.getFileName());
+            copyStreamToFile(pdfInputStream, pdfTempFile);
+            
+            imagenTempFile = File.createTempFile("img_empleado_", "_" + imagenFileDetail.getFileName());
+            copyStreamToFile(imagenInputStream, imagenTempFile);
+
+            int idGenerado = empleadoService.registrarEmpleadoCompleto(
+                    request, 
+                    pdfTempFile, 
+                    pdfFileDetail,
+                    imagenTempFile,
+                    imagenFileDetail,
+                    idAdmin
+            );
 
             if (idGenerado > 0) {
-                String json = String.format(
-                    "{\"mensaje\": \"Empleado registrado exitosamente\", \"idEmpleado\": %d}",
-                    idGenerado
-                );
-
-                return Response.status(Response.Status.CREATED)
-                        .entity(json)
-                        .build();
+                String json = String.format("{\"mensaje\": \"Empleado y Cliente registrados exitosamente\", \"idEmpleado\": %d}", idGenerado);
+                return Response.status(Response.Status.CREATED).entity(json).build();
             } else {
-                return Response.status(Response.Status.BAD_REQUEST)
-                        .entity("{\"error\": \"No se pudo registrar el empleado completo\"}")
-                        .build();
+                 return Response.status(Response.Status.BAD_REQUEST).entity("{\"error\": \"No se pudo registrar el empleado completo. Verifique logs.\"}")
+                                .build();
             }
 
         } catch (Exception e) {
             e.printStackTrace();
             String error = String.format("{\"error\": \"Error interno en el servidor: %s\"}", e.getMessage());
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(error)
-                    .build();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(error).build();
+        } finally {
+            if (pdfTempFile != null && pdfTempFile.exists()) {
+                pdfTempFile.delete();
+            }
+            if (imagenTempFile != null && imagenTempFile.exists()) {
+                imagenTempFile.delete();
+            }
         }
     }
     

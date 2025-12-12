@@ -8,6 +8,7 @@ import com.restaurant.dao.RegistroDAO;
 import com.restaurant.model.Empleado;
 import com.restaurant.model.EmpleadoCompletoRequest;
 import com.restaurant.model.EmpleadoExisteCompletoRequest;
+import com.restaurant.model.Cliente;
 import com.restaurant.model.Contrato;
 import com.restaurant.model.Credenciales;
 import com.restaurant.model.Persona;
@@ -58,51 +59,112 @@ public class EmpleadoService {
         return data;
     }
 
-    public int registrarEmpleadoCompleto(EmpleadoCompletoRequest request) {
-        try {
-            Credenciales cred = request.getCredenciales();
-            Persona persona = request.getPersona();
-            Empleado empleado = request.getEmpleado();
-            Contrato contrato = request.getContrato();
+    public int registrarEmpleadoCompleto(
+            EmpleadoCompletoRequest request, 
+            File pdfTempFile, 
+            FormDataContentDisposition pdfFileDetail, 
+            File imagenTempFile, 
+            FormDataContentDisposition imagenFileDetail,
+            int idAdmin) throws Exception {
 
-            if (cred == null || persona == null || empleado == null || contrato == null) {
-                System.out.println("Error: Algún objeto está nulo. cred: " + cred + 
-                                   ", persona: " + persona + 
-                                   ", empleado: " + empleado +
-                                   ", contrato: " + contrato);
-                return 0;
-            }
-
-            if (cred.getUsuario() == null || cred.getContrasena() == null ||
-                cred.getUsuario().isEmpty() || cred.getContrasena().isEmpty()) {
-                System.out.println("Error: Usuario o contraseña vacíos.");
-                return 0;
-            }
-
-            String passwordEncriptada = BCrypt.hashpw(cred.getContrasena(), BCrypt.gensalt());
-            cred.setContrasena(passwordEncriptada);
-
-            if (persona.getCorreo() != null && !persona.getCorreo().contains("@")) {
-                System.out.println("Error: Correo no válido.");
-                return 0;
-            }
-
-            if (contrato.getIdSucursal() <= 0 ||
-                contrato.getIdTipoContrato() <= 0 ||
-                contrato.getIdRol() <= 0 ||
-                contrato.getSalario() == null ||
-                contrato.getFechaInicio() == null ||
-                contrato.getFechaFin() == null) {
-
-                System.out.println("Error: Datos de contrato incompletos.");
-                return 0;
-            }
+        Credenciales cred = request.getCredenciales();
+        Persona persona = request.getPersona();
+        Empleado empleado = request.getEmpleado();
+        Contrato contrato = request.getContrato();
+        
+        if (cred == null || persona == null || empleado == null || contrato == null ||
+            cred.getUsuario() == null || cred.getContrasena() == null ||
+            cred.getUsuario().isEmpty() || cred.getContrasena().isEmpty() ||
+            (persona.getCorreo() != null && !persona.getCorreo().contains("@")) ||
+            contrato.getIdSucursal() <= 0 || contrato.getIdTipoContrato() <= 0 ||
+            contrato.getIdRol() <= 0 || contrato.getSalario() == null ||
+            contrato.getFechaInicio() == null) {
             
-            return empleadoDAO.registrarEmpleadoCompleto(cred, persona, empleado, contrato);
+            throw new Exception("Datos de registro o contrato incompletos/inválidos.");
+        }
+        
+        String numDocumento = persona.getNumDocumento();
+        if (numDocumento == null || numDocumento.isEmpty()) {
+            throw new Exception("El número de documento (numDocumento) de la Persona es obligatorio para las Keys de B2.");
+        }
+        
+        cred.setContrasena(BCrypt.hashpw(cred.getContrasena(), BCrypt.gensalt()));
+
+        List<String> b2KeysToRollback = new ArrayList<>();
+        
+        String imagenOriginalName = imagenFileDetail.getFileName();
+        String imagenExtension = imagenOriginalName.substring(imagenOriginalName.lastIndexOf('.') + 1).toLowerCase();
+        
+        if (!ALLOWED_IMAGE_EXTENSIONS.contains(imagenExtension)) {
+            throw new Exception("Tipo de archivo de imagen no soportado.");
+        }
+        
+        String imagenUniqueName = generateUniqueFileName(imagenOriginalName, numDocumento);
+        
+        String imagenEmpleadoKey = "";
+        String imagenClienteKey = "";
+
+        String imagenEmpleadoPath = "imagen_empleado/" + numDocumento; 
+        try {
+            imagenEmpleadoKey = BackblazeUtil.uploadFile(imagenEmpleadoPath + "/" + imagenUniqueName, imagenTempFile);
+            b2KeysToRollback.add(imagenEmpleadoKey);
+        } catch (Exception e) {
+            throw new Exception("Fallo al subir la Imagen de Empleado a Backblaze B2: " + e.getMessage());
+        }
+        
+        String imagenClientePath = "imagen_cliente/" + numDocumento;
+        try {
+            imagenClienteKey = BackblazeUtil.uploadFile(imagenClientePath + "/" + imagenUniqueName, imagenTempFile);
+            b2KeysToRollback.add(imagenClienteKey);
+        } catch (Exception e) {
+            BackblazeUtil.deleteFile(imagenEmpleadoKey); 
+            throw new Exception("Fallo al subir la Imagen de Cliente a Backblaze B2: " + e.getMessage());
+        }
+       
+        String pdfOriginalFileName = pdfFileDetail.getFileName();
+        String pdfUniqueName = generateUniqueFileName(pdfOriginalFileName, numDocumento);
+        String pdfKeyPath = "contratos/firmados/" + numDocumento; 
+        String pdfB2KeyCompleta = "";
+
+        try {
+            pdfB2KeyCompleta = BackblazeUtil.uploadFile(pdfKeyPath + "/" + pdfUniqueName, pdfTempFile);
+            b2KeysToRollback.add(pdfB2KeyCompleta);
+        } catch (Exception e) {
+            BackblazeUtil.deleteFile(imagenEmpleadoKey);
+            BackblazeUtil.deleteFile(imagenClienteKey);
+            throw new Exception("Fallo al subir el Contrato PDF a Backblaze B2: " + e.getMessage());
+        }
+        
+        Cliente cliente = new Cliente();
+        cliente.setImagenCliente_url(imagenClienteKey);
+        
+        empleado.setImagenConductor_url(imagenEmpleadoKey); 
+        
+        contrato.setPdfFirmadoKey(pdfB2KeyCompleta); 
+        
+        StorageFile pdfStorageFile = prepareStorageFile(pdfB2KeyCompleta, pdfUniqueName, pdfFileDetail, pdfTempFile, "Contrato", idAdmin);
+        StorageFile imagenEmpleadoStorageFile = prepareStorageFile(imagenEmpleadoKey, imagenUniqueName, imagenFileDetail, imagenTempFile, "Empleado", idAdmin);
+        
+        StorageFile imagenClienteStorageFile = prepareStorageFile(imagenClienteKey, imagenUniqueName, imagenFileDetail, imagenTempFile, "Cliente", idAdmin); 
+        
+        List<StorageFile> storageFiles = Arrays.asList(pdfStorageFile, imagenEmpleadoStorageFile, imagenClienteStorageFile);
+        
+        try {
+             return empleadoDAO.registrarEmpleadoCompleto(
+                    cred, 
+                    persona, 
+                    empleado, 
+                    contrato, 
+                    cliente,
+                    storageFiles
+             );
 
         } catch (Exception e) {
-            e.printStackTrace();
-            return 0;
+            System.out.println("Error fatal en EmpleadoService durante la transacción: " + e.getMessage());
+            for (String key : b2KeysToRollback) {
+                try { BackblazeUtil.deleteFile(key); } catch (Exception ex) {}
+            }
+            throw e; 
         }
     }
 	
@@ -214,5 +276,17 @@ public class EmpleadoService {
             
             throw e; 
         }
+    }
+    
+    private StorageFile prepareStorageFile(String b2Key, String uniqueName, FormDataContentDisposition fileDetail, File tempFile, String relatedTable, int uploadedBy) {
+        StorageFile storageFile = new StorageFile();
+        storageFile.setBucket(BackblazeConfig.getBucketName());
+        storageFile.setObjectKey(b2Key);
+        storageFile.setFilename(uniqueName);
+        storageFile.setContentType(fileDetail.getType());
+        storageFile.setSize(tempFile.length());
+        storageFile.setRelatedTable(relatedTable);
+        storageFile.setUploadedBy(uploadedBy);
+        return storageFile;
     }
 }
