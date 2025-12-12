@@ -157,86 +157,89 @@ public class RegistroDAO {
         return idGenerado;
     }
 	
-	public int registrarClienteCompleto(Credenciales cred, Persona persona, Cliente cliente) {
-	    int idGenerado = 0;
+    public int registrarClienteCompleto(Credenciales cred, Persona persona, Cliente cliente, List<StorageFile> storageFiles) throws Exception {
+	    int idGenerado = 0; // idCliente
 	    Connection conn = null;
 
 	    try {
 	        conn = DBConnection.getConnection();
 	        conn.setAutoCommit(false);
 
-	        // Credenciales
 	        String sqlCred = "INSERT INTO Credenciales (usuario, contrasena, fechaCreacion) VALUES (?, ?, NOW())";
+	        int idCredencial = 0;
 	        try (PreparedStatement psCred = conn.prepareStatement(sqlCred, Statement.RETURN_GENERATED_KEYS)) {
 	            psCred.setString(1, cred.getUsuario());
 	            psCred.setString(2, cred.getContrasena());
 	            psCred.executeUpdate();
 
 	            ResultSet rsCred = psCred.getGeneratedKeys();
-	            int idCredencial = 0;
 	            if (rsCred.next()) {
 	                idCredencial = rsCred.getInt(1);
 	            } else {
-	                System.out.println("Error: No se pudo obtener el ID de las credenciales.");
-	                conn.rollback();
-	                return -1;
-	            }
-
-	            // Insertar Persona
-	            String sqlPersona = "INSERT INTO Persona (idCredencial, nombres, apPaterno, apMaterno, genero, tipoDocumento, numDocumento, telefono, correo, fechaNacimiento) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-	            try (PreparedStatement psPersona = conn.prepareStatement(sqlPersona, Statement.RETURN_GENERATED_KEYS)) {
-	                psPersona.setInt(1, idCredencial);
-	                psPersona.setString(2, persona.getNombres());
-	                psPersona.setString(3, persona.getApPaterno());
-	                psPersona.setString(4, persona.getApMaterno());
-	                psPersona.setString(5, String.valueOf(persona.getGenero()));
-	                psPersona.setString(6, persona.getTipoDocumento());
-	                psPersona.setString(7, persona.getNumDocumento());
-	                psPersona.setString(8, persona.getTelefono());
-	                psPersona.setString(9, persona.getCorreo());
-
-	                if (persona.getFechaNacimiento() != null) {
-	                    java.time.LocalDate localDate = persona.getFechaNacimiento()
-	                        .toInstant()
-	                        .atZone(java.time.ZoneId.systemDefault())
-	                        .toLocalDate();
-	                    psPersona.setDate(10, java.sql.Date.valueOf(localDate));
-	                } else {
-	                    psPersona.setNull(10, java.sql.Types.DATE);
-	                }
-	                psPersona.executeUpdate();
-
-	                ResultSet rsPersona = psPersona.getGeneratedKeys();
-	                int idPersona = 0;
-	                if (rsPersona.next()) {
-	                    idPersona = rsPersona.getInt(1);
-	                } else {
-	                    System.out.println("Error: No se pudo obtener el ID de la persona.");
-	                    conn.rollback();
-	                    return -1;
-	                }
-
-	                // Cliente
-	                String sqlCliente = "INSERT INTO Cliente (idPersona, fechaRegistro, imagenCliente_url) VALUES (?, NOW(), ?)";
-	                    try (PreparedStatement psCliente = conn.prepareStatement(sqlCliente, Statement.RETURN_GENERATED_KEYS)) {
-	                    psCliente.setInt(1, idPersona);
-	                    psCliente.setString(2, cliente.getImagenCliente_url());
-	                    psCliente.executeUpdate();
-
-
-	                    ResultSet rsCliente = psCliente.getGeneratedKeys();
-	                    if (rsCliente.next()) {
-	                        idGenerado = rsCliente.getInt(1);
-	                    } else {
-	                        System.out.println("Error: No se pudo obtener el ID del empleado.");
-	                        conn.rollback();
-	                        return -1;
-	                    }
-
-	                    conn.commit();
-	                }
+	                throw new Exception("Error: No se pudo obtener el ID de las credenciales.");
 	            }
 	        }
+
+	        String sqlPersona = "INSERT INTO Persona (idCredencial, nombres, apPaterno, apMaterno, genero, tipoDocumento, numDocumento, telefono, correo, fechaNacimiento) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+	        int idPersona = 0;
+	        try (PreparedStatement psPersona = conn.prepareStatement(sqlPersona, Statement.RETURN_GENERATED_KEYS)) {
+	            psPersona.setInt(1, idCredencial);
+	            psPersona.setString(2, persona.getNombres());
+	            psPersona.setString(3, persona.getApPaterno());
+	            psPersona.setString(4, persona.getApMaterno());
+	            psPersona.setString(5, String.valueOf(persona.getGenero()));
+	            psPersona.setString(6, persona.getTipoDocumento());
+	            psPersona.setString(7, persona.getNumDocumento());
+	            psPersona.setString(8, persona.getTelefono());
+	            psPersona.setString(9, persona.getCorreo());
+
+
+	            if (persona.getFechaNacimiento() != null) {
+	                java.time.LocalDate localDate = persona.getFechaNacimiento()
+	                    .toInstant()
+	                    .atZone(java.time.ZoneId.systemDefault())
+	                    .toLocalDate();
+	                psPersona.setDate(10, java.sql.Date.valueOf(localDate));
+	            } else {
+	                psPersona.setNull(10, java.sql.Types.DATE);
+	            }
+	            psPersona.executeUpdate();
+
+	            ResultSet rsPersona = psPersona.getGeneratedKeys();
+	            if (rsPersona.next()) {
+	                idPersona = rsPersona.getInt(1);
+	            } else {
+	                throw new Exception("Error: No se pudo obtener el ID de la persona.");
+	            }
+	        }
+
+	        String sqlCliente = "INSERT INTO Cliente (idPersona, fechaRegistro, imagenCliente_url) VALUES (?, NOW(), ?)";
+	        int idCliente = 0;
+	        try (PreparedStatement psCliente = conn.prepareStatement(sqlCliente, Statement.RETURN_GENERATED_KEYS)) {
+	            psCliente.setInt(1, idPersona);
+	            psCliente.setString(2, cliente.getImagenCliente_url());
+	            psCliente.executeUpdate();
+
+	            ResultSet rsCliente = psCliente.getGeneratedKeys();
+	            if (rsCliente.next()) {
+	                idCliente = rsCliente.getInt(1);
+	            } else {
+	                throw new Exception("Error: No se pudo obtener el ID del cliente.");
+	            }
+	            idGenerado = idCliente;
+	        }
+        
+            for (StorageFile metadata : storageFiles) {
+                if (metadata.getObjectKey().contains("imagen_cliente")) { 
+                    metadata.setRelatedTable("Cliente");
+                    metadata.setRelatedId(idCliente); 
+                    metadata.setUploadedBy(idCliente);
+                }
+                storageFileDAO.insertFileMetadata(conn, metadata);
+            }
+
+
+	        conn.commit();
 
 	    } catch (Exception e) {
 	        e.printStackTrace();
@@ -245,7 +248,7 @@ public class RegistroDAO {
 	        } catch (Exception ex) {
 	            ex.printStackTrace();
 	        }
-	        return -1;
+	        return 0; 
 	    } finally {
 	        try {
 	            if (conn != null) conn.close();
