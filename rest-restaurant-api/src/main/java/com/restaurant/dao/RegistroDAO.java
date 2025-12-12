@@ -17,8 +17,11 @@ import com.restaurant.model.Cliente;
 import com.restaurant.model.Contrato;
 import com.restaurant.model.Credenciales;
 import com.restaurant.model.Persona;
+import com.restaurant.model.StorageFile;
 
 public class RegistroDAO {
+	
+    private StorageFileDAO storageFileDAO = new StorageFileDAO(); 
 	
 	public int registrarEmpleadoCompleto(Credenciales cred, Persona persona, Empleado empleado, Contrato contrato) {
 	    int idGenerado = 0;
@@ -286,10 +289,8 @@ public class RegistroDAO {
 
         return null;
     }
-    
-    //REGISTRAR EMPLEADO EXISTENTE CONTRATO
-    public int registrarEmpleadoExisteCompleto(Empleado empleado, Contrato contrato, int idPersona) {
 
+    public int registrarEmpleadoExisteCompleto(Empleado empleado, Contrato contrato, int idPersona, StorageFile storageFileMetadata) {
         Connection conn = null;
 
         try {
@@ -302,33 +303,30 @@ public class RegistroDAO {
             int idEmpleadoGenerado = 0;
 
             try (PreparedStatement psEmp = conn.prepareStatement(sqlEmpleado, Statement.RETURN_GENERATED_KEYS)) {
-
                 psEmp.setInt(1, idPersona);
                 psEmp.setString(2, empleado.getDireccion());
                 psEmp.setString(3, empleado.getImagenConductor_url());
 
                 int rowsEmp = psEmp.executeUpdate();
                 if (rowsEmp == 0) {
-                    conn.rollback();
-                    System.out.println("Error: No se pudo insertar Empleado.");
-                    return 0;
+                    throw new Exception("Error: No se pudo insertar Empleado.");
                 }
 
                 try (ResultSet rs = psEmp.getGeneratedKeys()) {
                     if (rs.next()) {
                         idEmpleadoGenerado = rs.getInt(1);
                     } else {
-                        conn.rollback();
-                        System.out.println("Error: No se obtuvo idEmpleado.");
-                        return 0;
+                        throw new Exception("Error: No se obtuvo idEmpleado.");
                     }
                 }
             }
+            
+            String sqlContrato = "INSERT INTO Contrato (idEmpleado, idSucursal, idTipoContrato, idRol, fechaInicio, fechaFin, salario, estadoContrato, pdf_firmado_key) "
+                    + "VALUES (?, ?, ?, ?, ?, ?, ?, 'activo', ?)";
 
-            String sqlContrato = "INSERT INTO Contrato (idEmpleado, idSucursal, idTipoContrato, idRol, fechaInicio, fechaFin, salario, estadoContrato) "
-                    + "VALUES (?, ?, ?, ?, ?, ?, ?, 'activo')";
-
-            try (PreparedStatement psCon = conn.prepareStatement(sqlContrato)) {
+            int idContratoGenerado = 0; 
+            
+            try (PreparedStatement psCon = conn.prepareStatement(sqlContrato, Statement.RETURN_GENERATED_KEYS)) {
 
                 psCon.setInt(1, idEmpleadoGenerado);
                 psCon.setInt(2, contrato.getIdSucursal());
@@ -338,22 +336,37 @@ public class RegistroDAO {
                 psCon.setTimestamp(5, new java.sql.Timestamp(contrato.getFechaInicio().getTime()));
                 psCon.setTimestamp(6, new java.sql.Timestamp(contrato.getFechaFin().getTime()));
                 psCon.setBigDecimal(7, contrato.getSalario());
+                psCon.setString(8, contrato.getPdfFirmadoKey());
 
                 int rowsCon = psCon.executeUpdate();
                 if (rowsCon == 0) {
-                    conn.rollback();
-                    System.out.println("Error: No se pudo insertar Contrato.");
-                    return 0;
+                    throw new Exception("Error: No se pudo insertar Contrato.");
+                }
+                
+                try (ResultSet rs = psCon.getGeneratedKeys()) {
+                     if (rs.next()) {
+                         idContratoGenerado = rs.getInt(1);
+                     } else {
+                         throw new Exception("Error: No se obtuvo idContrato.");
+                     }
                 }
             }
 
+            storageFileMetadata.setRelatedTable("Contrato");
+            storageFileMetadata.setRelatedId(idContratoGenerado);
+            
+            storageFileDAO.insertFileMetadata(conn, storageFileMetadata);
+            
             conn.commit();
             return idEmpleadoGenerado;
 
         } catch (Exception e) {
 
             try {
-                if (conn != null) conn.rollback();
+                if (conn != null) {
+                    System.out.println("Transacción fallida. Realizando Rollback.");
+                    conn.rollback();
+                }
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
@@ -362,7 +375,6 @@ public class RegistroDAO {
             return 0;
 
         } finally {
-
             try {
                 if (conn != null) conn.setAutoCommit(true);
                 if (conn != null) conn.close();

@@ -11,6 +11,12 @@ import com.restaurant.model.EmpleadoExisteCompletoRequest;
 import com.restaurant.model.Contrato;
 import com.restaurant.model.Credenciales;
 import com.restaurant.model.Persona;
+import com.restaurant.util.BackblazeUtil;
+import com.restaurant.config.BackblazeConfig;
+import com.restaurant.model.StorageFile;
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
+
+import java.io.File;
 
 public class EmpleadoService {
 	private final RegistroDAO empleadoDAO = new RegistroDAO();
@@ -82,65 +88,73 @@ public class EmpleadoService {
         }
     }
 	
-    public int registrarEmpleadoExisteCompleto(EmpleadoExisteCompletoRequest request) {
+    public int registrarEmpleadoExisteCompleto(
+            EmpleadoExisteCompletoRequest request, 
+            File pdfTempFile, 
+            FormDataContentDisposition fileDetail,
+            int idAdmin
+    ) throws Exception {
 
+        if (request == null || pdfTempFile == null || fileDetail == null) {
+             throw new Exception("Datos de empleado o archivo PDF incompletos.");
+        }
+        if (idAdmin <= 0) {
+            throw new Exception("El ID del administrador que registra es inválido.");
+        }
+        
+        String numDocumento = request.getPersona().getNumDocumento();
+        if (numDocumento == null || numDocumento.isEmpty()) {
+            throw new Exception("El número de documento (numDocumento) de la Persona es obligatorio para la Key de B2.");
+        }
+        
+        String originalFileName = fileDetail.getFileName();
+        String keyPath = "firmados/" + numDocumento; 
+        String b2KeyCompleta = "";
+        
         try {
-            if (request == null) {
-                System.out.println("Error: El request está vacío.");
-                return 0;
-            }
-
-            Persona persona = request.getPersona();
-            Empleado empleado = request.getEmpleado();
-            Contrato contrato = request.getContrato();
-
-            if (persona == null || empleado == null || contrato == null) {
-                System.out.println("Error: Los datos enviados están incompletos.");
-                return 0;
-            }
-
-            if (persona.getIdPersona() <= 0) {
-                System.out.println("Error: El idPersona es inválido.");
-                return 0;
-            }
-
-            if (empleado.getDireccion() == null || empleado.getDireccion().isEmpty()) {
-                System.out.println("Error: La dirección del empleado es obligatoria.");
-                return 0;
-            }
-
-            if (empleado.getImagenConductor_url() == null) {
-                empleado.setImagenConductor_url("");
-            }
-
-            if (contrato.getIdSucursal() <= 0 ||
-                contrato.getIdTipoContrato() <= 0 ||
-                contrato.getIdRol() <= 0) {
-
-                System.out.println("Error: Sucursal, TipoContrato y Rol son obligatorios.");
-                return 0;
-            }
-
-            if (contrato.getFechaInicio() == null || contrato.getFechaFin() == null) {
-                System.out.println("Error: Las fechas del contrato son obligatorias.");
-                return 0;
-            }
-
-            if (contrato.getSalario() == null || contrato.getSalario().doubleValue() <= 0) {
-                System.out.println("Error: El salario debe ser mayor a cero.");
-                return 0;
-            }
+            b2KeyCompleta = BackblazeUtil.uploadFile(keyPath + "/" + originalFileName, pdfTempFile);
             
-            return empleadoDAO.registrarEmpleadoExisteCompleto(
-                    empleado,
+        } catch (Exception e) {
+            throw new Exception("Fallo al subir el Contrato PDF a Backblaze B2: " + e.getMessage());
+        }
+        
+        Contrato contrato = request.getContrato();
+        contrato.setPdfFirmadoKey(b2KeyCompleta); 
+        
+        StorageFile storageFileMetadata = new StorageFile();
+        storageFileMetadata.setBucket(BackblazeConfig.getBucketName());
+        storageFileMetadata.setObjectKey(b2KeyCompleta);
+        storageFileMetadata.setFilename(originalFileName);
+        storageFileMetadata.setContentType(fileDetail.getType());
+        storageFileMetadata.setSize(pdfTempFile.length());
+        storageFileMetadata.setUploadedBy(idAdmin);
+        
+        int idEmpleadoGenerado = 0;
+        try {
+            idEmpleadoGenerado = empleadoDAO.registrarEmpleadoExisteCompleto(
+                    request.getEmpleado(),
                     contrato,
-                    persona.getIdPersona()
+                    request.getPersona().getIdPersona(),
+                    storageFileMetadata 
             );
 
+            if (idEmpleadoGenerado <= 0) {
+                 throw new Exception("El DAO no pudo registrar Empleado/Contrato, la transacción falló.");
+            }
+            
+            return idEmpleadoGenerado;
+
         } catch (Exception e) {
-            System.out.println("Error en EmpleadoService: " + e.getMessage());
-            e.printStackTrace();
-            return 0;
+            System.out.println("Error fatal en EmpleadoService durante la transacción: " + e.getMessage());
+            
+            try {
+                BackblazeUtil.deleteFile(b2KeyCompleta);
+                System.out.println("Archivo huérfano eliminado de B2: " + b2KeyCompleta);
+            } catch (Exception ex) {
+                System.err.println("ADVERTENCIA: No se pudo limpiar el archivo huérfano de B2: " + ex.getMessage());
+            }
+            
+            throw e; 
         }
     }
 }
