@@ -21,43 +21,34 @@ export default function Login() {
     resolver: yupResolver(loginSchema),
   });
 
-  const doLogin = ({
-    usuario,
-    contrasena,
-  }: {
-    usuario: string;
-    contrasena: string;
-  }) => {
-    mutate(
-      {
-        usuario,
-        contrasena,
-      },
-      {
-        onSuccess: (data) => {
-          dispatch(
-            login({
-              token: data?.data?.token,
-              rol: data?.data?.usuario?.rol,
-              nombre: data?.data?.usuario?.nombre,
-              tipoId: data?.data?.usuario?.tipoId,
-              id: data?.data?.usuario?.id,
-            })
-          );
-        },
-        onError: () => {
-          Swal.fire({
-            position: "center",
-            icon: "error",
-            title: "Usuario y/o Contraseña Incorrecta",
-            showConfirmButton: false,
-            timer: 1200,
-          });
-        },
-      }
-    );
-  };
+const doLogin = ({
+  usuario,
+  contrasena,
+}: {
+  usuario: string;
+  contrasena: string;
+}) => {
+  mutate(
+    { usuario, contrasena },
+    {
+      onSuccess: (response) => {
+        console.log(response);
 
+        dispatch(login(response.data)); // ✅
+      },
+      onError: () => {
+        Swal.fire({
+          position: "center",
+          icon: "error",
+          title: "Usuario y/o Contraseña Incorrecta",
+          showConfirmButton: false,
+          timer: 1200,
+        });
+      },
+    }
+  );
+};
+  
   return (
     <Card
       sx={{

@@ -24,6 +24,6 @@ telefono: yup
   }),
 
   cliente: yup.object({
-    imagenCliente_url: yup.string().required(),
+    imagenCliente_url: yup.string().required("Suba la imagen"),
   }),
 });

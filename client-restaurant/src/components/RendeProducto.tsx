@@ -4,7 +4,7 @@ import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
 import { Box, Button, CardActionArea, CardMedia } from '@mui/material';
 import { useSelector, useDispatch } from 'react-redux';
-import { selectRol } from '../store/slices/auth.slice';
+import { selectIdCliente, selectIdEmpleado, selectRol } from '../store/slices/auth.slice';
 import { selectCart, addItem, decreaseItem } from '../store/slices/cart.slice';
 import { useState } from 'react';
 import type { Plate } from '../types/Plate.type';
@@ -12,7 +12,9 @@ import { useGetPlate, useRemovePlate, useUpdatePlate } from '../services/plate.s
 import EditModalPlate from './Modals/FormModalEdit';
 
 export default function CardPlate({ Plate }: { Plate: Plate }) {
-  const rol = useSelector(selectRol);
+  const idEmpleado = useSelector(selectIdEmpleado);
+    const idCliente = useSelector(selectIdCliente);
+
   const cart = useSelector(selectCart);
   const dispatch = useDispatch();
 
@@ -97,7 +99,7 @@ export default function CardPlate({ Plate }: { Plate: Plate }) {
 
         <Box sx={{ display: "flex", gap: 1, p: 1, alignItems: "center" }}>
           {/* Botones para empleado */}
-          {rol === "empleado" && (
+          {idEmpleado !=null && (
             <>
               <Button size="small" variant="contained" color="error" onClick={handleRemove}>
                 Eliminar
@@ -109,7 +111,7 @@ export default function CardPlate({ Plate }: { Plate: Plate }) {
           )}
 
           {/* Botones para cliente */}
-          {rol === "cliente" && (
+          {idCliente !=null && (
             <>
               {cantidad === 0 ? (
                 <Button size="small" variant="contained" onClick={handleAdd}>

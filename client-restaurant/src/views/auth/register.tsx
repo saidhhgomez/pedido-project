@@ -1,14 +1,18 @@
-import { Box, Typography, TextField, Button } from "@mui/material";
+import { useState } from "react";
+import { Box, Typography, TextField, Button, MenuItem } from "@mui/material";
 import { useNavigate } from "react-router";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { registrarEmpleadoSchema } from "../../validators/Cliente.schema";
-import MenuItem from "@mui/material/MenuItem";
-import type { RegistrarClienteDTO } from "../../types/cliente.types";
-import { useRegisterCliente } from "../../services/cliente.service";
 import Swal from "sweetalert2";
+import { registrarEmpleadoSchema } from "../../validators/Cliente.schema";
+import type { RegistrarClienteDTO } from "../../types/cliente.types";
+import { useRegistrarClienteFormData } from "../../services/cliente.service";
 
 export default function Register() {
+  const navigate = useNavigate();
+  const { mutate } = useRegistrarClienteFormData();
+  const [imagenCliente, setImagenCliente] = useState<File | null>(null);
+
   const tiposDocumento = [
     { value: "DNI", label: "DNI" },
     { value: "CARNET", label: "Carnet de Extranjería" },
@@ -20,14 +24,7 @@ export default function Register() {
     { value: "F", label: "Femenino" },
   ];
 
-  const navigate = useNavigate();
-  const { mutate } = useRegisterCliente();
-
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<RegistrarClienteDTO>({
+  const { register, getValues, formState: { errors }, trigger } = useForm<RegistrarClienteDTO>({
     resolver: yupResolver(registrarEmpleadoSchema),
     defaultValues: {
       credenciales: { usuario: "", contrasena: "" },
@@ -46,25 +43,61 @@ export default function Register() {
     },
   });
 
-  const doRegister = (data: RegistrarClienteDTO) => {
-    mutate(data, {
+  // Función para limpiar undefined y vacíos
+  const cleanData = (data: any) => {
+    return JSON.parse(JSON.stringify(data, (key, value) =>
+      value === undefined || value === "" ? null : value
+    ));
+  };
+
+  // Función principal para registrar
+  const doRegister = async () => {
+    // Validar todos los campos antes de enviar
+    const valid = await trigger();
+    if (!valid) {
+      return Swal.fire({
+        icon: "error",
+        title: "Complete todos los campos correctamente",
+        showConfirmButton: false,
+        timer: 1500,
+      });
+    }
+
+    if (!imagenCliente) {
+      return Swal.fire({
+        icon: "error",
+        title: "Debe seleccionar una imagen",
+        showConfirmButton: false,
+        timer: 1500,
+      });
+    }
+
+    const data = cleanData(getValues());
+
+    const formData = new FormData();
+    formData.append("data", JSON.stringify(data));
+    formData.append("archivo", imagenCliente);
+
+    mutate(formData, {
       onSuccess: () => {
-Swal.fire({
-  position: "center",
-  icon: "success",
-  title: "Rol registrado",
-  showConfirmButton: false,
-  timer: 1500
-});        navigate("/");
+        Swal.fire({
+          position: "center",
+          icon: "success",
+          title: "Cliente registrado",
+          showConfirmButton: false,
+          timer: 1500,
+        });
+        navigate("/");
       },
       onError: () => {
-Swal.fire({
-  position: "center",
-  icon: "error",
-  title: "Rol registrado",
-  showConfirmButton: false,
-  timer: 1500
-});      },
+        Swal.fire({
+          position: "center",
+          icon: "error",
+          title: "Cliente no registrado",
+          showConfirmButton: false,
+          timer: 1500,
+        });
+      },
     });
   };
 
@@ -76,14 +109,12 @@ Swal.fire({
         display: "flex",
         justifyContent: "center",
         alignItems: "flex-start",
-        backgroundColor: "#e74c3c", // 🔴 COLOR ROJO CORRECTO
+        backgroundColor: "#e74c3c",
         p: 4,
         overflowY: "auto",
       }}
     >
       <Box
-        component="form"
-        onSubmit={handleSubmit(doRegister)}
         sx={{
           width: "100%",
           maxWidth: "850px",
@@ -103,7 +134,6 @@ Swal.fire({
           Registrarse
         </Typography>
 
-        {/* GRID DEL FORMULARIO */}
         <Box
           sx={{
             display: "grid",
@@ -111,6 +141,7 @@ Swal.fire({
             gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
           }}
         >
+          {/* Credenciales */}
           <TextField
             {...register("credenciales.usuario")}
             label="Usuario"
@@ -119,7 +150,6 @@ Swal.fire({
             helperText={errors.credenciales?.usuario?.message}
             sx={{ backgroundColor: "#fafafa" }}
           />
-
           <TextField
             {...register("credenciales.contrasena")}
             type="password"
@@ -129,6 +159,7 @@ Swal.fire({
             sx={{ backgroundColor: "#fafafa" }}
           />
 
+          {/* Datos personales */}
           <TextField
             {...register("persona.nombres")}
             label="Nombre Completo"
@@ -136,7 +167,6 @@ Swal.fire({
             helperText={errors.persona?.nombres?.message}
             sx={{ backgroundColor: "#fafafa" }}
           />
-
           <TextField
             {...register("persona.apPaterno")}
             label="Apellido Paterno"
@@ -144,7 +174,6 @@ Swal.fire({
             helperText={errors.persona?.apPaterno?.message}
             sx={{ backgroundColor: "#fafafa" }}
           />
-
           <TextField
             {...register("persona.apMaterno")}
             label="Apellido Materno"
@@ -152,7 +181,6 @@ Swal.fire({
             helperText={errors.persona?.apMaterno?.message}
             sx={{ backgroundColor: "#fafafa" }}
           />
-
           <TextField
             select
             label="Género"
@@ -167,7 +195,6 @@ Swal.fire({
               </MenuItem>
             ))}
           </TextField>
-
           <TextField
             select
             label="Tipo de documento"
@@ -182,7 +209,6 @@ Swal.fire({
               </MenuItem>
             ))}
           </TextField>
-
           <TextField
             {...register("persona.numDocumento")}
             label="N° de Documento"
@@ -190,7 +216,6 @@ Swal.fire({
             helperText={errors.persona?.numDocumento?.message}
             sx={{ backgroundColor: "#fafafa" }}
           />
-
           <TextField
             {...register("persona.telefono")}
             label="Teléfono"
@@ -198,7 +223,6 @@ Swal.fire({
             helperText={errors.persona?.telefono?.message}
             sx={{ backgroundColor: "#fafafa" }}
           />
-
           <TextField
             {...register("persona.correo")}
             label="Correo electrónico"
@@ -206,7 +230,6 @@ Swal.fire({
             helperText={errors.persona?.correo?.message}
             sx={{ backgroundColor: "#fafafa" }}
           />
-
           <TextField
             {...register("persona.fechaNacimiento")}
             label="Fecha de Nacimiento"
@@ -217,16 +240,16 @@ Swal.fire({
             sx={{ backgroundColor: "#fafafa" }}
           />
 
+          {/* Imagen */}
           <TextField
-            {...register("cliente.imagenCliente_url")}
-            label="Imagen (URL)"
-            error={!!errors.cliente?.imagenCliente_url}
-            helperText={errors.cliente?.imagenCliente_url?.message}
+            type="file"
+            inputProps={{ accept: "image/*" }}
+            onChange={(e) => setImagenCliente(e.target.files?.[0] || null)}
             sx={{ backgroundColor: "#fafafa" }}
           />
         </Box>
 
-        {/* BOTÓN PRINCIPAL */}
+        {/* Botón principal */}
         <Button
           fullWidth
           variant="contained"
@@ -237,14 +260,15 @@ Swal.fire({
             fontWeight: "bold",
             borderRadius: "10px",
             backgroundColor: "#e74c3c",
-            "&:hover": { backgroundColor: "#d8433c" }, // tono más oscuro
+            "&:hover": { backgroundColor: "#d8433c" },
           }}
-          type="submit"
+          type="button"
+          onClick={doRegister}
         >
           Registrarse
         </Button>
 
-        {/* BOTÓN OUTLINED */}
+        {/* Botón secundario */}
         <Button
           fullWidth
           variant="outlined"
