@@ -5,7 +5,9 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.sql.Types;
 import java.util.HashMap;
+import java.util.List;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -17,23 +19,155 @@ import com.restaurant.model.Cliente;
 import com.restaurant.model.Contrato;
 import com.restaurant.model.Credenciales;
 import com.restaurant.model.Persona;
+import com.restaurant.model.StorageFile;
 
 public class RegistroDAO {
 	
-	public int registrarEmpleadoCompleto(Credenciales cred, Persona persona, Empleado empleado, Contrato contrato) {
-	    int idGenerado = 0;
+    private StorageFileDAO storageFileDAO = new StorageFileDAO(); 
+	
+    public int registrarEmpleadoCompleto(
+            Credenciales cred, 
+            Persona persona, 
+            Empleado empleado, 
+            Contrato contrato,
+            Cliente cliente,
+            List<StorageFile> storageFiles
+    ) {
+        Connection conn = null;
+        int idGenerado = 0;
+        int idCredencial = 0;
+        int idPersona = 0;
+        int idEmpleado = 0;
+        int idContrato = 0;
+        int idCliente = 0; 
+        
+        try {
+            conn = DBConnection.getConnection();
+            conn.setAutoCommit(false);
+
+            String sqlCred = "INSERT INTO Credenciales (usuario, contrasena, fechaCreacion) VALUES (?, ?, NOW())";
+            try (PreparedStatement psCred = conn.prepareStatement(sqlCred, Statement.RETURN_GENERATED_KEYS)) {
+                psCred.setString(1, cred.getUsuario());
+                psCred.setString(2, cred.getContrasena());
+                psCred.executeUpdate();
+                ResultSet rsCred = psCred.getGeneratedKeys();
+                if (rsCred.next()) { idCredencial = rsCred.getInt(1); } else { throw new Exception("Error: No se obtuvo idCredencial."); }
+            }
+
+            String sqlPersona = "INSERT INTO Persona (idCredencial, nombres, apPaterno, apMaterno, genero, tipoDocumento, numDocumento, telefono, correo, fechaNacimiento) "
+                    + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            try (PreparedStatement psPersona = conn.prepareStatement(sqlPersona, Statement.RETURN_GENERATED_KEYS)) {
+                psPersona.setInt(1, idCredencial);
+                psPersona.setString(2, persona.getNombres());
+                psPersona.setString(3, persona.getApPaterno());
+                psPersona.setString(4, persona.getApMaterno());
+                psPersona.setString(5, String.valueOf(persona.getGenero()));
+                psPersona.setString(6, persona.getTipoDocumento());
+                psPersona.setString(7, persona.getNumDocumento());
+                psPersona.setString(8, persona.getTelefono());
+                psPersona.setString(9, persona.getCorreo());
+                
+                if (persona.getFechaNacimiento() != null) {
+                    Instant instant = persona.getFechaNacimiento().toInstant();
+                    LocalDate localDate = instant.atZone(ZoneId.systemDefault()).toLocalDate();
+                    psPersona.setDate(10, java.sql.Date.valueOf(localDate));
+                } else { psPersona.setNull(10, java.sql.Types.DATE); }
+                psPersona.executeUpdate();
+
+                ResultSet rsPersona = psPersona.getGeneratedKeys();
+                if (rsPersona.next()) { idPersona = rsPersona.getInt(1); } else { throw new Exception("Error: No se obtuvo idPersona."); }
+            }
+            
+            String sqlCliente = "INSERT INTO Cliente (idPersona, fechaRegistro, imagenCliente_url) VALUES (?, NOW(), ?)";
+            try (PreparedStatement psCliente = conn.prepareStatement(sqlCliente, Statement.RETURN_GENERATED_KEYS)) {
+                psCliente.setInt(1, idPersona);
+                psCliente.setString(2, cliente.getImagenCliente_url()); 
+                psCliente.executeUpdate();
+                
+                ResultSet rsCliente = psCliente.getGeneratedKeys();
+                if (rsCliente.next()) { idCliente = rsCliente.getInt(1); } else { throw new Exception("Error: No se obtuvo idCliente."); }
+            }
+            
+            String sqlEmpleado = "INSERT INTO Empleado (idPersona, direccion, fechaRegistro, imagenEmpleado_url) VALUES (?, ?, NOW(), ?)";
+            try (PreparedStatement psEmpleado = conn.prepareStatement(sqlEmpleado, Statement.RETURN_GENERATED_KEYS)) {
+                psEmpleado.setInt(1, idPersona);
+                psEmpleado.setString(2, empleado.getDireccion());
+                psEmpleado.setString(3, empleado.getImagenConductor_url());
+                psEmpleado.executeUpdate();
+
+                ResultSet rsEmpleado = psEmpleado.getGeneratedKeys();
+                if (rsEmpleado.next()) { idEmpleado = rsEmpleado.getInt(1); } else { throw new Exception("Error: No se obtuvo idEmpleado."); }
+            }
+
+            String sqlContrato = "INSERT INTO Contrato (idEmpleado, idSucursal, idTipoContrato, idRol, fechaInicio, fechaFin, salario, pdf_firmado_key) "
+                    + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+            try (PreparedStatement psContrato = conn.prepareStatement(sqlContrato, Statement.RETURN_GENERATED_KEYS)) {
+                psContrato.setInt(1, idEmpleado);
+                psContrato.setInt(2, contrato.getIdSucursal());
+                psContrato.setInt(3, contrato.getIdTipoContrato());
+                psContrato.setInt(4, contrato.getIdRol());
+                psContrato.setTimestamp(5, new java.sql.Timestamp(contrato.getFechaInicio().getTime()));
+                
+                if (contrato.getFechaFin() != null) {
+                    psContrato.setTimestamp(6, new java.sql.Timestamp(contrato.getFechaFin().getTime()));
+                } else {
+                    psContrato.setNull(6, Types.TIMESTAMP);
+                }
+                
+                psContrato.setBigDecimal(7, contrato.getSalario());
+                psContrato.setString(8, contrato.getPdfFirmadoKey());
+
+                psContrato.executeUpdate();
+                
+                ResultSet rsContrato = psContrato.getGeneratedKeys();
+                if (rsContrato.next()) { idContrato = rsContrato.getInt(1); } else { throw new Exception("Error: No se obtuvo idContrato."); }
+            }
+
+            for (StorageFile metadata : storageFiles) {
+                if (metadata.getObjectKey().contains("contratos/firmados")) {
+                    metadata.setRelatedTable("Contrato");
+                    metadata.setRelatedId(idContrato); 
+                } else if (metadata.getObjectKey().contains("imagen_empleado")) {
+                    metadata.setRelatedTable("Empleado");
+                    metadata.setRelatedId(idEmpleado); 
+                } else if (metadata.getObjectKey().contains("imagen_cliente")) {
+                    metadata.setRelatedTable("Cliente");
+                    metadata.setRelatedId(idCliente);
+                }
+                
+                storageFileDAO.insertFileMetadata(conn, metadata);
+            }
+            
+            conn.commit();
+            idGenerado = idEmpleado;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            try {
+                if (conn != null) conn.rollback();
+            } catch (Exception ex) {}
+            return 0;
+
+        } finally {
+            try {
+                if (conn != null) conn.close();
+            } catch (Exception e) {}
+        }
+
+        return idGenerado;
+    }
+	
+    public int registrarClienteCompleto(Credenciales cred, Persona persona, Cliente cliente, List<StorageFile> storageFiles) throws Exception {
+	    int idGenerado = 0; // idCliente
 	    Connection conn = null;
 
 	    try {
 	        conn = DBConnection.getConnection();
 	        conn.setAutoCommit(false);
 
-	        // Credenciales
 	        String sqlCred = "INSERT INTO Credenciales (usuario, contrasena, fechaCreacion) VALUES (?, ?, NOW())";
 	        int idCredencial = 0;
-
 	        try (PreparedStatement psCred = conn.prepareStatement(sqlCred, Statement.RETURN_GENERATED_KEYS)) {
-
 	            psCred.setString(1, cred.getUsuario());
 	            psCred.setString(2, cred.getContrasena());
 	            psCred.executeUpdate();
@@ -42,19 +176,13 @@ public class RegistroDAO {
 	            if (rsCred.next()) {
 	                idCredencial = rsCred.getInt(1);
 	            } else {
-	                conn.rollback();
-	                return -1;
+	                throw new Exception("Error: No se pudo obtener el ID de las credenciales.");
 	            }
 	        }
 
-	        // Persona
-	        String sqlPersona = "INSERT INTO Persona (idCredencial, nombres, apPaterno, apMaterno, genero, tipoDocumento, numDocumento, telefono, correo, fechaNacimiento) "
-	        		+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-
+	        String sqlPersona = "INSERT INTO Persona (idCredencial, nombres, apPaterno, apMaterno, genero, tipoDocumento, numDocumento, telefono, correo, fechaNacimiento) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 	        int idPersona = 0;
-
 	        try (PreparedStatement psPersona = conn.prepareStatement(sqlPersona, Statement.RETURN_GENERATED_KEYS)) {
-
 	            psPersona.setInt(1, idCredencial);
 	            psPersona.setString(2, persona.getNombres());
 	            psPersona.setString(3, persona.getApPaterno());
@@ -66,166 +194,51 @@ public class RegistroDAO {
 	            psPersona.setString(9, persona.getCorreo());
 
 	            if (persona.getFechaNacimiento() != null) {
-	                Instant instant = persona.getFechaNacimiento().toInstant();
-	                LocalDate localDate = instant.atZone(ZoneId.systemDefault()).toLocalDate();
+	                java.time.LocalDate localDate = persona.getFechaNacimiento()
+	                    .toInstant()
+	                    .atZone(java.time.ZoneId.systemDefault())
+	                    .toLocalDate();
 	                psPersona.setDate(10, java.sql.Date.valueOf(localDate));
 	            } else {
 	                psPersona.setNull(10, java.sql.Types.DATE);
 	            }
-
 	            psPersona.executeUpdate();
 
 	            ResultSet rsPersona = psPersona.getGeneratedKeys();
 	            if (rsPersona.next()) {
 	                idPersona = rsPersona.getInt(1);
 	            } else {
-	                conn.rollback();
-	                return -1;
+	                throw new Exception("Error: No se pudo obtener el ID de la persona.");
 	            }
 	        }
 
-	        // Empleado
-	        String sqlEmpleado = "INSERT INTO Empleado (idPersona, direccion, estadoEmpleado, fechaRegistro, imagenEmpleado_url) "
-	        		+ "VALUES (?, ?, ?, NOW(), ?)";
+	        String sqlCliente = "INSERT INTO Cliente (idPersona, fechaRegistro, imagenCliente_url) VALUES (?, NOW(), ?)";
+	        int idCliente = 0;
+	        try (PreparedStatement psCliente = conn.prepareStatement(sqlCliente, Statement.RETURN_GENERATED_KEYS)) {
+	            psCliente.setInt(1, idPersona);
+	            psCliente.setString(2, cliente.getImagenCliente_url());
+	            psCliente.executeUpdate();
 
-	        int idEmpleado = 0;
-
-	        try (PreparedStatement psEmpleado =
-	                     conn.prepareStatement(sqlEmpleado, Statement.RETURN_GENERATED_KEYS)) {
-
-	            psEmpleado.setInt(1, idPersona);
-	            psEmpleado.setString(2, empleado.getDireccion());
-	            psEmpleado.setString(3, empleado.getEstadoEmpleado());
-	            psEmpleado.setString(4, empleado.getImagenConductor_url());
-	            psEmpleado.executeUpdate();
-
-	            ResultSet rsEmpleado = psEmpleado.getGeneratedKeys();
-	            if (rsEmpleado.next()) {
-	                idEmpleado = rsEmpleado.getInt(1);
+	            ResultSet rsCliente = psCliente.getGeneratedKeys();
+	            if (rsCliente.next()) {
+	                idCliente = rsCliente.getInt(1);
 	            } else {
-	                conn.rollback();
-	                return -1;
+	                throw new Exception("Error: No se pudo obtener el ID del cliente.");
 	            }
+	            idGenerado = idCliente;
 	        }
+        
+            for (StorageFile metadata : storageFiles) {
+                if (metadata.getObjectKey().contains("imagen_cliente")) { 
+                    metadata.setRelatedTable("Cliente");
+                    metadata.setRelatedId(idCliente); 
+                    metadata.setUploadedBy(idCliente);
+                }
+                storageFileDAO.insertFileMetadata(conn, metadata);
+            }
 
-	        // Contrato
-	        String sqlContrato = "INSERT INTO Contrato (idEmpleado, idSucursal, idTipoContrato, idRol, fechaInicio, fechaFin, salario, estadoContrato) "
-	        		+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-
-	        try (PreparedStatement psContrato = conn.prepareStatement(sqlContrato)) {
-
-	            psContrato.setInt(1, idEmpleado);
-	            psContrato.setInt(2, contrato.getIdSucursal());
-	            psContrato.setInt(3, contrato.getIdTipoContrato());
-	            psContrato.setInt(4, contrato.getIdRol());
-
-	            psContrato.setTimestamp(5, new java.sql.Timestamp(contrato.getFechaInicio().getTime()));
-	            psContrato.setTimestamp(6, new java.sql.Timestamp(contrato.getFechaFin().getTime()));
-	            psContrato.setBigDecimal(7, contrato.getSalario());
-
-	            psContrato.setString(8, contrato.getEstadoContrato() != null ? contrato.getEstadoContrato() : "ACTIVO");
-
-	            psContrato.executeUpdate();
-	        }
 
 	        conn.commit();
-	        idGenerado = idEmpleado;
-
-	    } catch (Exception e) {
-	        e.printStackTrace();
-	        try {
-	            if (conn != null) conn.rollback();
-	        } catch (Exception ex) {}
-	        return -1;
-	    } finally {
-	        try {
-	            if (conn != null) conn.close();
-	        } catch (Exception e) {}
-	    }
-
-	    return idGenerado;
-	}
-	
-	public int registrarClienteCompleto(Credenciales cred, Persona persona, Cliente cliente) {
-	    int idGenerado = 0;
-	    Connection conn = null;
-
-	    try {
-	        conn = DBConnection.getConnection();
-	        conn.setAutoCommit(false);
-
-	        // Credenciales
-	        String sqlCred = "INSERT INTO Credenciales (usuario, contrasena, fechaCreacion) VALUES (?, ?, NOW())";
-	        try (PreparedStatement psCred = conn.prepareStatement(sqlCred, Statement.RETURN_GENERATED_KEYS)) {
-	            psCred.setString(1, cred.getUsuario());
-	            psCred.setString(2, cred.getContrasena());
-	            psCred.executeUpdate();
-
-	            ResultSet rsCred = psCred.getGeneratedKeys();
-	            int idCredencial = 0;
-	            if (rsCred.next()) {
-	                idCredencial = rsCred.getInt(1);
-	            } else {
-	                System.out.println("Error: No se pudo obtener el ID de las credenciales.");
-	                conn.rollback();
-	                return -1;
-	            }
-
-	            // Insertar Persona
-	            String sqlPersona = "INSERT INTO Persona (idCredencial, nombres, apPaterno, apMaterno, genero, tipoDocumento, numDocumento, telefono, correo, fechaNacimiento) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-	            try (PreparedStatement psPersona = conn.prepareStatement(sqlPersona, Statement.RETURN_GENERATED_KEYS)) {
-	                psPersona.setInt(1, idCredencial);
-	                psPersona.setString(2, persona.getNombres());
-	                psPersona.setString(3, persona.getApPaterno());
-	                psPersona.setString(4, persona.getApMaterno());
-	                psPersona.setString(5, String.valueOf(persona.getGenero()));
-	                psPersona.setString(6, persona.getTipoDocumento());
-	                psPersona.setString(7, persona.getNumDocumento());
-	                psPersona.setString(8, persona.getTelefono());
-	                psPersona.setString(9, persona.getCorreo());
-
-	                if (persona.getFechaNacimiento() != null) {
-	                    java.time.LocalDate localDate = persona.getFechaNacimiento()
-	                        .toInstant()
-	                        .atZone(java.time.ZoneId.systemDefault())
-	                        .toLocalDate();
-	                    psPersona.setDate(10, java.sql.Date.valueOf(localDate));
-	                } else {
-	                    psPersona.setNull(10, java.sql.Types.DATE);
-	                }
-	                psPersona.executeUpdate();
-
-	                ResultSet rsPersona = psPersona.getGeneratedKeys();
-	                int idPersona = 0;
-	                if (rsPersona.next()) {
-	                    idPersona = rsPersona.getInt(1);
-	                } else {
-	                    System.out.println("Error: No se pudo obtener el ID de la persona.");
-	                    conn.rollback();
-	                    return -1;
-	                }
-
-	                // Cliente
-	                String sqlCliente = "INSERT INTO Cliente (idPersona, fechaRegistro, imagenCliente_url) VALUES (?, NOW(), ?)";
-	                    try (PreparedStatement psCliente = conn.prepareStatement(sqlCliente, Statement.RETURN_GENERATED_KEYS)) {
-	                    psCliente.setInt(1, idPersona);
-	                    psCliente.setString(2, cliente.getImagenCliente_url());
-	                    psCliente.executeUpdate();
-
-
-	                    ResultSet rsCliente = psCliente.getGeneratedKeys();
-	                    if (rsCliente.next()) {
-	                        idGenerado = rsCliente.getInt(1);
-	                    } else {
-	                        System.out.println("Error: No se pudo obtener el ID del empleado.");
-	                        conn.rollback();
-	                        return -1;
-	                    }
-
-	                    conn.commit();
-	                }
-	            }
-	        }
 
 	    } catch (Exception e) {
 	        e.printStackTrace();
@@ -234,7 +247,7 @@ public class RegistroDAO {
 	        } catch (Exception ex) {
 	            ex.printStackTrace();
 	        }
-	        return -1;
+	        return 0; 
 	    } finally {
 	        try {
 	            if (conn != null) conn.close();
@@ -287,9 +300,47 @@ public class RegistroDAO {
         return null;
     }
     
-    //REGISTRAR EMPLEADO EXISTENTE CONTRATO
-    public int registrarEmpleadoExisteCompleto(Empleado empleado, Contrato contrato, int idPersona) {
+    public boolean actualizarPersona(int idPersona, Persona persona) {
+        String sql = "UPDATE Persona SET nombres=?, apPaterno=?, apMaterno=?, genero=?, tipoDocumento=?, numDocumento=?, telefono=?, correo=?, fechaNacimiento=? WHERE idPersona=?";
 
+        try (Connection cn = DBConnection.getConnection();
+             PreparedStatement ps = cn.prepareStatement(sql)) {
+
+            ps.setString(1, persona.getNombres());
+            ps.setString(2, persona.getApPaterno());
+            ps.setString(3, persona.getApMaterno());
+            ps.setString(4, String.valueOf(persona.getGenero()));
+            ps.setString(5, persona.getTipoDocumento());
+            ps.setString(6, persona.getNumDocumento());
+            ps.setString(7, persona.getTelefono());
+            ps.setString(8, persona.getCorreo());
+
+            if (persona.getFechaNacimiento() != null) {
+                LocalDate localDate = persona.getFechaNacimiento()
+                        .toInstant()
+                        .atZone(ZoneId.systemDefault())
+                        .toLocalDate();
+                ps.setDate(9, java.sql.Date.valueOf(localDate));
+            } else {
+                ps.setNull(9, java.sql.Types.DATE);
+            }
+
+            ps.setInt(10, idPersona);
+
+            return ps.executeUpdate() > 0;
+
+        } catch (Exception e) {
+            System.out.println("Error al actualizar persona: " + e.getMessage());
+            return false;
+        }
+    }
+
+    public int registrarEmpleadoExisteCompleto(
+            Empleado empleado, 
+            Contrato contrato, 
+            int idPersona, 
+            List<StorageFile> storageFiles
+    ) {
         Connection conn = null;
 
         try {
@@ -302,58 +353,84 @@ public class RegistroDAO {
             int idEmpleadoGenerado = 0;
 
             try (PreparedStatement psEmp = conn.prepareStatement(sqlEmpleado, Statement.RETURN_GENERATED_KEYS)) {
-
                 psEmp.setInt(1, idPersona);
                 psEmp.setString(2, empleado.getDireccion());
-                psEmp.setString(3, empleado.getImagenConductor_url());
+                psEmp.setString(3, empleado.getImagenConductor_url()); 
 
                 int rowsEmp = psEmp.executeUpdate();
                 if (rowsEmp == 0) {
-                    conn.rollback();
-                    System.out.println("Error: No se pudo insertar Empleado.");
-                    return 0;
+                    throw new Exception("Error: No se pudo insertar Empleado.");
                 }
 
                 try (ResultSet rs = psEmp.getGeneratedKeys()) {
                     if (rs.next()) {
                         idEmpleadoGenerado = rs.getInt(1);
                     } else {
-                        conn.rollback();
-                        System.out.println("Error: No se obtuvo idEmpleado.");
-                        return 0;
+                        throw new Exception("Error: No se obtuvo idEmpleado.");
                     }
                 }
             }
+            
+            String sqlContrato = "INSERT INTO Contrato (idEmpleado, idSucursal, idTipoContrato, idRol, fechaInicio, fechaFin, salario, estadoContrato, pdf_firmado_key) "
+                    + "VALUES (?, ?, ?, ?, ?, ?, ?, 'activo', ?)";
 
-            String sqlContrato = "INSERT INTO Contrato (idEmpleado, idSucursal, idTipoContrato, idRol, fechaInicio, fechaFin, salario, estadoContrato) "
-                    + "VALUES (?, ?, ?, ?, ?, ?, ?, 'activo')";
-
-            try (PreparedStatement psCon = conn.prepareStatement(sqlContrato)) {
-
+            int idContratoGenerado = 0; 
+            
+            try (PreparedStatement psCon = conn.prepareStatement(sqlContrato, Statement.RETURN_GENERATED_KEYS)) {
                 psCon.setInt(1, idEmpleadoGenerado);
                 psCon.setInt(2, contrato.getIdSucursal());
                 psCon.setInt(3, contrato.getIdTipoContrato());
                 psCon.setInt(4, contrato.getIdRol());
-
                 psCon.setTimestamp(5, new java.sql.Timestamp(contrato.getFechaInicio().getTime()));
-                psCon.setTimestamp(6, new java.sql.Timestamp(contrato.getFechaFin().getTime()));
+                
+                if (contrato.getFechaFin() != null) {
+                    psCon.setTimestamp(6, new java.sql.Timestamp(contrato.getFechaFin().getTime()));
+                } else {
+                    psCon.setNull(6, java.sql.Types.TIMESTAMP);
+                }
+                
                 psCon.setBigDecimal(7, contrato.getSalario());
+                psCon.setString(8, contrato.getPdfFirmadoKey());
 
                 int rowsCon = psCon.executeUpdate();
                 if (rowsCon == 0) {
-                    conn.rollback();
-                    System.out.println("Error: No se pudo insertar Contrato.");
-                    return 0;
+                    throw new Exception("Error: No se pudo insertar Contrato.");
+                }
+                
+                try (ResultSet rs = psCon.getGeneratedKeys()) {
+                     if (rs.next()) {
+                         idContratoGenerado = rs.getInt(1);
+                     } else {
+                         throw new Exception("Error: No se obtuvo idContrato.");
+                     }
                 }
             }
 
+            for (StorageFile metadata : storageFiles) {
+                
+                if (metadata.getObjectKey().contains("contratos/firmados")) {
+                    metadata.setRelatedTable("Contrato");
+                    metadata.setRelatedId(idContratoGenerado);
+                } else if (metadata.getObjectKey().contains("imagen_empleado")) {
+                    metadata.setRelatedTable("Empleado");
+                    metadata.setRelatedId(idEmpleadoGenerado);
+                } else {
+                    System.err.println("ADVERTENCIA: Key de B2 no reconocida, no se pudo asignar relación: " + metadata.getObjectKey());
+                    continue; 
+                }
+                storageFileDAO.insertFileMetadata(conn, metadata);
+            }
+            
             conn.commit();
             return idEmpleadoGenerado;
 
         } catch (Exception e) {
 
             try {
-                if (conn != null) conn.rollback();
+                if (conn != null) {
+                    System.out.println("Transacción fallida. Realizando Rollback.");
+                    conn.rollback();
+                }
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
@@ -362,7 +439,6 @@ public class RegistroDAO {
             return 0;
 
         } finally {
-
             try {
                 if (conn != null) conn.setAutoCommit(true);
                 if (conn != null) conn.close();

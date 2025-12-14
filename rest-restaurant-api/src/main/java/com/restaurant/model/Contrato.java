@@ -18,6 +18,12 @@ public class Contrato {
     private Date fechaFin;
 	private BigDecimal salario;
 	private String estadoContrato;
+	private String pdfGeneradoKey;
+    private String pdfFirmadoKey;
+    
+    public Contrato() {
+    }
+    
 	public int getIdContrato() {
 		return idContrato;
 	}
@@ -72,4 +78,19 @@ public class Contrato {
 	public void setEstadoContrato(String estadoContrato) {
 		this.estadoContrato = estadoContrato;
 	}
+	public String getPdfGeneradoKey() {
+        return pdfGeneradoKey;
+    }
+
+    public void setPdfGeneradoKey(String pdfGeneradoKey) {
+        this.pdfGeneradoKey = pdfGeneradoKey;
+    }
+
+    public String getPdfFirmadoKey() {
+        return pdfFirmadoKey;
+    }
+
+    public void setPdfFirmadoKey(String pdfFirmadoKey) {
+        this.pdfFirmadoKey = pdfFirmadoKey;
+    }
 }
