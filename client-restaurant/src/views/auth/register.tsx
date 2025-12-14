@@ -5,7 +5,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { registrarEmpleadoSchema } from "../../validators/Cliente.schema";
 import MenuItem from "@mui/material/MenuItem";
 import type { RegistrarClienteDTO } from "../../types/cliente.types";
-import { useRegistrarClienteFormData } from "../../services/cliente.service";
+import {  useRegistrarClienteFormData} from "../../services/cliente.service";
 import Swal from "sweetalert2";
 
 export default function Register() {
@@ -42,50 +42,29 @@ export default function Register() {
         correo: "",
         fechaNacimiento: "",
       },
+      cliente: { imagenCliente_url: "" },
     },
   });
 
-  // 🔥 ENVÍO CORRECTO COMO MULTIPART
   const doRegister = (data: RegistrarClienteDTO) => {
-    const formData = new FormData();
-
-    // JSON EXACTO que espera el backend
-    formData.append(
-      "data",
-      JSON.stringify({
-        credenciales: data.credenciales,
-        persona: data.persona,
-        cliente: {
-          imagenCliente_url: "",
-        },
-      })
-    );
-
-    // Archivo
-    if (data.imagenCliente && data.imagenCliente.length > 0) {
-      formData.append("imagenCliente", data.imagenCliente[0]);
-    }
-
-    mutate(formData, {
+    mutate(data, {
       onSuccess: () => {
-        Swal.fire({
-          position: "center",
-          icon: "success",
-          title: "Cliente registrado correctamente",
-          showConfirmButton: false,
-          timer: 1500,
-        });
-        navigate("/");
+Swal.fire({
+  position: "center",
+  icon: "success",
+  title: "Rol registrado",
+  showConfirmButton: false,
+  timer: 1500
+});        navigate("/");
       },
       onError: () => {
-        Swal.fire({
-          position: "center",
-          icon: "error",
-          title: "Error al registrar cliente",
-          showConfirmButton: false,
-          timer: 1500,
-        });
-      },
+Swal.fire({
+  position: "center",
+  icon: "error",
+  title: "Rol registrado",
+  showConfirmButton: false,
+  timer: 1500
+});      },
     });
   };
 
@@ -97,7 +76,7 @@ export default function Register() {
         display: "flex",
         justifyContent: "center",
         alignItems: "flex-start",
-        backgroundColor: "#e74c3c",
+        backgroundColor: "#e74c3c", // 🔴 COLOR ROJO CORRECTO
         p: 4,
         overflowY: "auto",
       }}
@@ -119,12 +98,12 @@ export default function Register() {
         <Typography
           variant="h4"
           textAlign="center"
-          sx={{ mb: 2, fontWeight: "bold", color: "#e74c3c" }}
+          sx={{ mb: 1, fontWeight: "bold", color: "#e74c3c" }}
         >
           Registrarse
         </Typography>
 
-        {/* GRID */}
+        {/* GRID DEL FORMULARIO */}
         <Box
           sx={{
             display: "grid",
@@ -135,8 +114,10 @@ export default function Register() {
           <TextField
             {...register("credenciales.usuario")}
             label="Usuario"
+            variant="outlined"
             error={!!errors.credenciales?.usuario}
             helperText={errors.credenciales?.usuario?.message}
+            sx={{ backgroundColor: "#fafafa" }}
           />
 
           <TextField
@@ -145,6 +126,7 @@ export default function Register() {
             label="Contraseña"
             error={!!errors.credenciales?.contrasena}
             helperText={errors.credenciales?.contrasena?.message}
+            sx={{ backgroundColor: "#fafafa" }}
           />
 
           <TextField
@@ -152,6 +134,7 @@ export default function Register() {
             label="Nombre Completo"
             error={!!errors.persona?.nombres}
             helperText={errors.persona?.nombres?.message}
+            sx={{ backgroundColor: "#fafafa" }}
           />
 
           <TextField
@@ -159,6 +142,7 @@ export default function Register() {
             label="Apellido Paterno"
             error={!!errors.persona?.apPaterno}
             helperText={errors.persona?.apPaterno?.message}
+            sx={{ backgroundColor: "#fafafa" }}
           />
 
           <TextField
@@ -166,6 +150,7 @@ export default function Register() {
             label="Apellido Materno"
             error={!!errors.persona?.apMaterno}
             helperText={errors.persona?.apMaterno?.message}
+            sx={{ backgroundColor: "#fafafa" }}
           />
 
           <TextField
@@ -174,6 +159,7 @@ export default function Register() {
             {...register("persona.genero")}
             error={!!errors.persona?.genero}
             helperText={errors.persona?.genero?.message}
+            sx={{ backgroundColor: "#fafafa" }}
           >
             {Genero.map((op) => (
               <MenuItem key={op.value} value={op.value}>
@@ -188,6 +174,7 @@ export default function Register() {
             {...register("persona.tipoDocumento")}
             error={!!errors.persona?.tipoDocumento}
             helperText={errors.persona?.tipoDocumento?.message}
+            sx={{ backgroundColor: "#fafafa" }}
           >
             {tiposDocumento.map((op) => (
               <MenuItem key={op.value} value={op.value}>
@@ -201,6 +188,7 @@ export default function Register() {
             label="N° de Documento"
             error={!!errors.persona?.numDocumento}
             helperText={errors.persona?.numDocumento?.message}
+            sx={{ backgroundColor: "#fafafa" }}
           />
 
           <TextField
@@ -208,6 +196,7 @@ export default function Register() {
             label="Teléfono"
             error={!!errors.persona?.telefono}
             helperText={errors.persona?.telefono?.message}
+            sx={{ backgroundColor: "#fafafa" }}
           />
 
           <TextField
@@ -215,50 +204,61 @@ export default function Register() {
             label="Correo electrónico"
             error={!!errors.persona?.correo}
             helperText={errors.persona?.correo?.message}
+            sx={{ backgroundColor: "#fafafa" }}
           />
 
           <TextField
             {...register("persona.fechaNacimiento")}
-            type="date"
             label="Fecha de Nacimiento"
+            type="date"
             InputLabelProps={{ shrink: true }}
             error={!!errors.persona?.fechaNacimiento}
             helperText={errors.persona?.fechaNacimiento?.message}
+            sx={{ backgroundColor: "#fafafa" }}
           />
 
-          {/* 📷 INPUT FILE */}
-          <Box>
-            <Typography variant="body2">Imagen del cliente</Typography>
-            <input
-              type="file"
-              accept="image/*"
-              {...register("")}
-            />
-          </Box>
+          <TextField
+            {...register("cliente.imagenCliente_url")}
+            label="Imagen (URL)"
+            error={!!errors.cliente?.imagenCliente_url}
+            helperText={errors.cliente?.imagenCliente_url?.message}
+            sx={{ backgroundColor: "#fafafa" }}
+          />
         </Box>
 
+        {/* BOTÓN PRINCIPAL */}
         <Button
-          type="submit"
+          fullWidth
           variant="contained"
           sx={{
             mt: 3,
             py: 1.5,
+            fontSize: "1rem",
             fontWeight: "bold",
+            borderRadius: "10px",
             backgroundColor: "#e74c3c",
+            "&:hover": { backgroundColor: "#d8433c" }, // tono más oscuro
           }}
+          type="submit"
         >
           Registrarse
         </Button>
 
+        {/* BOTÓN OUTLINED */}
         <Button
+          fullWidth
           variant="outlined"
           sx={{
             mt: 2,
+            py: 1.2,
+            borderRadius: "10px",
             borderColor: "#e74c3c",
             color: "#e74c3c",
             fontWeight: "bold",
+            "&:hover": { borderColor: "#d8433c", color: "#d8433c" },
           }}
           onClick={() => navigate("/")}
+          type="button"
         >
           Iniciar sesión
         </Button>

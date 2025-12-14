@@ -1,24 +1,19 @@
 import { useMutation } from "@tanstack/react-query";
-import axiosFormData from "./api.service.file"; // Tu instancia de axios con token
-
-// ==============================
-// TIPOS
-// ==============================
-export interface RegistrarClienteConArchivoDTO {
-  data: any; // JSON con los datos del cliente
-  imagenCliente: File; // PDF o imagen del cliente
-}
+import axiosFormData from "./api.service.file";
 
 // ==============================
 // REGISTRAR CLIENTE (FormData)
 // ==============================
-export function registrarClienteFormData(payload: RegistrarClienteConArchivoDTO) {
+export function registrarClienteFormData(payload: {
+  data: any;
+  imagenCliente: File;
+}) {
   const formData = new FormData();
 
-  // Datos del cliente como JSON
+  // 🔴 JSON EXACTO QUE ESPERA EL BACKEND
   formData.append("data", JSON.stringify(payload.data));
 
-  // Archivo
+  // 🔴 ARCHIVO REAL
   formData.append("imagenCliente", payload.imagenCliente);
 
   return axiosFormData.post(
@@ -28,7 +23,7 @@ export function registrarClienteFormData(payload: RegistrarClienteConArchivoDTO)
 }
 
 // ==============================
-// HOOK DE REACT QUERY
+// HOOK
 // ==============================
 export function useRegistrarClienteFormData() {
   return useMutation({
