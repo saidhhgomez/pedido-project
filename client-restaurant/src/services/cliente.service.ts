@@ -6,7 +6,7 @@ import axiosFormData from "./api.service.file"; // Tu instancia de axios con tok
 // ==============================
 export interface RegistrarClienteConArchivoDTO {
   data: any; // JSON con los datos del cliente
-  archivo: File; // PDF o imagen del cliente
+  imagenCliente: File; // PDF o imagen del cliente
 }
 
 // ==============================
@@ -19,7 +19,7 @@ export function registrarClienteFormData(payload: RegistrarClienteConArchivoDTO)
   formData.append("data", JSON.stringify(payload.data));
 
   // Archivo
-  formData.append("archivo", payload.archivo);
+  formData.append("imagenCliente", payload.imagenCliente);
 
   return axiosFormData.post(
     "rest-restaurant-api/api/cliente/registrar",
@@ -33,6 +33,5 @@ export function registrarClienteFormData(payload: RegistrarClienteConArchivoDTO)
 export function useRegistrarClienteFormData() {
   return useMutation({
     mutationFn: registrarClienteFormData,
-    mutationKey: ["registrarClienteFormData"],
   });
 }
