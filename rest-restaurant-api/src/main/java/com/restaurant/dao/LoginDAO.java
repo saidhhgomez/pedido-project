@@ -1,11 +1,11 @@
 package com.restaurant.dao;
+
 import com.restaurant.config.DBConnection;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.HashMap;
-
-
 
 public class LoginDAO {
 
@@ -42,21 +42,12 @@ public class LoginDAO {
                 
                 int idCliente = rs.getInt("idCliente");
                 int idEmpleado = rs.getInt("idEmpleado");
-
-                if (idCliente > 0) {
-                    data.put("tipoId", "cliente");
-                    data.put("id", idCliente);
-                    data.put("rol", "cliente"); // DEFECTO
-                }
-
-                if (idEmpleado > 0) {
-                    data.put("tipoId", "empleado");
-                    data.put("id", idEmpleado);
-                    
-                    // SI TIENE ROL
-                    String rolNombre = rs.getString("rolNombre");
-                    data.put("rol", rolNombre != null ? rolNombre.toLowerCase() : "empleado");
-                }
+                
+                data.put("idCliente", idCliente > 0 ? idCliente : null);
+                data.put("idEmpleado", idEmpleado > 0 ? idEmpleado : null);
+                
+                String rolNombre = rs.getString("rolNombre");
+                data.put("rol", rolNombre != null ? rolNombre.toLowerCase() : "cliente");
 
                 return data;
             }

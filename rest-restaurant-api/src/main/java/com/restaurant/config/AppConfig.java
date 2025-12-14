@@ -4,7 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
-
+import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import com.restaurant.resource.CatalogoComidaResource;
 import com.restaurant.resource.ClienteResource;
 import com.restaurant.resource.DireccionClienteResource;
@@ -15,6 +15,7 @@ import com.restaurant.resource.PedidoResource;
 import com.restaurant.resource.RolResource;
 import com.restaurant.resource.SucursalResource;
 import com.restaurant.resource.TipoContratoResource;
+
 
 @ApplicationPath("/api")
 public class AppConfig extends Application {
@@ -34,6 +35,7 @@ public class AppConfig extends Application {
         resources.add(RolResource.class);
         resources.add(MetodoPagoResource.class);
         resources.add(PedidoResource.class);
+        resources.add(MultiPartFeature.class); // Muy importante
         return resources;
     }
 }

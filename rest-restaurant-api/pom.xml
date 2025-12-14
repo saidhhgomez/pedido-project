@@ -21,6 +21,19 @@ https://maven.apache.org/xsd/maven-4.0.0.xsd">
 </properties>
   
 <dependencies>
+
+	<!-- Esta dependencia permite que las aplicaciones se ejecuten en un contenedor de Servlets (Tomcat v9.0) -->
+	<dependency>
+	
+	<groupId>org.glassfish.jersey.containers</groupId>
+	
+	<artifactId>jersey-container-servlet</artifactId>
+	
+	<version>${jersey.version}</version>
+	
+	</dependency>
+
+
 	
 	<!-- Esta dependencia permite que las aplicaciones se ejecuten en un contenedor de Servlets (Tomcat v9.0) -->
 	<dependency>
@@ -80,6 +93,21 @@ https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	</dependency>
 	
 	
+	
+	
+		<!-- Jersey multipart -->
+	<dependency>
+	
+	    <groupId>org.glassfish.jersey.media</groupId>
+	    
+	    <artifactId>jersey-media-multipart</artifactId>
+	    
+	    <version>2.35</version>
+	    
+	</dependency>
+
+
+	
 	<!-- Esta dependencia es la encargada de encriptar y hashear las contraseñas, como BCryptPasswordEncoder -->
 	<dependency>
 	
@@ -127,6 +155,40 @@ https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<scope>runtime</scope>
 	    
 	</dependency>
+	
+	
+	
+	
+	
+	    <!-- Jersey server -->
+	<dependency>
+	
+	    <groupId>org.glassfish.jersey.core</groupId>
+	    
+	    <artifactId>jersey-server</artifactId>
+	    
+	    <version>2.35</version>
+	    
+	</dependency>
+	
+	
+		    <!-- Backblaze B2 Cloud Storage SDK (Java 8 compatible) -->
+	<dependency>
+	
+	    <groupId>com.amazonaws</groupId>
+	    
+	    <artifactId>aws-java-sdk-s3</artifactId>
+	    
+	    <version>1.12.693</version>
+	    
+	</dependency>	
+	
+	
+	
+		
+
+	
+
 	
 </dependencies>
   
