@@ -13,6 +13,7 @@ import com.restaurant.resource.DireccionClienteResource;
 import com.restaurant.resource.LoginResource;
 import com.restaurant.resource.MesaResource;
 import com.restaurant.resource.MetodoPagoResource;
+import com.restaurant.resource.PedidoResource;
 import com.restaurant.resource.RolResource;
 import com.restaurant.resource.SucursalResource;
 import com.restaurant.resource.TipoContratoResource;
@@ -32,6 +33,7 @@ public class AppConfig extends Application {
         resources.add(TipoContratoResource.class); 
         resources.add(ClienteResource.class); 
         resources.add(MesaResource.class); 
+        resources.add(PedidoResource.class); 
         resources.add(MultiPartFeature.class); // Muy importante
         return resources;
     }
