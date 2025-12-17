@@ -414,4 +414,18 @@ public class EmpleadoService {
             emp.put("pdfDownloadUrl", BASE_URL + pdfKey);
         }
     }
+    
+    public List<HashMap<String, Object>> listarHistorialContratos(int idEmpleado) throws Exception {
+        List<HashMap<String, Object>> lista = empleDAO.obtenerHistorialContratos(idEmpleado);
+        
+        if (lista.isEmpty()) {
+            throw new Exception("No se encontró historial para el empleado con ID: " + idEmpleado);
+        }
+
+        for (HashMap<String, Object> contrato : lista) {
+            transformarKeysAUrls(contrato);
+        }
+
+        return lista;
+    }
 }

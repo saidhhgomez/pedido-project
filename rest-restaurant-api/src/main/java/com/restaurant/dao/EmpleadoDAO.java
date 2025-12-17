@@ -1,6 +1,7 @@
 package com.restaurant.dao;
 
 import com.restaurant.config.DBConnection;
+
 import java.text.SimpleDateFormat;
 import java.sql.*;
 import java.util.ArrayList;
@@ -82,5 +83,49 @@ public class EmpleadoDAO {
 	        ps.setInt(1, idEmpleado);
 	        return ps.executeUpdate() > 0;
 	    }
+	}
+	
+	public List<HashMap<String, Object>> obtenerHistorialContratos(int idEmpleado) throws SQLException {
+	    List<HashMap<String, Object>> historial = new ArrayList<>();
+	    SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+	    
+	    String sql = "SELECT c.idContrato, s.nombre as sucursal, r.nombre as rol, tc.nombre as tipo, " +
+	                 "c.fechaInicio, c.fechaFin, c.salario, c.estadoContrato, " +
+	                 "c.pdf_firmado_key as pdfKey, e.imagenEmpleado_url as fotoUrl " +
+	                 "FROM Contrato c " +
+	                 "JOIN Empleado e ON c.idEmpleado = e.idEmpleado " +
+	                 "JOIN Sucursal s ON c.idSucursal = s.idSucursal " +
+	                 "JOIN Roles r ON c.idRol = r.idRol " +
+	                 "JOIN TipoContrato tc ON c.idTipoContrato = tc.idTipoContrato " +
+	                 "WHERE c.idEmpleado = ? ORDER BY c.fechaInicio DESC";
+
+	    try (Connection conn = DBConnection.getConnection();
+	         PreparedStatement ps = conn.prepareStatement(sql)) {
+	        ps.setInt(1, idEmpleado);
+	        try (ResultSet rs = ps.executeQuery()) {
+	            while (rs.next()) {
+	                HashMap<String, Object> fila = new HashMap<>();
+	                fila.put("idContrato", rs.getInt("idContrato"));
+	                fila.put("sucursal", rs.getString("sucursal"));
+	                fila.put("rol", rs.getString("rol"));
+	                fila.put("tipo", rs.getString("tipo"));
+	                
+	                fila.put("fechaInicio", rs.getTimestamp("fechaInicio") != null ? 
+	                         sdf.format(rs.getTimestamp("fechaInicio")) : "");
+	                
+	                fila.put("fechaFin", rs.getTimestamp("fechaFin") != null ? 
+	                         sdf.format(rs.getTimestamp("fechaFin")) : "Vigente");
+	                
+	                fila.put("salario", rs.getBigDecimal("salario"));
+	                fila.put("estado", rs.getString("estadoContrato"));
+	                
+	                fila.put("pdfKey", rs.getString("pdfKey"));
+	                fila.put("fotoUrl", rs.getString("fotoUrl"));
+	                
+	                historial.add(fila);
+	            }
+	        }
+	    }
+	    return historial;
 	}
 }

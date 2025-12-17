@@ -257,6 +257,18 @@ public class EmpleadoResource {
     }
     
     @GET
+    @Path("/historial/{idEmpleado}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getHistorial(@PathParam("idEmpleado") int idEmpleado) {
+        try {
+            return Response.ok(empleadoService.listarHistorialContratos(idEmpleado)).build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.NOT_FOUND)
+                           .entity("{\"error\": \"" + e.getMessage() + "\"}").build();
+        }
+    }
+    
+    @GET
     @Path("/activos-vencimiento")
     public Response getActivos() {
         return Response.ok(empleadoService.listarActivosVigentes()).build();
