@@ -136,6 +136,64 @@ public class PedidoResource {
             return Response.status(404).entity("{\"error\":\"" + e.getMessage() + "\"}").build();
         }
     }
+    
+    @GET
+    @Path("/online/activos/{idSucursal}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getOnlineActivos(@PathParam("idSucursal") int idSucursal) {
+        try {
+            List<HashMap<String, Object>> lista = service.listarPedidosOnlineActivos(idSucursal);
+            return Response.ok(lista).build();
+        } catch (Exception e) {
+            return Response.status(400).entity("{\"error\": \"" + e.getMessage() + "\"}").build();
+        }
+    }
+    
+    @PUT
+    @Path("/{idPedido}/asignar-repartidor/{idEmpleado}")
+    public Response asignarRepartidor(@PathParam("idPedido") int idPedido, 
+                                     @PathParam("idEmpleado") int idEmpleado) {
+        try {
+            service.procesarAsignacionRepartidor(idPedido, idEmpleado);
+            return Response.ok("{\"mensaje\": \"Pedido actualizado con éxito. El repartidor ya está en camino.\"}").build();
+        } catch (Exception e) {
+            return Response.status(400).entity("{\"error\": \"" + e.getMessage() + "\"}").build();
+        }
+    }
+    
+    @PUT
+    @Path("/online/{idPedido}/finalizar")
+    public Response finalizarPedido(@PathParam("idPedido") int idPedido) {
+        try {
+            service.finalizarPedidoOnline(idPedido);
+            return Response.ok("{\"mensaje\": \"Pedido Online finalizado exitosamente.\"}").build();
+        } catch (Exception e) {
+            return Response.status(400).entity("{\"error\": \"" + e.getMessage() + "\"}").build();
+        }
+    }
+    
+    @GET
+    @Path("/historial/sucursal/{idSucursal}")
+    public Response getHistorialSucursal(
+            @PathParam("idSucursal") int idSucursal,
+            @QueryParam("desde") String desde,
+            @QueryParam("hasta") String hasta) {
+        try {
+            List<HashMap<String, Object>> lista = service.obtenerHistorialSucursal(idSucursal, desde, hasta);
+            return Response.ok(lista).build();
+        } catch (Exception e) {
+            return Response.status(404).entity("{\"error\": \"" + e.getMessage() + "\"}").build();
+        }
+    }
+
+    @GET
+    @Path("/historial/repartidor/{idEmpleado}")
+    public Response getHistorialRepartidor(@PathParam("idEmpleado") int idEmpleado) {
+        try {
+            List<HashMap<String, Object>> lista = service.obtenerHistorialRepartidor(idEmpleado);
+            return Response.ok(lista).build();
+        } catch (Exception e) {
+            return Response.status(404).entity("{\"error\": \"" + e.getMessage() + "\"}").build();
+        }
+    }
 }
-
-

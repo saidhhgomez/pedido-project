@@ -428,4 +428,14 @@ public class EmpleadoService {
 
         return lista;
     }
+    
+    public List<HashMap<String, Object>> obtenerRepartidoresActivos(int idSucursal) throws Exception {
+        List<HashMap<String, Object>> lista = empleDAO.listarRepartidoresPorSucursal(idSucursal);
+        
+        if (lista.isEmpty()) {
+            throw new Exception("No hay repartidores con contrato activo para esta sucursal.");
+        }
+        
+        return lista;
+    }
 }

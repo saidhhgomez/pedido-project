@@ -24,25 +24,30 @@ public class MesaDAO {
         }
     }
 
-    public List<HashMap<String, Object>> listarMesas(String estadoFiltro) {
+    public List<HashMap<String, Object>> listarMesas(int idSucursal, String estadoFiltro) {
         List<HashMap<String, Object>> lista = new ArrayList<>();
-        String sql;
-        
-        if (estadoFiltro.equals("TODOS")) {
-            sql = "SELECT * FROM Mesa";
-        } 
-        else if (estadoFiltro.equals("OPERATIVO")) {
-            sql = "SELECT * FROM Mesa WHERE estado != 'inactivo'";
-        } 
-        else {
-            sql = "SELECT * FROM Mesa WHERE estado = ?";
+        StringBuilder sql = new StringBuilder("SELECT * FROM Mesa WHERE 1=1");
+
+        if (idSucursal > 0) {
+            sql.append(" AND idSucursal = ?");
+        }
+
+        if (estadoFiltro.equals("OPERATIVO")) {
+            sql.append(" AND estado != 'inactivo'");
+        } else if (!estadoFiltro.equals("TODOS")) {
+            sql.append(" AND estado = ?");
         }
 
         try (Connection cn = DBConnection.getConnection();
-             PreparedStatement ps = cn.prepareStatement(sql)) {
+             PreparedStatement ps = cn.prepareStatement(sql.toString())) {
+            
+            int paramIndex = 1;
+            if (idSucursal > 0) {
+                ps.setInt(paramIndex++, idSucursal);
+            }
             
             if (!estadoFiltro.equals("TODOS") && !estadoFiltro.equals("OPERATIVO")) {
-                ps.setString(1, estadoFiltro);
+                ps.setString(paramIndex, estadoFiltro);
             }
             
             ResultSet rs = ps.executeQuery();

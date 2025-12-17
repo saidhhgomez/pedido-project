@@ -29,7 +29,8 @@ public class PedidoDAO {
     }
 
     public int insertarPedidoCompleto(HashMap<String, Object> cabecera, List<HashMap<String, Object>> detalles) throws SQLException {
-        String sqlPed = "INSERT INTO Pedido (idCliente, idDireccion, idMesa, idFormaPago, fecha, hora, estado) VALUES (?, ?, ?, ?, CURDATE(), CURTIME(), 'pendiente')";
+        String sqlPed = "INSERT INTO Pedido (idCliente, idDireccion, idMesa, idSucursal, idFormaPago, fecha, hora, estado) " +
+                        "VALUES (?, ?, ?, ?, ?, CURDATE(), CURTIME(), 'pendiente')";
         String sqlDet = "INSERT INTO DetallePedido (idPedido, idCatalogo, cantidad, precioUnitario, igv, subtotal) VALUES (?, ?, ?, ?, ?, ?)";
         String sqlStock = "UPDATE CatalogoComida SET stock = stock - ? WHERE idCatalogo = ?";
 
@@ -41,11 +42,12 @@ public class PedidoDAO {
                     ps.setInt(1, (int) cabecera.get("idCliente"));
                     ps.setInt(2, (int) cabecera.get("idDireccion"));
                     ps.setInt(3, (int) cabecera.get("idMesa"));
-                    ps.setInt(4, (int) cabecera.get("idFormaPago"));
+                    ps.setInt(4, (int) cabecera.get("idSucursal"));
+                    ps.setInt(5, (int) cabecera.get("idFormaPago"));
                     ps.executeUpdate();
                     ResultSet rs = ps.getGeneratedKeys();
                     if (rs.next()) idPedido = rs.getInt(1);
-                    else throw new SQLException("Error al generar ID de Pedido.");
+                    else throw new SQLException("Error al generar ID de Pedido Online.");
                 }
 
                 try (PreparedStatement psD = conn.prepareStatement(sqlDet);
@@ -76,7 +78,7 @@ public class PedidoDAO {
     }
     
     public int insertarPedidoPresencial(HashMap<String, Object> cabecera, List<HashMap<String, Object>> detalles) throws SQLException {
-        String sqlPed = "INSERT INTO Pedido (idCliente, idDireccion, idEmpleado, idMesa, idFormaPago, fecha, hora, estado) VALUES (?, ?, ?, ?, ?, CURDATE(), CURTIME(), 'pendiente')";
+        String sqlPed = "INSERT INTO Pedido (idCliente, idDireccion, idEmpleado, idMesa, idSucursal, idFormaPago, fecha, hora, estado) VALUES (?, ?, ?, ?, ?, ?, CURDATE(), CURTIME(), 'pendiente')";
         String sqlDet = "INSERT INTO DetallePedido (idPedido, idCatalogo, cantidad, precioUnitario, igv, subtotal) VALUES (?, ?, ?, ?, ?, ?)";
         String sqlStock = "UPDATE CatalogoComida SET stock = stock - ? WHERE idCatalogo = ?";
         String sqlMesa = "UPDATE Mesa SET estado = 'ocupada' WHERE idMesa = ?";
@@ -90,7 +92,8 @@ public class PedidoDAO {
                     ps.setInt(2, (int) cabecera.get("idDireccion"));
                     ps.setInt(3, (int) cabecera.get("idEmpleado"));
                     ps.setInt(4, (int) cabecera.get("idMesa"));
-                    ps.setInt(5, (int) cabecera.get("idFormaPago"));
+                    ps.setInt(5, (int) cabecera.get("idSucursal")); // <--- NUEVO
+                    ps.setInt(6, (int) cabecera.get("idFormaPago"));
                     ps.executeUpdate();
                     ResultSet rs = ps.getGeneratedKeys();
                     if (rs.next()) idPedido = rs.getInt(1);
@@ -233,6 +236,19 @@ public class PedidoDAO {
             ps.setInt(1, idPedido);
             ps.executeUpdate();
         }
+    }
+    
+    public boolean validarMesaEnSucursal(int idMesa, int idSucursal) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM Mesa WHERE idMesa = ? AND idSucursal = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, idMesa);
+            ps.setInt(2, idSucursal);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getInt(1) > 0;
+            }
+        }
+        return false;
     }
     
     public HashMap<String, Object> obtenerPedidoActivoPorMesa(int idMesa) throws SQLException {
@@ -389,7 +405,7 @@ public class PedidoDAO {
     }
     
     public HashMap<String, Object> obtenerInfoBasicaPedido(int idPedido) throws SQLException {
-        String sql = "SELECT estado, idMesa FROM Pedido WHERE idPedido = ?";
+        String sql = "SELECT estado, idMesa, idSucursal FROM Pedido WHERE idPedido = ?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, idPedido);
@@ -397,7 +413,8 @@ public class PedidoDAO {
                 if (rs.next()) {
                     HashMap<String, Object> info = new HashMap<>();
                     info.put("estado", rs.getString("estado"));
-                    info.put("idMesa", rs.getObject("idMesa")); 
+                    info.put("idMesa", rs.getInt("idMesa")); 
+                    info.put("idSucursal", rs.getInt("idSucursal"));
                     return info;
                 }
             }
@@ -472,6 +489,133 @@ public class PedidoDAO {
             }
         }
         return historial;
+    }
+    
+    public List<HashMap<String, Object>> obtenerPedidosOnlineActivosPorSucursal(int idSucursal) throws SQLException {
+        List<HashMap<String, Object>> pedidos = new ArrayList<>();
+        String sql = "SELECT p.idPedido, p.fecha, p.hora, p.estado, " +
+                     "per.nombres, per.apPaterno, d.direccion AS direccionEnvio, d.referencia " +
+                     "FROM Pedido p " +
+                     "JOIN Persona per ON p.idCliente = per.idPersona " +
+                     "JOIN DireccionCliente d ON p.idDireccion = d.idDireccion " +
+                     "WHERE p.idMesa = 1 " + 
+                     "AND p.idSucursal = ? " + 
+                     "AND p.estado IN ('pendiente', 'en camino') " +
+                     "ORDER BY p.idPedido ASC";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, idSucursal);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    HashMap<String, Object> p = new HashMap<>();
+                    int idPedido = rs.getInt("idPedido");
+                    
+                    p.put("idPedido", idPedido);
+                    p.put("fecha", rs.getString("fecha"));
+                    p.put("hora", rs.getString("hora"));
+                    p.put("estado", rs.getString("estado"));
+                    p.put("cliente", rs.getString("nombres") + " " + rs.getString("apPaterno"));
+                    p.put("direccion", rs.getString("direccionEnvio"));
+                    p.put("referencia", rs.getString("referencia"));
+                    
+                    p.put("detalles", obtenerDetallesPorPedido(idPedido));
+                    
+                    pedidos.add(p);
+                }
+            }
+        }
+        return pedidos;
+    }
+    
+    public boolean esRepartidorDeSucursal(int idEmpleado, int idSucursal) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM Contrato c " +
+                     "JOIN Roles r ON c.idRol = r.idRol " +
+                     "WHERE c.idEmpleado = ? AND c.idSucursal = ? " +
+                     "AND r.nombre = 'Repartidor' AND c.estadoContrato = 'activo'";
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, idEmpleado);
+            ps.setInt(2, idSucursal);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() && rs.getInt(1) > 0;
+            }
+        }
+    }
+
+    public void asignarRepartidorYEstado(int idPedido, int idEmpleado) throws SQLException {
+        String sql = "UPDATE Pedido SET idEmpleado = ?, estado = 'en camino' WHERE idPedido = ?";
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, idEmpleado);
+            ps.setInt(2, idPedido);
+            ps.executeUpdate();
+        }
+    }
+    
+    //ONLINE
+    public List<HashMap<String, Object>> listarHistorialSucursal(int idSucursal, String desde, String hasta) throws SQLException {
+        List<HashMap<String, Object>> lista = new ArrayList<>();
+
+        String fechaInicio = (desde == null || desde.isEmpty()) ? "2000-01-01" : desde;
+        String fechaFin = (hasta == null || hasta.isEmpty()) ? "2099-12-31" : hasta;
+
+        String sql = "SELECT p.idPedido, p.fecha, p.hora, p.estado, per.nombres, per.apPaterno, d.direccion " +
+                     "FROM Pedido p " +
+                     "JOIN Persona per ON p.idCliente = per.idPersona " +
+                     "JOIN DireccionCliente d ON p.idDireccion = d.idDireccion " +
+                     "WHERE p.idSucursal = ? AND p.idMesa = 1 " + 
+                     "AND p.estado IN ('finalizado', 'cancelado') " +
+                     "AND p.fecha BETWEEN ? AND ? " +
+                     "ORDER BY p.fecha DESC, p.hora DESC LIMIT 100";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, idSucursal);
+            ps.setString(2, fechaInicio);
+            ps.setString(3, fechaFin);
+            
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    HashMap<String, Object> m = new HashMap<>();
+                    m.put("idPedido", rs.getInt("idPedido"));
+                    m.put("fecha", rs.getString("fecha"));
+                    m.put("hora", rs.getString("hora"));
+                    m.put("estado", rs.getString("estado"));
+                    m.put("cliente", rs.getString("nombres") + " " + rs.getString("apPaterno"));
+                    m.put("direccion", rs.getString("direccion"));
+                    lista.add(m);
+                }
+            }
+        }
+        return lista;
+    }
+
+    public List<HashMap<String, Object>> listarHistorialRepartidor(int idEmpleado) throws SQLException {
+        List<HashMap<String, Object>> lista = new ArrayList<>();
+        String sql = "SELECT p.idPedido, p.fecha, p.hora, p.estado, d.direccion " +
+                     "FROM Pedido p " +
+                     "JOIN DireccionCliente d ON p.idDireccion = d.idDireccion " +
+                     "WHERE p.idEmpleado = ? AND p.estado = 'finalizado' " +
+                     "ORDER BY p.fecha DESC, p.hora DESC LIMIT 20";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, idEmpleado);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    HashMap<String, Object> m = new HashMap<>();
+                    m.put("idPedido", rs.getInt("idPedido"));
+                    m.put("fecha", rs.getString("fecha"));
+                    m.put("hora", rs.getString("hora"));
+                    m.put("direccion", rs.getString("direccion"));
+                    lista.add(m);
+                }
+            }
+        }
+        return lista;
     }
 }
 

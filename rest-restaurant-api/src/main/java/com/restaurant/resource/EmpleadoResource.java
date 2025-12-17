@@ -1,6 +1,7 @@
 package com.restaurant.resource;
 
 import java.util.HashMap;
+import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -289,6 +290,17 @@ public class EmpleadoResource {
             return Response.ok(resultado).build();
         } else {
             return Response.status(Response.Status.BAD_REQUEST).entity(resultado).build();
+        }
+    }
+    
+    @GET
+    @Path("/repartidores/sucursal/{idSucursal}")
+    public Response getRepartidores(@PathParam("idSucursal") int idSucursal) {
+        try {
+            List<HashMap<String, Object>> lista = empleadoService.obtenerRepartidoresActivos(idSucursal);
+            return Response.ok(lista).build();
+        } catch (Exception e) {
+            return Response.status(404).entity("{\"error\": \"" + e.getMessage() + "\"}").build();
         }
     }
 }

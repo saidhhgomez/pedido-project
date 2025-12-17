@@ -11,13 +11,22 @@ public class PedidoService {
     private PedidoDAO pedidoDAO = new PedidoDAO();
 
     public int procesarPedidoOnline(HashMap<String, Object> request) throws Exception {
+        if (!request.containsKey("idSucursal") || (int) request.get("idSucursal") <= 0) {
+            throw new Exception("Error: Debe seleccionar una sucursal válida para procesar su pedido online.");
+        }
+
         List<HashMap<String, Object>> detallesRaw = (List<HashMap<String, Object>>) request.get("detalles");
+        if (detallesRaw == null || detallesRaw.isEmpty()) {
+            throw new Exception("El pedido debe contener al menos un plato.");
+        }
+
         List<HashMap<String, Object>> detallesProcesados = new ArrayList<>();
 
         for (HashMap<String, Object> det : detallesRaw) {
             int idProd = (int) det.get("idCatalogo");
             int cant = (int) det.get("cantidad");
 
+            if (cant <= 0) throw new Exception("La cantidad debe ser mayor a 0.");
             if (cant > 10) throw new Exception("Máximo 10 unidades por plato (ID: " + idProd + ")");
 
             HashMap<String, Object> platoDB = pedidoDAO.obtenerInfoPlato(idProd);
@@ -37,17 +46,22 @@ public class PedidoService {
             detallesProcesados.add(det);
         }
 
-        request.put("idMesa", 1); 
+        request.put("idMesa", 1);
         return pedidoDAO.insertarPedidoCompleto(request, detallesProcesados);
     }
     
     public int procesarPedidoPresencial(HashMap<String, Object> request) throws Exception {
         int idMesa = (int) request.get("idMesa");
+        int idSucursal = (int) request.get("idSucursal");
+
+        if (!pedidoDAO.validarMesaEnSucursal(idMesa, idSucursal)) {
+            throw new Exception("Error de seguridad: La mesa " + idMesa + " no pertenece a la sucursal " + idSucursal);
+        }
 
         String estadoMesa = pedidoDAO.obtenerEstadoMesa(idMesa);
         if (estadoMesa == null) throw new Exception("La mesa con ID " + idMesa + " no existe.");
         if (!estadoMesa.equalsIgnoreCase("disponible") && !estadoMesa.equalsIgnoreCase("activo")) {
-            throw new Exception("La mesa " + idMesa + " no está disponible ni activa (Estado actual: " + estadoMesa + ").");
+            throw new Exception("La mesa " + idMesa + " no está disponible (Estado: " + estadoMesa + ").");
         }
 
         if (!request.containsKey("idCliente")) request.put("idCliente", 1);
@@ -209,5 +223,79 @@ public class PedidoService {
             throw new Exception("No hay registros de consumo para la mesa ID: " + idMesa);
         }
         return historial;
+    }
+    
+    public List<HashMap<String, Object>> listarPedidosOnlineActivos(int idSucursal) throws Exception {
+        List<HashMap<String, Object>> lista = pedidoDAO.obtenerPedidosOnlineActivosPorSucursal(idSucursal);
+        
+        if (lista.isEmpty()) {
+            throw new Exception("No hay pedidos online pendientes o en camino para esta sucursal.");
+        }
+        
+        return lista;
+    }
+    
+    public void procesarAsignacionRepartidor(int idPedido, int idEmpleado) throws Exception {
+        HashMap<String, Object> pedido = pedidoDAO.obtenerInfoBasicaPedido(idPedido);
+        
+        if (pedido == null) throw new Exception("El pedido no existe.");
+        
+        int idSucursalPedido = (int) pedido.get("idSucursal");
+        String estadoActual = (String) pedido.get("estado");
+        int idMesa = (int) pedido.get("idMesa");
+
+        if (idMesa != 1) {
+            throw new Exception("Solo se puede asignar repartidor a pedidos Online.");
+        }
+
+        if (!estadoActual.equalsIgnoreCase("pendiente")) {
+            throw new Exception("El pedido no se puede asignar porque está en estado: " + estadoActual);
+        }
+
+        if (!pedidoDAO.esRepartidorDeSucursal(idEmpleado, idSucursalPedido)) {
+            throw new Exception("El empleado no es un repartidor activo en la sucursal del pedido (Sucursal ID: " + idSucursalPedido + ")");
+        }
+
+        pedidoDAO.asignarRepartidorYEstado(idPedido, idEmpleado);
+    }
+    
+    public void finalizarPedidoOnline(int idPedido) throws Exception {
+        HashMap<String, Object> pedido = pedidoDAO.obtenerInfoBasicaPedido(idPedido);
+        
+        if (pedido == null) {
+            throw new Exception("El pedido con ID " + idPedido + " no existe.");
+        }
+        
+        if (!pedido.get("idMesa").toString().equals("1")) {
+            throw new Exception("Este método solo es para pedidos Online.");
+        }
+
+        String estado = (String) pedido.get("estado");
+        if (estado.equalsIgnoreCase("finalizado")) {
+            throw new Exception("El pedido ya fue entregado y finalizado anteriormente.");
+        }
+        if (!estado.equalsIgnoreCase("en camino")) {
+            throw new Exception("No se puede finalizar un pedido que no ha sido enviado (Estado actual: " + estado + ").");
+        }
+
+        pedidoDAO.finalizarPedido(idPedido);
+    }
+    
+    public List<HashMap<String, Object>> obtenerHistorialSucursal(int idSucursal, String desde, String hasta) throws Exception {
+        List<HashMap<String, Object>> lista = pedidoDAO.listarHistorialSucursal(idSucursal, desde, hasta);
+        
+        if (lista.isEmpty()) {
+            throw new Exception("No se encontraron pedidos en el historial.");
+        }
+        return lista;
+    }
+
+    public List<HashMap<String, Object>> obtenerHistorialRepartidor(int idEmpleado) throws Exception {
+        List<HashMap<String, Object>> lista = pedidoDAO.listarHistorialRepartidor(idEmpleado);
+        
+        if (lista.isEmpty()) {
+            throw new Exception("El repartidor aún no tiene pedidos finalizados en su historial.");
+        }
+        return lista;
     }
 }
