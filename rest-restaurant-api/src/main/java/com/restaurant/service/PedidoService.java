@@ -46,8 +46,8 @@ public class PedidoService {
 
         String estadoMesa = pedidoDAO.obtenerEstadoMesa(idMesa);
         if (estadoMesa == null) throw new Exception("La mesa con ID " + idMesa + " no existe.");
-        if (!estadoMesa.equalsIgnoreCase("disponible")) {
-            throw new Exception("La mesa " + idMesa + " no está disponible (Estado actual: " + estadoMesa + ").");
+        if (!estadoMesa.equalsIgnoreCase("disponible") && !estadoMesa.equalsIgnoreCase("activo")) {
+            throw new Exception("La mesa " + idMesa + " no está disponible ni activa (Estado actual: " + estadoMesa + ").");
         }
 
         if (!request.containsKey("idCliente")) request.put("idCliente", 1);
@@ -82,6 +82,41 @@ public class PedidoService {
         return pedidoDAO.insertarPedidoPresencial(request, detallesProcesados);
     }
     
+    public void agregarPlatosAPedido(int idPedido, List<HashMap<String, Object>> nuevosPlatos) throws Exception {
+        String estado = pedidoDAO.obtenerEstadoPedido(idPedido);
+        if (estado == null) throw new Exception("El pedido no existe.");
+        if (!estado.equals("pendiente")) {
+            throw new Exception("No se pueden agregar platos a un pedido " + estado);
+        }
+
+        List<HashMap<String, Object>> procesados = new ArrayList<>();
+
+        for (HashMap<String, Object> p : nuevosPlatos) {
+            int idPlato = (int) p.get("idCatalogo");
+            int cant = (int) p.get("cantidad");
+
+            if (cant > 10) throw new Exception("Máximo 10 unidades por plato.");
+
+            HashMap<String, Object> platoDB = pedidoDAO.obtenerInfoPlato(idPlato);
+            if (platoDB == null) throw new Exception("Plato ID " + idPlato + " no existe.");
+            
+            int stockActual = (int) platoDB.get("stock");
+            if (stockActual < cant) throw new Exception("Stock insuficiente para: " + platoDB.get("nombre"));
+
+            BigDecimal precio = (BigDecimal) platoDB.get("precio");
+            BigDecimal base = precio.multiply(new BigDecimal(cant));
+            BigDecimal igv = base.multiply(new BigDecimal("0.18"));
+            BigDecimal subtotal = base.add(igv);
+
+            p.put("precioUnitario", precio);
+            p.put("igv", igv);
+            p.put("subtotal", subtotal);
+            procesados.add(p);
+        }
+
+        pedidoDAO.insertarMasDetalles(idPedido, procesados);
+    }
+    
     public void marcarMesaParaLimpieza(int idPedido, int idMesa) throws Exception {
         pedidoDAO.finalizarPedido(idPedido);
         pedidoDAO.cambiarEstadoMesa(idMesa, "liberando");
@@ -101,5 +136,78 @@ public class PedidoService {
             throw new Exception("No hay un pedido pendiente para la mesa ID: " + idMesa);
         }
         return pedido;
+    }
+    
+    public void procesarCambioMesa(HashMap<String, Object> request) throws Exception {
+        int idPedido = (int) request.get("idPedido");
+        int idMesaOrigen = (int) request.get("idMesaOrigen");
+        int idMesaDestino = (int) request.get("idMesaDestino");
+
+        String estadoPedido = pedidoDAO.obtenerEstadoPedido(idPedido);
+        if (estadoPedido == null) throw new Exception("El pedido " + idPedido + " no existe.");
+        if (!estadoPedido.equals("pendiente")) {
+            throw new Exception("Solo se pueden cambiar mesas de pedidos pendientes.");
+        }
+
+        String estadoMesaDestino = pedidoDAO.obtenerEstadoMesa(idMesaDestino);
+        if (estadoMesaDestino == null) throw new Exception("La mesa destino no existe.");
+        if (!estadoMesaDestino.equals("disponible")) {
+            throw new Exception("La mesa destino está " + estadoMesaDestino + ". Elija una disponible.");
+        }
+
+        pedidoDAO.ejecutarCambioMesa(idPedido, idMesaOrigen, idMesaDestino);
+    }
+    
+    public void cancelarPedidoTotal(int idPedido) throws Exception {
+        HashMap<String, Object> info = pedidoDAO.obtenerInfoBasicaPedido(idPedido);
+        
+        if (info == null) {
+            throw new Exception("El pedido con ID " + idPedido + " no existe.");
+        }
+
+        String estadoActual = (String) info.get("estado");
+        Integer idMesa = (Integer) info.get("idMesa");
+
+        if ("finalizado".equals(estadoActual) || "pagado".equals(estadoActual)) {
+            throw new Exception("No se puede cancelar un pedido que ya ha sido finalizado o pagado.");
+        }
+        
+        if ("cancelado".equals(estadoActual)) {
+            throw new Exception("El pedido ya se encuentra cancelado.");
+        }
+
+        pedidoDAO.cancelarPedidoCompleto(idPedido, idMesa);
+    }
+    
+    public void cancelarPlatoEspecifico(int idPedido, int idDetalle) throws Exception {
+        HashMap<String, Object> info = pedidoDAO.obtenerInfoBasicaPedido(idPedido);
+
+        if (info == null) {
+            throw new Exception("El pedido no existe.");
+        }
+
+        String estado = (String) info.get("estado");
+
+        if (!"pendiente".equalsIgnoreCase(estado)) {
+            throw new Exception("No se puede eliminar el plato. El pedido está: " + estado);
+        }
+
+        pedidoDAO.eliminarPlatoDetalle(idDetalle);
+    }
+    
+    public List<HashMap<String, Object>> listarHistorialEmpleado(int idEmpleado) throws Exception {
+        List<HashMap<String, Object>> lista = pedidoDAO.obtenerHistorialPorEmpleado(idEmpleado);
+        if (lista.isEmpty()) {
+            throw new Exception("El empleado no tiene pedidos registrados.");
+        }
+        return lista;
+    }
+    
+    public List<HashMap<String, Object>> listarHistorialMesa(int idMesa) throws Exception {
+        List<HashMap<String, Object>> historial = pedidoDAO.obtenerHistorialPorMesa(idMesa);
+        if (historial.isEmpty()) {
+            throw new Exception("No hay registros de consumo para la mesa ID: " + idMesa);
+        }
+        return historial;
     }
 }
