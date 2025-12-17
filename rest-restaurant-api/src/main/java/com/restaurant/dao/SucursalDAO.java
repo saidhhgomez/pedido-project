@@ -11,6 +11,7 @@ import com.restaurant.config.DBConnection;
 import com.restaurant.model.Sucursal;
 
 public class SucursalDAO {
+
     // CREATE
     public boolean crearSucursal(Sucursal sucursal) {
         String sql = "INSERT INTO Sucursal (nombre, direccion, telefono) VALUES (?, ?, ?)";
@@ -98,18 +99,20 @@ public class SucursalDAO {
         }
     }
 
-    // DELETE
-    public boolean eliminarSucursal(int idSucursal) {
-        String sql = "DELETE FROM Sucursal WHERE idSucursal=?";
+    // DELETE LOGICO (CAMBIO CLAVE)
+    public boolean cambiarEstado(int idSucursal, String nuevoEstado) {
+        String sql = "UPDATE Sucursal SET estadoSucursal = ? WHERE idSucursal = ?";
         try (Connection cn = DBConnection.getConnection();
              PreparedStatement ps = cn.prepareStatement(sql)) {
 
-            ps.setInt(1, idSucursal);
+            ps.setString(1, nuevoEstado);
+            ps.setInt(2, idSucursal);
             return ps.executeUpdate() > 0;
 
         } catch (Exception e) {
-            System.out.println("Error al eliminar sucursal: " + e.getMessage());
+            System.out.println("Error al cambiar estado de sucursal: " + e.getMessage());
             return false;
         }
     }
 }
+

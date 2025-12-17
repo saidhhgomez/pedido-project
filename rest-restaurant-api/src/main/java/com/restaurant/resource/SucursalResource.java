@@ -69,16 +69,16 @@ public class SucursalResource {
     @Path("/{id}")
     public Response eliminar(@PathParam("id") int id) {
         boolean exito = service.eliminarSucursal(id);
+        HashMap<String, Object> resp = new HashMap<>();
         if (exito) {
-            HashMap<String, Object> resp = new HashMap<>();
             resp.put("status", "success");
-            resp.put("mensaje", "Sucursal eliminada correctamente");
+            resp.put("mensaje", "Sucursal eliminada lógicamente");
             return Response.ok(resp).build();
         } else {
-            HashMap<String, Object> resp = new HashMap<>();
             resp.put("status", "error");
             resp.put("mensaje", "No se pudo eliminar la sucursal");
             return Response.status(Response.Status.BAD_REQUEST).entity(resp).build();
         }
     }
 }
+

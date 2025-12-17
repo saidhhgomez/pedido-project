@@ -35,10 +35,11 @@ public class SucursalService {
         return sucursalDAO.actualizarSucursal(s);
     }
 
+    // DELETE LOGICO
     public boolean eliminarSucursal(int id) {
         if (id <= 0) {
             throw new IllegalArgumentException("El ID de la sucursal es obligatorio");
         }
-        return sucursalDAO.eliminarSucursal(id);
+        return sucursalDAO.cambiarEstado(id, "inactivo");
     }
 }
