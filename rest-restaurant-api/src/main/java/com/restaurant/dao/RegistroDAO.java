@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
 import java.util.HashMap;
@@ -335,116 +336,74 @@ public class RegistroDAO {
         }
     }
 
-    public int registrarEmpleadoExisteCompleto(
-            Empleado empleado, 
-            Contrato contrato, 
-            int idPersona, 
-            List<StorageFile> storageFiles
-    ) {
-        Connection conn = null;
+    
 
-        try {
-            conn = DBConnection.getConnection();
-            conn.setAutoCommit(false);
+    public boolean tieneContratoActivo(int idPersona) {
+        String sql = "SELECT COUNT(*) FROM Contrato c " +
+                     "INNER JOIN Empleado e ON c.idEmpleado = e.idEmpleado " +
+                     "WHERE e.idPersona = ? AND c.estadoContrato = 'activo'";
+        try (Connection cn = DBConnection.getConnection();
+             PreparedStatement ps = cn.prepareStatement(sql)) {
+            ps.setInt(1, idPersona);
+            ResultSet rs = ps.executeQuery();
+            return rs.next() && rs.getInt(1) > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 
-            String sqlEmpleado = "INSERT INTO Empleado (idPersona, direccion, estadoEmpleado, fechaRegistro, imagenEmpleado_url) "
-                    + "VALUES (?, ?, 'activo', NOW(), ?)";
-
-            int idEmpleadoGenerado = 0;
-
-            try (PreparedStatement psEmp = conn.prepareStatement(sqlEmpleado, Statement.RETURN_GENERATED_KEYS)) {
-                psEmp.setInt(1, idPersona);
-                psEmp.setString(2, empleado.getDireccion());
-                psEmp.setString(3, empleado.getImagenConductor_url()); 
-
-                int rowsEmp = psEmp.executeUpdate();
-                if (rowsEmp == 0) {
-                    throw new Exception("Error: No se pudo insertar Empleado.");
-                }
-
-                try (ResultSet rs = psEmp.getGeneratedKeys()) {
-                    if (rs.next()) {
-                        idEmpleadoGenerado = rs.getInt(1);
-                    } else {
-                        throw new Exception("Error: No se obtuvo idEmpleado.");
-                    }
-                }
-            }
-            
-            String sqlContrato = "INSERT INTO Contrato (idEmpleado, idSucursal, idTipoContrato, idRol, fechaInicio, fechaFin, salario, estadoContrato, pdf_firmado_key) "
-                    + "VALUES (?, ?, ?, ?, ?, ?, ?, 'activo', ?)";
-
-            int idContratoGenerado = 0; 
-            
-            try (PreparedStatement psCon = conn.prepareStatement(sqlContrato, Statement.RETURN_GENERATED_KEYS)) {
-                psCon.setInt(1, idEmpleadoGenerado);
-                psCon.setInt(2, contrato.getIdSucursal());
-                psCon.setInt(3, contrato.getIdTipoContrato());
-                psCon.setInt(4, contrato.getIdRol());
-                psCon.setTimestamp(5, new java.sql.Timestamp(contrato.getFechaInicio().getTime()));
-                
-                if (contrato.getFechaFin() != null) {
-                    psCon.setTimestamp(6, new java.sql.Timestamp(contrato.getFechaFin().getTime()));
-                } else {
-                    psCon.setNull(6, java.sql.Types.TIMESTAMP);
-                }
-                
-                psCon.setBigDecimal(7, contrato.getSalario());
-                psCon.setString(8, contrato.getPdfFirmadoKey());
-
-                int rowsCon = psCon.executeUpdate();
-                if (rowsCon == 0) {
-                    throw new Exception("Error: No se pudo insertar Contrato.");
-                }
-                
-                try (ResultSet rs = psCon.getGeneratedKeys()) {
-                     if (rs.next()) {
-                         idContratoGenerado = rs.getInt(1);
-                     } else {
-                         throw new Exception("Error: No se obtuvo idContrato.");
-                     }
-                }
-            }
-
-            for (StorageFile metadata : storageFiles) {
-                
-                if (metadata.getObjectKey().contains("contratos/firmados")) {
-                    metadata.setRelatedTable("Contrato");
-                    metadata.setRelatedId(idContratoGenerado);
-                } else if (metadata.getObjectKey().contains("imagen_empleado")) {
-                    metadata.setRelatedTable("Empleado");
-                    metadata.setRelatedId(idEmpleadoGenerado);
-                } else {
-                    System.err.println("ADVERTENCIA: Key de B2 no reconocida, no se pudo asignar relación: " + metadata.getObjectKey());
-                    continue; 
-                }
-                storageFileDAO.insertFileMetadata(conn, metadata);
-            }
-            
-            conn.commit();
-            return idEmpleadoGenerado;
-
-        } catch (Exception e) {
-
-            try {
-                if (conn != null) {
-                    System.out.println("Transacción fallida. Realizando Rollback.");
-                    conn.rollback();
-                }
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-
-            System.out.println("Error en registrarEmpleadoExisteCompleto: " + e.getMessage());
+    public int obtenerIdEmpleadoSiExiste(int idPersona) {
+        String sql = "SELECT idEmpleado FROM Empleado WHERE idPersona = ?";
+        try (Connection cn = DBConnection.getConnection();
+             PreparedStatement ps = cn.prepareStatement(sql)) {
+            ps.setInt(1, idPersona);
+            ResultSet rs = ps.executeQuery();
+            return rs.next() ? rs.getInt(1) : 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
             return 0;
+        }
+    }
 
-        } finally {
-            try {
-                if (conn != null) conn.setAutoCommit(true);
-                if (conn != null) conn.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+    public int insertarEmpleado(Empleado emp, int idPersona, Connection cn) throws SQLException {
+        String sql = "INSERT INTO Empleado (idPersona, direccion, estadoEmpleado, fechaRegistro, imagenEmpleado_url) VALUES (?, ?, 'activo', NOW(), ?)";
+        try (PreparedStatement ps = cn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            ps.setInt(1, idPersona);
+            ps.setString(2, emp.getDireccion());
+            ps.setString(3, emp.getImagenConductor_url());
+            ps.executeUpdate();
+            ResultSet rs = ps.getGeneratedKeys();
+            return rs.next() ? rs.getInt(1) : 0;
+        }
+    }
+
+    public void reactivarEmpleado(Empleado emp, int idEmpleado, Connection cn) throws SQLException {
+        String sql = "UPDATE Empleado SET direccion = ?, estadoEmpleado = 'activo', imagenEmpleado_url = ?, fechaRegistro = NOW() WHERE idEmpleado = ?";
+        try (PreparedStatement ps = cn.prepareStatement(sql)) {
+            ps.setString(1, emp.getDireccion());
+            ps.setString(2, emp.getImagenConductor_url());
+            ps.setInt(3, idEmpleado);
+            ps.executeUpdate();
+        }
+    }
+
+    public int insertarContrato(Contrato c, int idEmpleado, Connection cn) throws SQLException {
+        String sql = "INSERT INTO Contrato (idEmpleado, idSucursal, idTipoContrato, idRol, fechaInicio, fechaFin, salario, estadoContrato, pdf_firmado_key) " +
+                     "VALUES (?, ?, ?, ?, ?, ?, ?, 'activo', ?)";
+        try (PreparedStatement ps = cn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            ps.setInt(1, idEmpleado);
+            ps.setInt(2, c.getIdSucursal());
+            ps.setInt(3, c.getIdTipoContrato());
+            ps.setInt(4, c.getIdRol());
+            ps.setTimestamp(5, new java.sql.Timestamp(c.getFechaInicio().getTime()));
+            if (c.getFechaFin() != null) ps.setTimestamp(6, new java.sql.Timestamp(c.getFechaFin().getTime()));
+            else ps.setNull(6, java.sql.Types.TIMESTAMP);
+            ps.setBigDecimal(7, c.getSalario());
+            ps.setString(8, c.getPdfFirmadoKey());
+            ps.executeUpdate();
+            ResultSet rs = ps.getGeneratedKeys();
+            return rs.next() ? rs.getInt(1) : 0;
         }
     }
 }
