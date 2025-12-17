@@ -617,7 +617,93 @@ public class PedidoDAO {
         }
         return lista;
     }
+    
+    public List<HashMap<String, Object>> listarPlatosPendientesCocina(int idSucursal) throws SQLException {
+        List<HashMap<String, Object>> lista = new ArrayList<>();
+        String sql = "SELECT dp.idDetalle, dp.idPedido, c.nombre AS plato, dp.cantidad, p.hora " +
+                     "FROM DetallePedido dp " +
+                     "JOIN Pedido p ON dp.idPedido = p.idPedido " +
+                     "JOIN CatalogoComida c ON dp.idCatalogo = c.idCatalogo " +
+                     "WHERE p.idSucursal = ? " +
+                     "AND dp.idEmpleado IS NULL " +
+                     "AND p.estado NOT IN ('finalizado', 'cancelado') " + 
+                     "ORDER BY p.idPedido ASC, p.hora ASC";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, idSucursal);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    HashMap<String, Object> item = new HashMap<>();
+                    item.put("idDetalle", rs.getInt("idDetalle"));
+                    item.put("idPedido", rs.getInt("idPedido"));
+                    item.put("plato", rs.getString("plato"));
+                    item.put("cantidad", rs.getInt("cantidad"));
+                    item.put("horaPedido", rs.getString("hora"));
+                    lista.add(item);
+                }
+            }
+        }
+        return lista;
+    }
+
+    public int obtenerIdPedidoDeDetalle(int idDetallePedido) throws SQLException {
+        String sql = "SELECT idPedido FROM DetallePedido WHERE idDetalle = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, idDetallePedido);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? rs.getInt("idPedido") : 0;
+            }
+        }
+    }
+
+    public boolean esCocineroDeSucursal(int idEmpleado, int idSucursal) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM Contrato c JOIN Roles r ON c.idRol = r.idRol " +
+                     "WHERE c.idEmpleado = ? AND c.idSucursal = ? " +
+                     "AND r.nombre = 'Cocinero' AND c.estadoContrato = 'activo'";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, idEmpleado); ps.setInt(2, idSucursal);
+            try (ResultSet rs = ps.executeQuery()) { return rs.next() && rs.getInt(1) > 0; }
+        }
+    }
+
+    public void asignarCocineroADetalle(int idDetallePedido, int idEmpleado) throws SQLException {
+        String sql = "UPDATE DetallePedido SET idEmpleado = ? WHERE idDetalle = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, idEmpleado);
+            ps.setInt(2, idDetallePedido);
+            ps.executeUpdate();
+        }
+    }
+    
+    public List<HashMap<String, Object>> listarHistorialPlatosCocinero(int idEmpleado) throws SQLException {
+        List<HashMap<String, Object>> lista = new ArrayList<>();
+        String sql = "SELECT dp.idDetallePedido, dp.idPedido, c.nombre AS plato, dp.cantidad, p.fecha, p.hora " +
+                     "FROM DetallePedido dp " +
+                     "JOIN CatalogoComida c ON dp.idCatalogo = c.idCatalogo " +
+                     "JOIN Pedido p ON dp.idPedido = p.idPedido " +
+                     "WHERE dp.idEmpleado = ? " +
+                     "ORDER BY p.fecha DESC, p.hora DESC LIMIT 50";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, idEmpleado);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    HashMap<String, Object> item = new HashMap<>();
+                    item.put("idDetallePedido", rs.getInt("idDetallePedido"));
+                    item.put("idPedido", rs.getInt("idPedido"));
+                    item.put("plato", rs.getString("plato"));
+                    item.put("cantidad", rs.getInt("cantidad"));
+                    item.put("fecha", rs.getString("fecha"));
+                    item.put("hora", rs.getString("hora"));
+                    lista.add(item);
+                }
+            }
+        }
+        return lista;
+    }
 }
-
-
-

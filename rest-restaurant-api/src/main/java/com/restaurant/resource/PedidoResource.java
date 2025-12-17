@@ -196,4 +196,37 @@ public class PedidoResource {
             return Response.status(404).entity("{\"error\": \"" + e.getMessage() + "\"}").build();
         }
     }
+    
+    @GET
+    @Path("/cocina/pendientes/{idSucursal}")
+    public Response getPendientesCocina(@PathParam("idSucursal") int idSucursal) {
+        try {
+            return Response.ok(service.obtenerPendientesCocina(idSucursal)).build();
+        } catch (Exception e) {
+            return Response.status(400).entity(e.getMessage()).build();
+        }
+    }
+
+    @PUT
+    @Path("/cocina/tomar-plato/{idDetallePedido}/{idEmpleado}")
+    public Response asignarCocinero(@PathParam("idDetallePedido") int idDetallePedido, 
+                                    @PathParam("idEmpleado") int idEmpleado) {
+        try {
+            service.tomarPlatoParaPreparar(idDetallePedido, idEmpleado);
+            return Response.ok("{\"mensaje\": \"Plato tomado. ¡A cocinar!\"}").build();
+        } catch (Exception e) {
+            return Response.status(400).entity("{\"error\": \"" + e.getMessage() + "\"}").build();
+        }
+    }
+    
+    @GET
+    @Path("/cocina/historial/{idEmpleado}")
+    public Response getHistorialCocinero(@PathParam("idEmpleado") int idEmpleado) {
+        try {
+            List<HashMap<String, Object>> historial = service.obtenerHistorialCocinero(idEmpleado);
+            return Response.ok(historial).build();
+        } catch (Exception e) {
+            return Response.status(404).entity("{\"error\": \"" + e.getMessage() + "\"}").build();
+        }
+    }
 }
