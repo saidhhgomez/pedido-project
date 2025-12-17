@@ -1,9 +1,11 @@
 package com.restaurant.resource;
 
 import java.util.HashMap;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -18,6 +20,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+import com.restaurant.dao.RegistroDAO;
 import com.restaurant.model.EmpleadoCompletoRequest;
 import com.restaurant.model.EmpleadoExisteCompletoRequest;
 import com.restaurant.model.Persona;
@@ -32,6 +35,7 @@ import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 public class EmpleadoResource {
 	
 	private final EmpleadoService empleadoService = new EmpleadoService();
+	private final RegistroDAO empleadoDAO = new RegistroDAO();
 	private final ObjectMapper objectMapper = new ObjectMapper();
 	private static final long MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;
 	
@@ -142,30 +146,24 @@ public class EmpleadoResource {
         }
     }
     
-    @GET
-    @Path("/dni/{dni}")
-    public Response buscarPorDni(@PathParam("dni") String dni) {
+	@GET
+	@Path("/dni/{dni}")
+	public Response buscarPorDni(@PathParam("dni") String dni) {
+	    try {
+	        HashMap<String, Object> data = empleadoService.buscarPorDni(dni);
+	        int idPersona = (int) data.get("idPersona");
+	        
+	        boolean tieneContrato = empleadoDAO.tieneContratoActivo(idPersona);
+	        data.put("puedeContratar", !tieneContrato);
+	        data.put("mensajeEstado", tieneContrato ? "Persona con contrato activo" : "Disponible para contratación");
 
-        try {
-            HashMap<String, Object> persona = empleadoService.buscarPorDni(dni);
-            return Response.ok(persona).build();
-
-        } catch (IllegalArgumentException e) {
-            return Response.status(Response.Status.BAD_REQUEST)
-                    .entity("{\"error\":\"" + e.getMessage() + "\"}")
-                    .build();
-
-        } catch (RuntimeException e) {
-            return Response.status(Response.Status.NOT_FOUND)
-                    .entity("{\"error\":\"" + e.getMessage() + "\"}")
-                    .build();
-
-        } catch (Exception e) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("{\"error\":\"Error interno del servidor\"}")
-                    .build();
-        }
-    }
+	        return Response.ok(data).build();
+	    } catch (RuntimeException e) {
+	        return Response.status(Response.Status.NOT_FOUND).entity("{\"error\":\"" + e.getMessage() + "\"}").build();
+	    } catch (Exception e) {
+	        return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("{\"error\":\"Error interno\"}").build();
+	    }
+	}
     
     @POST
     @Path("/contrato-existente")
@@ -255,6 +253,42 @@ public class EmpleadoResource {
             if (imagenTempFile != null && imagenTempFile.exists()) {
                 imagenTempFile.delete();
             }
+        }
+    }
+    
+    @GET
+    @Path("/historial/{idEmpleado}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getHistorial(@PathParam("idEmpleado") int idEmpleado) {
+        try {
+            return Response.ok(empleadoService.listarHistorialContratos(idEmpleado)).build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.NOT_FOUND)
+                           .entity("{\"error\": \"" + e.getMessage() + "\"}").build();
+        }
+    }
+    
+    @GET
+    @Path("/activos-vencimiento")
+    public Response getActivos() {
+        return Response.ok(empleadoService.listarActivosVigentes()).build();
+    }
+
+    @GET
+    @Path("/historial-completo")
+    public Response getGestion() {
+        return Response.ok(empleadoService.listarTodoParaGestion()).build();
+    }
+    
+    @DELETE
+    @Path("/baja/{id}")
+    public Response darDeBaja(@PathParam("id") int id) {
+        HashMap<String, Object> resultado = empleadoService.darDeBajaEmpleado(id);
+        
+        if ((boolean) resultado.get("success")) {
+            return Response.ok(resultado).build();
+        } else {
+            return Response.status(Response.Status.BAD_REQUEST).entity(resultado).build();
         }
     }
 }
