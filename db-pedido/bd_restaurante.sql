@@ -83,7 +83,8 @@ CREATE TABLE Empleado (
 CREATE TABLE TipoContrato (
 	idTipoContrato INT AUTO_INCREMENT PRIMARY KEY,
 	nombre VARCHAR(100),
-	descripcion VARCHAR(255)
+	descripcion VARCHAR(255),
+	estadoTipoContrato VARCHAR(50) DEFAULT 'activo'
 );
 
 -- Tabla: Roles (Tipos de Contratos como Mesero, Cocinero, Repartidor)
@@ -154,7 +155,8 @@ CREATE TABLE CatalogoComida (
 -- Tabla: FormaPago
 CREATE TABLE FormaPago (
 	idFormaPago INT AUTO_INCREMENT PRIMARY KEY,
-	nombre VARCHAR(100) NOT NULL
+	nombre VARCHAR(100) NOT NULL,
+	estadoFormaPago VARCHAR(100) DEFAULT 'activo'
 );
 
 -- Tabla: FormaPago
@@ -178,6 +180,7 @@ CREATE TABLE Pedido (
 	idCliente INT,
 	idDireccion INT,
     idEmpleado INT,
+	idSucursal INT,
     idMesa INT, 
 	idFormaPago INT NOT NULL,
 	fecha DATE NOT NULL,
@@ -185,6 +188,7 @@ CREATE TABLE Pedido (
 	estado VARCHAR(50) DEFAULT 'pendiente',
 	FOREIGN KEY (idCliente) REFERENCES Cliente(idCliente),
 	FOREIGN KEY (idDireccion) REFERENCES DireccionCliente(idDireccion),
+	FOREIGN KEY (idSucursal) REFERENCES Sucursal(idSucursal),
 	FOREIGN KEY (idEmpleado) REFERENCES Empleado(idEmpleado),
 	FOREIGN KEY (idMesa) REFERENCES Mesa(idMesa),
 	FOREIGN KEY (idFormaPago) REFERENCES FormaPago(idFormaPago)

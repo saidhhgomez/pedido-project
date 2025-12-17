@@ -35,12 +35,24 @@ public class MesaService {
         return res;
     }
 
-    public List<HashMap<String, Object>> listarParaMesero() {
-        return mesaDAO.listarMesas("OPERATIVO");
+    public List<HashMap<String, Object>> listarParaMesero(int idSucursal) throws Exception {
+        List<HashMap<String, Object>> lista = mesaDAO.listarMesas(idSucursal, "OPERATIVO");
+        
+        if (lista.isEmpty()) {
+            throw new Exception("No hay mesas operativas disponibles para la sucursal ID: " + idSucursal);
+        }
+        
+        return lista;
     }
 
-    public List<HashMap<String, Object>> listarParaAdmin() {
-        return mesaDAO.listarMesas("TODOS");
+    public List<HashMap<String, Object>> listarParaAdmin(int idSucursal) throws Exception {
+        List<HashMap<String, Object>> lista = mesaDAO.listarMesas(idSucursal, "TODOS");
+        
+        if (lista.isEmpty()) {
+            throw new Exception("No se encontraron mesas registradas en el sistema para esta sucursal.");
+        }
+        
+        return lista;
     }
 
     public HashMap<String, Object> actualizar(Mesa mesa) {

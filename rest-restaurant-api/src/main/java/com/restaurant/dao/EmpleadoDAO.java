@@ -128,4 +128,39 @@ public class EmpleadoDAO {
 	    }
 	    return historial;
 	}
+	
+	public List<HashMap<String, Object>> listarRepartidoresPorSucursal(int idSucursal) throws SQLException {
+	    List<HashMap<String, Object>> repartidores = new ArrayList<>();
+	    
+	    String sql = "SELECT e.idEmpleado, per.nombres, per.apPaterno, per.apMaterno " +
+	                 "FROM Empleado e " +
+	                 "JOIN Persona per ON e.idPersona = per.idPersona " +
+	                 "JOIN Contrato c ON e.idEmpleado = c.idEmpleado " +
+	                 "JOIN Roles r ON c.idRol = r.idRol " +
+	                 "WHERE r.nombre = 'Repartidor' " +
+	                 "AND c.idSucursal = ? " + 
+	                 "AND c.estadoContrato = 'activo' " + 
+	                 "AND e.estadoEmpleado = 'activo'";
+
+	    try (Connection conn = DBConnection.getConnection();
+	         PreparedStatement ps = conn.prepareStatement(sql)) {
+	        
+	        ps.setInt(1, idSucursal);
+	        
+	        try (ResultSet rs = ps.executeQuery()) {
+	            while (rs.next()) {
+	                HashMap<String, Object> rep = new HashMap<>();
+	                rep.put("idEmpleado", rs.getInt("idEmpleado"));
+	                
+	                String nombreCompleto = rs.getString("nombres") + " " + 
+	                                       rs.getString("apPaterno") + " " + 
+	                                       (rs.getString("apMaterno") != null ? rs.getString("apMaterno") : "");
+	                
+	                rep.put("nombreCompleto", nombreCompleto.trim());
+	                repartidores.add(rep);
+	            }
+	        }
+	    }
+	    return repartidores;
+	}
 }

@@ -6,6 +6,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.HashMap;
+import java.util.List;
 
 @Path("/mesas")
 @Produces(MediaType.APPLICATION_JSON)
@@ -14,15 +15,30 @@ public class MesaResource {
     private final MesaService mesaService = new MesaService();
 
     @GET
-    @Path("/mesero")
-    public Response listarParaMesero() {
-        return Response.ok(mesaService.listarParaMesero()).build();
+    @Path("/mesero/{idSucursal}")
+    public Response listarParaMesero(@PathParam("idSucursal") int idSucursal) {
+        try {
+            List<HashMap<String, Object>> mesas = mesaService.listarParaMesero(idSucursal);
+            return Response.ok(mesas).build();
+        } catch (Exception e) {
+            // Devolvemos 404 (Not Found) con el mensaje de "No hay mesas"
+            return Response.status(Response.Status.NOT_FOUND)
+                           .entity("{\"error\": \"" + e.getMessage() + "\"}")
+                           .build();
+        }
     }
 
     @GET
-    @Path("/gestion")
-    public Response listarParaAdmin() {
-        return Response.ok(mesaService.listarParaAdmin()).build();
+    @Path("/admin/{idSucursal}")
+    public Response listarParaAdmin(@PathParam("idSucursal") int idSucursal) {
+        try {
+            List<HashMap<String, Object>> mesas = mesaService.listarParaAdmin(idSucursal);
+            return Response.ok(mesas).build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.NOT_FOUND)
+                           .entity("{\"error\": \"" + e.getMessage() + "\"}")
+                           .build();
+        }
     }
 
     @POST
