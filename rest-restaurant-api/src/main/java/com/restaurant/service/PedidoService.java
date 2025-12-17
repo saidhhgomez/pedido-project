@@ -330,4 +330,12 @@ public class PedidoService {
         }
         return lista;
     }
+    
+    public List<HashMap<String, Object>> obtenerHistorialCliente(int idCliente) throws Exception {
+        List<HashMap<String, Object>> historial = pedidoDAO.listarPedidosPorCliente(idCliente);
+        if (historial.isEmpty()) {
+            throw new Exception("Aún no has realizado ningún pedido.");
+        }
+        return historial;
+    }
 }

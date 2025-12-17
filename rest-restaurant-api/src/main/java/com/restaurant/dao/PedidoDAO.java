@@ -706,4 +706,38 @@ public class PedidoDAO {
         }
         return lista;
     }
+    
+    public List<HashMap<String, Object>> listarPedidosPorCliente(int idCliente) throws SQLException {
+        List<HashMap<String, Object>> lista = new ArrayList<>();
+        String sql = "SELECT p.idPedido, p.fecha, p.hora, p.estado, p.idSucursal, " +
+                     "d.direccion, fp.nombre AS formaPago " +
+                     "FROM Pedido p " +
+                     "JOIN DireccionCliente d ON p.idDireccion = d.idDireccion " +
+                     "JOIN FormaPago fp ON p.idFormaPago = fp.idFormaPago " +
+                     "WHERE p.idCliente = ? " +
+                     "ORDER BY p.fecha DESC, p.hora DESC";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, idCliente);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    HashMap<String, Object> p = new HashMap<>();
+                    int idPedido = rs.getInt("idPedido");
+                    p.put("idPedido", idPedido);
+                    p.put("fecha", rs.getString("fecha"));
+                    p.put("hora", rs.getString("hora"));
+                    p.put("estado", rs.getString("estado"));
+                    p.put("idSucursal", rs.getInt("idSucursal"));
+                    p.put("direccion", rs.getString("direccion"));
+                    p.put("formaPago", rs.getString("formaPago"));
+                    
+                    p.put("detalles", obtenerDetallesPorPedido(idPedido)); 
+                    
+                    lista.add(p);
+                }
+            }
+        }
+        return lista;
+    }
 }

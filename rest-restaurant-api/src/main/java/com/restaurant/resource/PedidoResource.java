@@ -229,4 +229,14 @@ public class PedidoResource {
             return Response.status(404).entity("{\"error\": \"" + e.getMessage() + "\"}").build();
         }
     }
+    
+    @GET
+    @Path("/cliente/mis-pedidos/{idCliente}")
+    public Response getPedidosCliente(@PathParam("idCliente") int idCliente) {
+        try {
+            return Response.ok(service.obtenerHistorialCliente(idCliente)).build();
+        } catch (Exception e) {
+            return Response.status(404).entity("{\"error\": \"" + e.getMessage() + "\"}").build();
+        }
+    }
 }
