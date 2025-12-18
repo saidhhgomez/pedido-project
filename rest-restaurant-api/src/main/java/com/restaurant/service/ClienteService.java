@@ -13,9 +13,15 @@ import com.restaurant.util.BackblazeUtil;
 import com.restaurant.config.BackblazeConfig;
 
 import java.io.File;
+<<<<<<< HEAD
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+=======
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+>>>>>>> develop
 import java.util.List;
 import java.util.UUID;
 import java.text.SimpleDateFormat;
@@ -56,6 +62,19 @@ public class ClienteService {
 	        
 	        throw new Exception("Datos de registro incompletos o inválidos.");
 	    }
+<<<<<<< HEAD
+=======
+	    
+	    if (clientDAO.existeUsuario(cred.getUsuario())) {
+	        throw new Exception("El nombre de usuario '" + cred.getUsuario() + "' ya existe.");
+	    }
+	    if (clientDAO.existeDocumento(persona.getNumDocumento())) {
+	        throw new Exception("El número de documento '" + persona.getNumDocumento() + "' ya está registrado.");
+	    }
+	    if (persona.getCorreo() != null && clientDAO.existeCorreo(persona.getCorreo())) {
+	        throw new Exception("El correo '" + persona.getCorreo() + "' ya está registrado por otro usuario.");
+	    }
+>>>>>>> develop
         
         String numDocumento = persona.getNumDocumento();
         if (numDocumento == null || numDocumento.isEmpty()) {
@@ -105,4 +124,30 @@ public class ClienteService {
 	        throw e;
 	    }
 	}
+<<<<<<< HEAD
 }
+=======
+	
+	public HashMap<String, Object> obtenerPerfilCompleto(int idCliente) throws Exception {
+        HashMap<String, Object> perfil = clientDAO.obtenerPerfil(idCliente);
+        
+        if (perfil == null) {
+            throw new Exception("Cliente no encontrado.");
+        }
+
+        return transformarImagenPerfil(perfil);
+    }
+
+    private HashMap<String, Object> transformarImagenPerfil(HashMap<String, Object> perfil) {
+        String clave = (String) perfil.get("imagenUrl");
+        
+        if (clave != null && !clave.isEmpty()) {
+            final String BASE_URL = BackblazeConfig.getPublicFileEndpoint(); 
+            perfil.put("imagenUrl", BASE_URL + clave);
+        } else {
+            perfil.put("imagenUrl", "https://cdn-icons-png.flaticon.com/512/3135/3135715.png");
+        }
+        return perfil;
+    }
+}
+>>>>>>> develop

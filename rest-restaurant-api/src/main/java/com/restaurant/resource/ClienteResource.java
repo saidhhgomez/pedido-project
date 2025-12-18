@@ -13,6 +13,10 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+<<<<<<< HEAD
+=======
+import java.util.HashMap;
+>>>>>>> develop
 
 @Path("/cliente")
 @Produces(MediaType.APPLICATION_JSON)
@@ -85,4 +89,19 @@ public class ClienteResource {
             }
         }
     }
+<<<<<<< HEAD
+=======
+    
+    @GET
+    @Path("/perfil/{idCliente}")
+    public Response getPerfil(@PathParam("idCliente") int idCliente) {
+        try {
+            HashMap<String, Object> perfil = service.obtenerPerfilCompleto(idCliente);
+            return Response.ok(perfil).build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.NOT_FOUND)
+                           .entity("{\"error\": \"" + e.getMessage() + "\"}").build();
+        }
+    }
+>>>>>>> develop
 }

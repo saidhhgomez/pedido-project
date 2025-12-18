@@ -4,7 +4,9 @@ import java.util.HashMap;
 
 import org.springframework.security.crypto.bcrypt.BCrypt;
 
+import com.restaurant.dao.EmpleadoDAO;
 import com.restaurant.dao.RegistroDAO;
+import com.restaurant.dao.StorageFileDAO;
 import com.restaurant.model.Empleado;
 import com.restaurant.model.EmpleadoCompletoRequest;
 import com.restaurant.model.EmpleadoExisteCompletoRequest;
@@ -13,11 +15,20 @@ import com.restaurant.model.Contrato;
 import com.restaurant.model.Credenciales;
 import com.restaurant.model.Persona;
 import com.restaurant.util.BackblazeUtil;
+<<<<<<< HEAD
+=======
+import com.restaurant.config.DBConnection;
+>>>>>>> develop
 import com.restaurant.config.BackblazeConfig;
 import com.restaurant.model.StorageFile;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 
 import java.io.File;
+<<<<<<< HEAD
+=======
+import java.sql.Connection;
+import java.sql.SQLException;
+>>>>>>> develop
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -27,6 +38,11 @@ import java.util.ArrayList;
 
 public class EmpleadoService {
 	private final RegistroDAO empleadoDAO = new RegistroDAO();
+<<<<<<< HEAD
+=======
+	private final EmpleadoDAO empleDAO = new EmpleadoDAO();
+	private final StorageFileDAO storageFileDAO = new StorageFileDAO();
+>>>>>>> develop
 	
 	private static final List<String> ALLOWED_IMAGE_EXTENSIONS = Arrays.asList("png", "jpg", "jpeg", "webp");
     
@@ -58,6 +74,34 @@ public class EmpleadoService {
 
         return data;
     }
+<<<<<<< HEAD
+=======
+    
+    public boolean actualizarPersona(int idPersona, Persona persona) {
+
+        if (persona == null) {
+            System.out.println("Error: Persona nula");
+            return false;
+        }
+
+        if (persona.getNombres() == null || persona.getNombres().trim().isEmpty()) {
+            System.out.println("Error: Nombre vacío");
+            return false;
+        }
+
+        if (persona.getNumDocumento() == null || persona.getNumDocumento().trim().isEmpty()) {
+            System.out.println("Error: Numero documento vacío");
+            return false;
+        }
+
+        if (persona.getCorreo() != null && !persona.getCorreo().contains("@")) {
+            System.out.println("Error: Correo inválido");
+            return false;
+        }
+
+        return empleadoDAO.actualizarPersona(idPersona, persona);
+    }
+>>>>>>> develop
 
     public int registrarEmpleadoCompleto(
             EmpleadoCompletoRequest request, 
@@ -82,6 +126,21 @@ public class EmpleadoService {
             
             throw new Exception("Datos de registro o contrato incompletos/inválidos.");
         }
+<<<<<<< HEAD
+=======
+
+        validarFechasContrato(contrato.getFechaInicio(), contrato.getFechaFin());
+        
+        if (empleadoDAO.existeUsuario(cred.getUsuario())) {
+            throw new Exception("El usuario '" + cred.getUsuario() + "' ya está en uso.");
+        }
+        if (empleadoDAO.existeDocumento(persona.getNumDocumento())) {
+            throw new Exception("El documento '" + persona.getNumDocumento() + "' ya está registrado.");
+        }
+        if (persona.getCorreo() != null && empleadoDAO.existeCorreo(persona.getCorreo())) {
+            throw new Exception("El correo '" + persona.getCorreo() + "' ya pertenece a otra persona.");
+        }
+>>>>>>> develop
         
         String numDocumento = persona.getNumDocumento();
         if (numDocumento == null || numDocumento.isEmpty()) {
@@ -120,7 +179,11 @@ public class EmpleadoService {
             BackblazeUtil.deleteFile(imagenEmpleadoKey); 
             throw new Exception("Fallo al subir la Imagen de Cliente a Backblaze B2: " + e.getMessage());
         }
+<<<<<<< HEAD
        
+=======
+        
+>>>>>>> develop
         String pdfOriginalFileName = pdfFileDetail.getFileName();
         String pdfUniqueName = generateUniqueFileName(pdfOriginalFileName, numDocumento);
         String pdfKeyPath = "contratos/firmados/" + numDocumento; 
@@ -137,6 +200,7 @@ public class EmpleadoService {
         
         Cliente cliente = new Cliente();
         cliente.setImagenCliente_url(imagenClienteKey);
+<<<<<<< HEAD
         
         empleado.setImagenConductor_url(imagenEmpleadoKey); 
         
@@ -146,6 +210,40 @@ public class EmpleadoService {
         StorageFile imagenEmpleadoStorageFile = prepareStorageFile(imagenEmpleadoKey, imagenUniqueName, imagenFileDetail, imagenTempFile, "Empleado", idAdmin);
         
         StorageFile imagenClienteStorageFile = prepareStorageFile(imagenClienteKey, imagenUniqueName, imagenFileDetail, imagenTempFile, "Cliente", idAdmin); 
+=======
+        empleado.setImagenConductor_url(imagenEmpleadoKey); 
+        contrato.setPdfFirmadoKey(pdfB2KeyCompleta); 
+        
+        StorageFile pdfStorageFile = prepareStorageFile(
+                pdfB2KeyCompleta, 
+                pdfUniqueName, 
+                "Contrato", 
+                0, 
+                idAdmin, 
+                pdfFileDetail, 
+                pdfTempFile
+        );
+
+        StorageFile imagenEmpleadoStorageFile = prepareStorageFile(
+                imagenEmpleadoKey, 
+                imagenUniqueName, 
+                "Empleado", 
+                0, 
+                idAdmin, 
+                imagenFileDetail, 
+                imagenTempFile
+        );
+        
+        StorageFile imagenClienteStorageFile = prepareStorageFile(
+                imagenClienteKey, 
+                imagenUniqueName, 
+                "Cliente", 
+                0, 
+                idAdmin, 
+                imagenFileDetail, 
+                imagenTempFile
+        ); 
+>>>>>>> develop
         
         List<StorageFile> storageFiles = Arrays.asList(pdfStorageFile, imagenEmpleadoStorageFile, imagenClienteStorageFile);
         
@@ -167,7 +265,11 @@ public class EmpleadoService {
             throw e; 
         }
     }
+<<<<<<< HEAD
 	
+=======
+	    
+>>>>>>> develop
     public int registrarEmpleadoExisteCompleto(
             EmpleadoExisteCompletoRequest request, 
             File pdfTempFile, 
@@ -175,6 +277,7 @@ public class EmpleadoService {
             File imagenTempFile,
             FormDataContentDisposition imagenFileDetail,
             int idAdmin) throws Exception {
+<<<<<<< HEAD
 
         if (request == null || pdfTempFile == null || imagenTempFile == null || idAdmin <= 0) {
              throw new Exception("Datos incompletos o ID de administrador inválido.");
@@ -280,6 +383,116 @@ public class EmpleadoService {
     }
     
     private StorageFile prepareStorageFile(String b2Key, String uniqueName, FormDataContentDisposition fileDetail, File tempFile, String relatedTable, int uploadedBy) {
+=======
+    	
+    	Contrato contrato = request.getContrato();
+
+        int idPersona = request.getPersona().getIdPersona();
+        String numDoc = request.getPersona().getNumDocumento();
+        
+        if (numDoc == null || numDoc.isEmpty()) {
+            throw new Exception("El número de documento es obligatorio para procesar los archivos.");
+        }
+        
+        validarFechasContrato(contrato.getFechaInicio(), contrato.getFechaFin());
+        
+        if (empleadoDAO.tieneContratoActivo(idPersona)) {
+            throw new Exception("BLOQUEO: Esta persona ya cuenta con un contrato vigente activo.");
+        }
+
+        String pdfUniqueName = generateUniqueFileName(pdfFileDetail.getFileName(), numDoc);
+        String imgUniqueName = generateUniqueFileName(imagenFileDetail.getFileName(), numDoc);
+        
+        String pdfB2Path = "contratos/firmados/" + numDoc + "/" + pdfUniqueName;
+        String imgB2Path = "imagen_empleado/" + numDoc + "/" + imgUniqueName;
+
+        String pdfKey = "";
+        String imgKey = "";
+        List<String> b2KeysToRollback = new ArrayList<>();
+
+        try {
+            imgKey = BackblazeUtil.uploadFile(imgB2Path, imagenTempFile);
+            b2KeysToRollback.add(imgKey);
+            
+            pdfKey = BackblazeUtil.uploadFile(pdfB2Path, pdfTempFile);
+            b2KeysToRollback.add(pdfKey);
+        } catch (Exception e) {
+            for (String key : b2KeysToRollback) {
+                try { BackblazeUtil.deleteFile(key); } catch (Exception ex) {}
+            }
+            throw new Exception("Error al subir archivos a Backblaze: " + e.getMessage());
+        }
+        
+        Connection conn = null;
+        try {
+            conn = DBConnection.getConnection();
+            conn.setAutoCommit(false);
+
+            int idEmpleadoFinal = empleadoDAO.obtenerIdEmpleadoSiExiste(idPersona);
+            Empleado empData = request.getEmpleado();
+            empData.setImagenConductor_url(imgKey);
+
+            if (idEmpleadoFinal > 0) {
+                empleadoDAO.reactivarEmpleado(empData, idEmpleadoFinal, conn);
+            } else {
+                idEmpleadoFinal = empleadoDAO.insertarEmpleado(empData, idPersona, conn);
+            }
+
+            Contrato conData = request.getContrato();
+            conData.setPdfFirmadoKey(pdfKey);
+            int idContratoGenerado = empleadoDAO.insertarContrato(conData, idEmpleadoFinal, conn);
+
+            if (idContratoGenerado <= 0) throw new Exception("Error al generar el registro de contrato.");
+
+            StorageFile pdfMeta = prepareStorageFile(
+                pdfKey, 
+                pdfUniqueName, 
+                "Contrato", 
+                idContratoGenerado, 
+                idAdmin, 
+                pdfFileDetail, 
+                pdfTempFile
+            );
+
+            StorageFile imgMeta = prepareStorageFile(
+                imgKey, 
+                imgUniqueName, 
+                "Empleado", 
+                idEmpleadoFinal, 
+                idAdmin, 
+                imagenFileDetail, 
+                imagenTempFile
+            );
+
+            storageFileDAO.insertFileMetadata(conn, pdfMeta);
+            storageFileDAO.insertFileMetadata(conn, imgMeta);
+
+            conn.commit();
+            return idEmpleadoFinal;
+
+        } catch (Exception e) {
+            if (conn != null) try { conn.rollback(); } catch (SQLException ex) { ex.printStackTrace(); }
+            for (String key : b2KeysToRollback) {
+                try { BackblazeUtil.deleteFile(key); } catch (Exception ex) {}
+            }
+            
+            throw e;
+        } finally {
+            if (conn != null) try { conn.setAutoCommit(true); conn.close(); } catch (SQLException e) { e.printStackTrace(); }
+        }
+    }
+
+    // MÉTODO AUXILIAR CORREGIDO
+    private StorageFile prepareStorageFile(
+            String b2Key, 
+            String uniqueName, 
+            String relatedTable, 
+            int relatedId, 
+            int uploadedBy, 
+            FormDataContentDisposition fileDetail, 
+            File tempFile) {
+        
+>>>>>>> develop
         StorageFile storageFile = new StorageFile();
         storageFile.setBucket(BackblazeConfig.getBucketName());
         storageFile.setObjectKey(b2Key);
@@ -287,7 +500,138 @@ public class EmpleadoService {
         storageFile.setContentType(fileDetail.getType());
         storageFile.setSize(tempFile.length());
         storageFile.setRelatedTable(relatedTable);
+<<<<<<< HEAD
         storageFile.setUploadedBy(uploadedBy);
         return storageFile;
     }
 }
+=======
+        storageFile.setRelatedId(relatedId);
+        storageFile.setUploadedBy(uploadedBy);
+        return storageFile;
+    }
+    
+    public List<HashMap<String, Object>> listarActivosVigentes() {
+        List<HashMap<String, Object>> lista = empleDAO.listarEmpleados("SOLO_VIGENTES");
+        for (HashMap<String, Object> emp : lista) {
+            transformarKeysAUrls(emp);
+        }
+        return lista;
+    }
+
+    public List<HashMap<String, Object>> listarTodoParaGestion() {
+        List<HashMap<String, Object>> lista = empleDAO.listarEmpleados("GESTION_TOTAL");
+        for (HashMap<String, Object> emp : lista) {
+            transformarKeysAUrls(emp);
+        }
+        return lista;
+    }
+    
+    public HashMap<String, Object> darDeBajaEmpleado(int idEmpleado) {
+        HashMap<String, Object> res = new HashMap<>();
+        Connection cn = null;
+
+        try {
+            cn = DBConnection.getConnection();
+            cn.setAutoCommit(false);
+
+            empleDAO.finalizarContratoActivo(idEmpleado, cn);
+
+            boolean empleadoInactivado = empleDAO.inactivarEmpleado(idEmpleado, cn);
+
+            if (empleadoInactivado) {
+                cn.commit();
+                res.put("success", true);
+                res.put("message", "Empleado cesado y contrato finalizado correctamente");
+            } else {
+                cn.rollback();
+                res.put("success", false);
+                res.put("message", "No se pudo encontrar al empleado para dar de baja");
+            }
+
+        } catch (Exception e) {
+            try {
+                if (cn != null) cn.rollback();
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+            res.put("success", false);
+            res.put("message", "Error en la transacción: " + e.getMessage());
+        } finally {
+            try {
+                if (cn != null) cn.close();
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+        }
+        return res;
+    }
+
+    private void transformarKeysAUrls(HashMap<String, Object> emp) {
+        final String BASE_URL = BackblazeConfig.getPublicFileEndpoint(); 
+        
+        String fotoKey = (String) emp.get("fotoUrl");
+        if (fotoKey != null && !fotoKey.isEmpty()) {
+            emp.put("fotoUrl", BASE_URL + fotoKey);
+        }
+        String pdfKey = (String) emp.get("pdfKey");
+        if (pdfKey != null && !pdfKey.isEmpty()) {
+            emp.put("pdfDownloadUrl", BASE_URL + pdfKey);
+        }
+    }
+    
+    private void validarFechasContrato(Date fechaInicio, Date fechaFin) throws Exception {
+        long ahora = System.currentTimeMillis();
+        long haceUnMes = ahora - (30L * 24 * 60 * 60 * 1000);
+
+        if (fechaInicio.getTime() < haceUnMes) {
+            throw new Exception("La fecha de inicio es demasiado antigua. No puede ser mayor a 30 días atrás.");
+        }
+
+        if (fechaFin != null && fechaFin.before(fechaInicio)) {
+            throw new Exception("La fecha de fin no puede ser anterior a la fecha de inicio.");
+        }
+    }
+    
+    public List<HashMap<String, Object>> listarHistorialContratos(int idEmpleado) throws Exception {
+        List<HashMap<String, Object>> lista = empleDAO.obtenerHistorialContratos(idEmpleado);
+        
+        if (lista.isEmpty()) {
+            throw new Exception("No se encontró historial para el empleado con ID: " + idEmpleado);
+        }
+
+        for (HashMap<String, Object> contrato : lista) {
+            transformarKeysAUrls(contrato);
+        }
+
+        return lista;
+    }
+    
+    public List<HashMap<String, Object>> obtenerRepartidoresActivos(int idSucursal) throws Exception {
+        List<HashMap<String, Object>> lista = empleDAO.listarRepartidoresPorSucursal(idSucursal);
+        
+        if (lista.isEmpty()) {
+            throw new Exception("No hay repartidores con contrato activo para esta sucursal.");
+        }
+        
+        return lista;
+    }
+    
+    public HashMap<String, Object> obtenerPerfilEmpleadoCompleto(int idEmpleado) throws Exception {
+        HashMap<String, Object> perfil = empleadoDAO.obtenerPerfilBasico(idEmpleado);
+        if (perfil == null) throw new Exception("Empleado no encontrado.");
+
+        List<HashMap<String, Object>> historial = empleDAO.obtenerHistorialContratos(idEmpleado);
+
+        transformarKeysAUrls(perfil); 
+
+        for (HashMap<String, Object> contrato : historial) {
+            transformarKeysAUrls(contrato);
+        }
+
+        perfil.put("historialContratos", historial);
+        
+        return perfil;
+    }
+}
+>>>>>>> develop

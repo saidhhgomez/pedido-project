@@ -45,6 +45,7 @@ CREATE TABLE DireccionCliente (
 	distrito VARCHAR(100),
 	direccion VARCHAR(255) NOT NULL,
 	referencia VARCHAR(255),
+    estado BOOLEAN DEFAULT TRUE,
 	FOREIGN KEY (idCliente) REFERENCES Cliente(idCliente)
 );
 
@@ -83,14 +84,16 @@ CREATE TABLE Empleado (
 CREATE TABLE TipoContrato (
 	idTipoContrato INT AUTO_INCREMENT PRIMARY KEY,
 	nombre VARCHAR(100),
-	descripcion VARCHAR(255)
+	descripcion VARCHAR(255),
+	estadoTipoContrato VARCHAR(50) DEFAULT 'activo'
 );
 
 -- Tabla: Roles (Tipos de Contratos como Mesero, Cocinero, Repartidor)
 CREATE TABLE Roles (
 	idRol INT AUTO_INCREMENT PRIMARY KEY,
 	nombre VARCHAR(80),
-	descripcion VARCHAR(255)
+	descripcion VARCHAR(255),
+    estadoRol VARCHAR(50) DEFAULT 'activo'
 );
 
 -- Tabla: Contrato (Datos personales del cliente)
@@ -104,10 +107,27 @@ CREATE TABLE Contrato (
 	fechaFin DATETIME,
     salario DECIMAL(10,2),
     estadoContrato VARCHAR(100) DEFAULT 'activo',
+	pdf_generado_key VARCHAR(512) NULL,
+	pdf_firmado_key VARCHAR(512) NULL,
 	FOREIGN KEY (idEmpleado) REFERENCES Empleado(idEmpleado),
 	FOREIGN KEY (idSucursal) REFERENCES Sucursal(idSucursal),
 	FOREIGN KEY (idTipoContrato) REFERENCES TipoContrato(idTipoContrato),
 	FOREIGN KEY (idRol) REFERENCES Roles(idRol)
+);
+
+-- Tabla para registrar cualquier archivo almacenado en Backblaze B2 (S3)
+CREATE TABLE storage_file (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  bucket VARCHAR(255) NOT NULL,
+  object_key VARCHAR(1024) NOT NULL,
+  filename VARCHAR(512) NOT NULL,
+  content_type VARCHAR(100),
+  size BIGINT,
+  uploaded_by INT, -- idEmpleado u otro usuario
+  related_table VARCHAR(100),     -- Ej: Contrato
+  related_id INT,                 -- Ej: idContrato
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  estado BOOLEAN DEFAULT TRUE NULL
 );
 
 -- Tabla: Proveedor (Tipo Producto, Servicio)
@@ -137,7 +157,8 @@ CREATE TABLE CatalogoComida (
 -- Tabla: FormaPago
 CREATE TABLE FormaPago (
 	idFormaPago INT AUTO_INCREMENT PRIMARY KEY,
-	nombre VARCHAR(100) NOT NULL
+	nombre VARCHAR(100) NOT NULL,
+	estadoFormaPago VARCHAR(100) DEFAULT 'activo'
 );
 
 -- Tabla: FormaPago
@@ -161,6 +182,7 @@ CREATE TABLE Pedido (
 	idCliente INT,
 	idDireccion INT,
     idEmpleado INT,
+	idSucursal INT,
     idMesa INT, 
 	idFormaPago INT NOT NULL,
 	fecha DATE NOT NULL,
@@ -168,6 +190,7 @@ CREATE TABLE Pedido (
 	estado VARCHAR(50) DEFAULT 'pendiente',
 	FOREIGN KEY (idCliente) REFERENCES Cliente(idCliente),
 	FOREIGN KEY (idDireccion) REFERENCES DireccionCliente(idDireccion),
+	FOREIGN KEY (idSucursal) REFERENCES Sucursal(idSucursal),
 	FOREIGN KEY (idEmpleado) REFERENCES Empleado(idEmpleado),
 	FOREIGN KEY (idMesa) REFERENCES Mesa(idMesa),
 	FOREIGN KEY (idFormaPago) REFERENCES FormaPago(idFormaPago)
@@ -187,3 +210,27 @@ CREATE TABLE DetallePedido (
 	FOREIGN KEY (idCatalogo) REFERENCES CatalogoComida(idCatalogo),
 	FOREIGN KEY (idEmpleado) REFERENCES Empleado(idEmpleado)
 );
+
+INSERT INTO Credenciales (usuario, contrasena, fechaCreacion) 
+VALUES ('cliente_generico', 'sistema123', NOW());
+
+INSERT INTO Persona (idCredencial, nombres, apPaterno, numDocumento) 
+VALUES (LAST_INSERT_ID(), 'CLIENTE', 'GENERICO', '00000000');
+
+INSERT INTO Cliente (idCliente, idPersona) 
+VALUES (1, LAST_INSERT_ID());
+
+INSERT INTO DireccionCliente (idDireccion, idCliente, direccion) 
+VALUES (1, 1, 'CONSUMO EN LOCAL');
+
+INSERT INTO Sucursal (nombre, direccion, telefono, estadoSucursal)
+VALUES ("Chavo Villa el Salvador", "Auxiliar Av. Mariano Pastor Sevilla, Villa EL Salvador, Lima", "2853408", "activo");
+
+INSERT INTO Mesa (idMesa, idSucursal, numeroMesa, capacidad, ubicacion, estado) 
+VALUES (1, 1, 'ONLINE', 0, 'Virtual', 'ocupada');
+
+INSERT INTO Roles (nombre, descripcion)
+VALUES ("Admin", "Dueño del Local");
+
+INSERT INTO tipocontrato (nombre, descripcion)
+VALUES ("Full Time", "Medio tiempo, 6 dias a la semana");

@@ -1,14 +1,19 @@
 package com.restaurant.dao;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.restaurant.config.DBConnection;
 import com.restaurant.model.CatalogoComida;
+import com.restaurant.model.StorageFile;
 
 public class CatalogoComidaDAO {
+
+    private StorageFileDAO storageFileDAO = new StorageFileDAO(); 
 
     public List<CatalogoComida> obtenerTodos() {
         List<CatalogoComida> lista = new ArrayList<>();
@@ -36,26 +41,63 @@ public class CatalogoComidaDAO {
 
         return lista;
     }
-    public boolean agregar(CatalogoComida d) {
-        String sql = "INSERT INTO CatalogoComida (nombre, categoria, precio, stock, estadoPlato, imagenPlato_url) VALUES (?,?, ?, ?, ?, ?)";
+    
+    public int agregarPlatoCompleto(CatalogoComida d, List<StorageFile> storageFiles) throws Exception {
+        Connection conn = null;
+        int idPlatoGenerado = 0;
 
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try {
+            conn = DBConnection.getConnection();
+            conn.setAutoCommit(false);
 
+            String sql = "INSERT INTO CatalogoComida (nombre, categoria, precio, stock, imagenPlato_url) VALUES (?, ?, ?, ?, ?)";
+
+            try (PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+                
+                stmt.setString(1, d.getNombre());
+                stmt.setString(2, d.getCategoria());
+                stmt.setDouble(3, d.getPrecio());
+                stmt.setInt(4, d.getStock());
+                stmt.setString(5, d.getImagenPlatoUrl());
+                
+                if (stmt.executeUpdate() > 0) {
+                    ResultSet rs = stmt.getGeneratedKeys();
+                    if (rs.next()) {
+                        idPlatoGenerado = rs.getInt(1);
+                    } else {
+                        throw new Exception("Error: No se obtuvo el ID del plato insertado.");
+                    }
+                } else {
+                    throw new Exception("Error al insertar el plato en CatalogoComida.");
+                }
+            }
             
-            stmt.setString(1, d.getNombre());
-            stmt.setString(2, d.getCategoria());
-            stmt.setDouble(3, d.getPrecio());
-            stmt.setInt(4, d.getStock());
-            stmt.setBoolean(5,d.isEstadoPlato());
-            stmt.setString(6,d.getImagenPlatoUrl());
-            return stmt.executeUpdate() > 0;
+            for (StorageFile metadata : storageFiles) {
+                if (metadata.getRelatedTable().equals("CatalogoComida")) {
+                    metadata.setRelatedId(idPlatoGenerado); 
+                }
+                storageFileDAO.insertFileMetadata(conn, metadata);
+            }
+
+            conn.commit();
 
         } catch (Exception e) {
             e.printStackTrace();
-            return false;
+            try {
+                if (conn != null) conn.rollback();
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+            throw e;
+            
+        } finally {
+            try {
+                if (conn != null) conn.close();
+            } catch (Exception e) {}
         }
+        return idPlatoGenerado;
     }
+    
     public boolean actualizar(int id, CatalogoComida d ) {
         String sql = "UPDATE CatalogoComida SET nombre = ?,precio = ?, stock = ?, estadoPlato = ? WHERE idCatalogo = ?";
         	

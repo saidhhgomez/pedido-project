@@ -81,6 +81,29 @@ https://maven.apache.org/xsd/maven-4.0.0.xsd">
     
     </dependency>
     
+    <!-- Jersey server -->
+	<dependency>
+	
+	    <groupId>org.glassfish.jersey.core</groupId>
+	    
+	    <artifactId>jersey-server</artifactId>
+	    
+	    <version>2.35</version>
+	    
+	</dependency>
+	
+	<!-- Jersey multipart -->
+	<dependency>
+	
+	    <groupId>org.glassfish.jersey.media</groupId>
+	    
+	    <artifactId>jersey-media-multipart</artifactId>
+	    
+	    <version>2.35</version>
+	    
+	</dependency>
+
+    
     <!-- Esta dependencia es el driver JDBC para conectar Java con MySQL -->
     <dependency>
     
@@ -155,40 +178,6 @@ https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<scope>runtime</scope>
 	    
 	</dependency>
-	
-	
-	
-	
-	
-	    <!-- Jersey server -->
-	<dependency>
-	
-	    <groupId>org.glassfish.jersey.core</groupId>
-	    
-	    <artifactId>jersey-server</artifactId>
-	    
-	    <version>2.35</version>
-	    
-	</dependency>
-	
-	
-		    <!-- Backblaze B2 Cloud Storage SDK (Java 8 compatible) -->
-	<dependency>
-	
-	    <groupId>com.amazonaws</groupId>
-	    
-	    <artifactId>aws-java-sdk-s3</artifactId>
-	    
-	    <version>1.12.693</version>
-	    
-	</dependency>	
-	
-	
-	
-		
-
-	
-
 	
 </dependencies>
   

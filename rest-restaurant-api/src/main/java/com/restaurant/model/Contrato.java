@@ -93,4 +93,8 @@ public class Contrato {
     public void setPdfFirmadoKey(String pdfFirmadoKey) {
         this.pdfFirmadoKey = pdfFirmadoKey;
     }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> develop

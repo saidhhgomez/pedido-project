@@ -22,4 +22,8 @@ public class EmpleadoExisteCompletoRequest {
 	public void setContrato(Contrato contrato) {
 		this.contrato = contrato;
 	}
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> develop

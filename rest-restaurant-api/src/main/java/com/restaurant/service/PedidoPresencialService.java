@@ -57,4 +57,8 @@ public class PedidoPresencialService {
         return dao.cambiarFormaPago(idPedido, idFormaPagoNueva);
     }
 
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> develop
