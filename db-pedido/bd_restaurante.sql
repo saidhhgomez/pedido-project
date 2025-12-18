@@ -211,10 +211,17 @@ CREATE TABLE DetallePedido (
 	FOREIGN KEY (idEmpleado) REFERENCES Empleado(idEmpleado)
 );
 
-INSERT INTO Persona (nombres, apPaterno, dni) VALUES ('CLIENTE', 'GENERICO', '00000000');
-INSERT INTO Cliente (idCliente, idPersona) VALUES (1, LAST_INSERT_ID());
+INSERT INTO Credenciales (usuario, contrasena, fechaCreacion) 
+VALUES ('cliente_generico', 'sistema123', NOW());
 
-INSERT INTO DireccionCliente (idDireccion, idCliente, direccion) VALUES (1, 1, 'CONSUMO EN LOCAL');
+INSERT INTO Persona (idCredencial, nombres, apPaterno, numDocumento) 
+VALUES (LAST_INSERT_ID(), 'CLIENTE', 'GENERICO', '00000000');
+
+INSERT INTO Cliente (idCliente, idPersona) 
+VALUES (1, LAST_INSERT_ID());
+
+INSERT INTO DireccionCliente (idDireccion, idCliente, direccion) 
+VALUES (1, 1, 'CONSUMO EN LOCAL');
 
 INSERT INTO Sucursal (nombre, direccion, telefono, estadoSucursal)
 VALUES ("Chavo Villa el Salvador", "Auxiliar Av. Mariano Pastor Sevilla, Villa EL Salvador, Lima", "2853408", "activo");
