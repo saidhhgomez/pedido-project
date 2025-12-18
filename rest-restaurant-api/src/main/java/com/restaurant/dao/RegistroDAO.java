@@ -465,4 +465,37 @@ public class RegistroDAO {
         }
         return perfil;
     }
+    
+    public boolean existeUsuario(String usuario) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM Credenciales WHERE usuario = ?";
+        try (Connection cn = DBConnection.getConnection();
+             PreparedStatement ps = cn.prepareStatement(sql)) {
+            ps.setString(1, usuario);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() && rs.getInt(1) > 0;
+            }
+        }
+    }
+
+    public boolean existeDocumento(String numDocumento) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM Persona WHERE numDocumento = ?";
+        try (Connection cn = DBConnection.getConnection();
+             PreparedStatement ps = cn.prepareStatement(sql)) {
+            ps.setString(1, numDocumento);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() && rs.getInt(1) > 0;
+            }
+        }
+    }
+
+    public boolean existeCorreo(String correo) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM Persona WHERE correo = ?";
+        try (Connection cn = DBConnection.getConnection();
+             PreparedStatement ps = cn.prepareStatement(sql)) {
+            ps.setString(1, correo);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() && rs.getInt(1) > 0;
+            }
+        }
+    }
 }

@@ -56,6 +56,16 @@ public class ClienteService {
 	        
 	        throw new Exception("Datos de registro incompletos o inválidos.");
 	    }
+	    
+	    if (clientDAO.existeUsuario(cred.getUsuario())) {
+	        throw new Exception("El nombre de usuario '" + cred.getUsuario() + "' ya existe.");
+	    }
+	    if (clientDAO.existeDocumento(persona.getNumDocumento())) {
+	        throw new Exception("El número de documento '" + persona.getNumDocumento() + "' ya está registrado.");
+	    }
+	    if (persona.getCorreo() != null && clientDAO.existeCorreo(persona.getCorreo())) {
+	        throw new Exception("El correo '" + persona.getCorreo() + "' ya está registrado por otro usuario.");
+	    }
         
         String numDocumento = persona.getNumDocumento();
         if (numDocumento == null || numDocumento.isEmpty()) {
