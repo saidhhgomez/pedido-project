@@ -1,15 +1,24 @@
-import type { CredencialesDTO, PersonaDTO } from "./empleado.types";
+export interface RegistrarClienteDTO {
+  credenciales: {
+    usuario: string;
+    contrasena: string;
+  };
 
+  persona: {
+    nombres: string;
+    apPaterno: string;
+    apMaterno: string;
+    genero: "M" | "F" | "";
+    tipoDocumento: string;
+    numDocumento: string;
+    telefono: string;
+    correo: string;
+    fechaNacimiento: string;
+  };
 
-export interface ClienteDTO{
-    imagenCliente_url:string;
+  cliente: {
+    imagenCliente?: FileList; // 🔥 CLAVE: opcional
+    imagenCliente_url?: string;
+  };
 }
-
-
-export interface RegistrarClienteDTO{
-    credenciales: CredencialesDTO;
-    persona:PersonaDTO;
-    cliente:ClienteDTO;
-}
-
 

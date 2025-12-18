@@ -23,7 +23,8 @@ function deleteMetodoPago(id: number) {
 
 /* Hooks */
 export function useGetAllMetodosPago() {
-  return useQuery({ queryKey: ["getAllMetodosPago"], queryFn: getAllMetodosPago });
+  return useQuery({ queryKey: ["getAllMetodosPago"], 
+  queryFn: getAllMetodosPago });
 }
 
 export function useCreateMetodoPago() {

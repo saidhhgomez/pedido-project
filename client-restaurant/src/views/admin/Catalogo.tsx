@@ -1,7 +1,7 @@
 import { useState } from "react";
 import FormModalPlate from "../../components/Modals/ModalProducto";
 import { Box, Button } from "@mui/material";
-import type { Plate, PlateEit } from "../../types/Plate.type";
+import type { Plate } from "../../types/Plate.type";
 import { useCreatePlate, useGetPlate } from "../../services/plate.service";
 import CardPlate from "../../components/RendeProducto";
 import Swal from "sweetalert2";

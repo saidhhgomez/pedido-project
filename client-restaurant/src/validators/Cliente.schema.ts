@@ -2,27 +2,86 @@ import * as yup from "yup";
 
 export const registrarEmpleadoSchema = yup.object({
   credenciales: yup.object({
-    usuario: yup.string().required("Ingresa tu usuario"),
-    contrasena: yup.string().required("Ingresa tu contraseña"),
+    usuario: yup
+      .string()
+      .trim()
+      .required("Usuario obligatorio"),
+
+    contrasena: yup
+      .string()
+      .min(6, "Mínimo 6 caracteres")
+      .required("Contraseña obligatoria"),
   }),
 
   persona: yup.object({
-    nombres: yup.string().required("Ingrese nombres"),
-    apPaterno: yup.string().required("Ingrese apellido paterno"),
-    apMaterno: yup.string().required("Ingrese apellido materno"),
-    genero: yup.string().required("Seleccione su género"),
-    tipoDocumento: yup.string().required("Seleccione tipo de documento"),
-    numDocumento: yup.string().required("Ingrese número de documento"),
+    nombres: yup
+      .string()
+      .trim()
+      .required("Nombres obligatorios"),
+
+    apPaterno: yup
+      .string()
+      .trim()
+      .required("Apellido paterno obligatorio"),
+
+    apMaterno: yup
+      .string()
+      .trim()
+      .required("Apellido materno obligatorio"),
+
+    genero: yup
+      .string()
+      .oneOf(["M", "F"], "Seleccione género")
+      .required("Género obligatorio"),
+
+    tipoDocumento: yup
+      .string()
+      .required("Tipo de documento obligatorio"),
+
+    numDocumento: yup
+      .string()
+      .matches(/^\d+$/, "Solo números")
+      .min(8, "Mínimo 8 dígitos")
+      .required("Documento obligatorio"),
+
     telefono: yup
       .string()
-      .required("Ingrese teléfono")
-      .matches(/^[0-9]+$/, "Solo números"),
-    correo: yup.string().email("Correo inválido").required("Ingrese correo"),
-    fechaNacimiento: yup.string().required("Seleccione fecha"),
+      .matches(/^\d{9}$/, "Teléfono debe tener 9 dígitos")
+      .required("Teléfono obligatorio"),
+
+    correo: yup
+      .string()
+      .email("Correo inválido")
+      .required("Correo obligatorio"),
+
+    fechaNacimiento: yup
+      .string()
+      .required("Fecha de nacimiento obligatoria"),
   }),
 
-  // 👇 ARCHIVO, NO STRING
-  imagenCliente: yup
-    .mixed()
-    .required("Debe subir una imagen"),
+  cliente: yup.object({
+    imagenCliente: yup
+      .mixed<FileList>()
+      .test(
+        "required",
+        "La imagen es obligatoria",
+        (value) => value instanceof FileList && value.length > 0
+      )
+      .test(
+        "fileSize",
+        "La imagen no debe superar 2MB",
+        (value) =>
+          value instanceof FileList &&
+          value.length > 0 &&
+          value[0].size <= 2_000_000
+      )
+      .test(
+        "fileType",
+        "Solo se permiten imágenes JPG o PNG",
+        (value) =>
+          value instanceof FileList &&
+          value.length > 0 &&
+          ["image/jpeg", "image/png"].includes(value[0].type)
+      ),
+  }),
 });

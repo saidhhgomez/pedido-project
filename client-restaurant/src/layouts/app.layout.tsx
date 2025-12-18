@@ -213,6 +213,29 @@ export default function PersistentDrawerLeft() {
             </ListItem>
           </Link>
 
+                            <Link to={"/mesa"}>
+                      <ListItem  disablePadding>
+              <ListItemButton>
+                <ListItemIcon>
+                  <HomeIcon />
+                </ListItemIcon>
+                <ListItemText primary={"Mesa"} />
+              </ListItemButton>
+            </ListItem>
+          </Link>
+
+                                      <Link to={"/historial"}>
+                      <ListItem  disablePadding>
+              <ListItemButton>
+                <ListItemIcon>
+                  <HomeIcon />
+                </ListItemIcon>
+                <ListItemText primary={"Historial"} />
+              </ListItemButton>
+            </ListItem>
+          </Link>
+
+
 
           <Link to={"/Rol"}>
                       <ListItem  disablePadding>

@@ -1,38 +1,40 @@
 import axiosClient from "./api.service";
+import axiosFormData from "./api.service.file";
+
 import { useMutation, useQuery } from "@tanstack/react-query";
-import type {  PlateEit, PlateUpdate } from "../types/Plate.type";
+import type {   Plate } from "../types/Plate.type";
 
 
 const PATH="rest-restaurant-api/api/catalogo";
 
-function createPlate(payload: PlateEit) {
-  return axiosClient
-    .post("rest-restaurant-api/api/catalogo", payload);
-  }
+
+export const createPlate = (formData: FormData) => {
+  return axiosFormData.post<Plate>(
+    `${PATH}?idAdmin=1`,
+    formData
+  );
+};
 
   function getAllPlate(){
     return axiosClient.get("rest-restaurant-api/api/catalogo");
 
   }
 
-
-
-
-function updatePlateBackend(id: number, data: PlateUpdate) {
-  return axiosClient.put(`${PATH}/${id}`, data);
-}
+  function updatePlateBackend(id: number, data) {
+    return axiosClient.put(`${PATH}/${id}`, data);
+  }
 
 
 function deletePlate(id:number){
 return axiosClient.delete(`${PATH}/${id}`);
 }
 
-export function useCreatePlate(){
-    return useMutation ({
-        mutationFn:createPlate,
-        mutationKey:["createPlate"],
-    });
-}
+// CREATE
+export const useCreatePlate = () =>
+  useMutation({
+    mutationFn: (formData: FormData) => createPlate(formData),
+  });
+
 
 
 export function useGetPlate(){
@@ -56,7 +58,7 @@ export function useRemovePlate(){
 
 export function useUpdatePlate() {
   return useMutation({
-    mutationFn: ({ id, data }: { id: number; data: PlateUpdate }) =>
+    mutationFn: ({ id, data }: { id: number; data}) =>
       updatePlateBackend(id, data),
     mutationKey: ["updatePlate"],
   });

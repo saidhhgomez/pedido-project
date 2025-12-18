@@ -12,6 +12,8 @@ import {
   OutlinedInput,
   FormHelperText,
   Typography,
+  CircularProgress,
+  Backdrop,
 } from "@mui/material";
 import { useForm, Controller } from "react-hook-form";
 import Swal from "sweetalert2";
@@ -62,6 +64,8 @@ export default function RegistroEmpleadoStepper() {
   const [empleadoData, setEmpleadoData] = useState<any>({});
   const [pdfFirmado, setPdfFirmado] = useState<File | null>(null);
   const [imagenEmpleado, setImagenEmpleado] = useState<File | null>(null);
+  const [pdfDescargado, setPdfDescargado] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const {
     register,
@@ -70,9 +74,10 @@ export default function RegistroEmpleadoStepper() {
     setValue,
     control,
     reset,
-    formState: { errors, isValid },
+    trigger,
+    formState: { errors },
   } = useForm({
-    mode: "onChange", // validación en tiempo real
+    mode: "onChange",
   });
 
   const { data: dniData } = useBuscarPorDni(dniBusqueda);
@@ -85,6 +90,40 @@ export default function RegistroEmpleadoStepper() {
   const actualizarPersonaMutation = useActualizarPersona();
 
   const steps = tipoFlujo === "NUEVO" ? stepsNuevo : stepsExistente;
+
+  /* ================= VALIDACIONES PERSONALIZADAS ================= */
+  const validarSinEspacios = (value: string) => {
+    if (!value) return true; // La validación de required se encarga de esto
+    if (value.trim() === "") {
+      return "No se permiten solo espacios en blanco";
+    }
+    if (value !== value.trim()) {
+      return "No se permiten espacios al inicio o al final";
+    }
+    return true;
+  };
+
+  const validarUsuarioSinEspacios = (value: string) => {
+    if (!value) return "Usuario obligatorio";
+    if (/\s/.test(value)) {
+      return "El usuario no puede contener espacios";
+    }
+    if (value.trim() === "") {
+      return "No se permiten solo espacios en blanco";
+    }
+    return true;
+  };
+
+  const validarContrasenaSinEspacios = (value: string) => {
+    if (!value) return "Contraseña obligatoria";
+    if (/\s/.test(value)) {
+      return "La contraseña no puede contener espacios";
+    }
+    if (value.trim() === "") {
+      return "No se permiten solo espacios en blanco";
+    }
+    return true;
+  };
 
   /* ================= AUTOLLENADO ================= */
   useEffect(() => {
@@ -102,9 +141,43 @@ export default function RegistroEmpleadoStepper() {
     }
   }, [dniData, setValue]);
 
-  /* ================= HELPERS ================= */
-  const actualizarEmpleadoData = () => setEmpleadoData(watch());
+  /* ================= WATCH FORM ================= */
+  useEffect(() => {
+    const subscription = watch(() => {
+      setEmpleadoData(watch());
+    });
+    return () => subscription.unsubscribe();
+  }, [watch]);
 
+  // Detectar cambios en los campos cuando está en modo edición
+  useEffect(() => {
+    console.log("👀 useEffect de detección - tipoFlujo:", tipoFlujo, "modoEdicion:", modoEdicion);
+    
+    if (tipoFlujo === "EXISTENTE" && modoEdicion && dniData?.idPersona) {
+      console.log("✅ Activando detector de cambios para persona existente");
+      
+      const subscription = watch((value, { name, type }) => {
+        console.log("📝 Cambio detectado:", { name, type, value: value[name], modoEdicion });
+        
+        if (name && modoEdicion) {
+          console.log(`🔄 Campo '${name}' modificado, activando personaEditada`);
+          setPersonaEditada(true);
+        }
+      });
+      
+      return () => {
+        console.log("🧹 Limpiando detector de cambios");
+        subscription.unsubscribe();
+      };
+    } else {
+      console.log("⚠️ Condiciones no cumplidas para activar detector:");
+      console.log("   - tipoFlujo === 'EXISTENTE':", tipoFlujo === "EXISTENTE");
+      console.log("   - modoEdicion:", modoEdicion);
+      console.log("   - dniData?.idPersona:", dniData?.idPersona);
+    }
+  }, [watch, tipoFlujo, modoEdicion, dniData]);
+
+  /* ================= HELPERS ================= */
   const textoPorId = (lista: any[], id: number, idKey: string, textKey: string) =>
     lista?.find((i) => Number(i[idKey]) === Number(id))?.[textKey] || "";
 
@@ -125,12 +198,109 @@ export default function RegistroEmpleadoStepper() {
     ),
   };
 
+  /* ================= VALIDACION STEP ================= */
+  const validarStepActual = async () => {
+    let camposStep: string[] = [];
+
+    if (tipoFlujo === "NUEVO") {
+      switch (activeStep) {
+        case 0:
+          camposStep = ["usuario", "contrasena"];
+          break;
+        case 1:
+          camposStep = [
+            "tipoDocumento",
+            "numDocumento",
+            "nombres",
+            "apPaterno",
+            "apMaterno",
+            "genero",
+            "telefono",
+            "correo",
+            "direccion",
+          ];
+          break;
+        case 2:
+          camposStep = ["idSucursal", "idTipoContrato", "idRol", "fechaInicio", "salario"];
+          break;
+      }
+    } else if (tipoFlujo === "EXISTENTE") {
+      switch (activeStep) {
+        case 0:
+          camposStep = [
+            "tipoDocumento",
+            "numDocumento",
+            "nombres",
+            "apPaterno",
+            "apMaterno",
+            "genero",
+            "telefono",
+            "correo",
+            "direccion",
+          ];
+          break;
+        case 1:
+          camposStep = ["idSucursal", "idTipoContrato", "idRol", "fechaInicio", "salario"];
+          break;
+      }
+    }
+
+    await trigger(camposStep);
+
+    const erroresStep = camposStep.filter((campo) => !!errors[campo]);
+    if (erroresStep.length > 0) {
+      Swal.fire({
+        icon: "warning",
+        title: "Campos incompletos o inválidos",
+        text: "Por favor, complete correctamente todos los campos requeridos antes de continuar.",
+      });
+      return false;
+    }
+
+    return true;
+  };
+
   /* ================= NAV ================= */
-  const handleNext = () => {
-    actualizarEmpleadoData();
+  const handleNext = async () => {
+    const valido = await validarStepActual();
+    if (!valido) return;
+
+    // Validación especial: PDF
+    if (
+      (tipoFlujo === "NUEVO" && activeStep === 3) ||
+      (tipoFlujo === "EXISTENTE" && activeStep === 2)
+    ) {
+      if (!pdfDescargado) {
+        Swal.fire({
+          icon: "warning",
+          title: "PDF no descargado",
+          text: "Debe descargar el PDF antes de continuar",
+        });
+        return;
+      }
+    }
+
     setActiveStep((s) => s + 1);
   };
+
   const handleBack = () => setActiveStep((s) => s - 1);
+
+  /* ================= BOTON SIGUIENTE DINAMICO ================= */
+  const siguienteDisabled = () => {
+    // Paso dirección
+    if ((tipoFlujo === "NUEVO" && activeStep === 1) ||
+        (tipoFlujo === "EXISTENTE" && activeStep === 0)) {
+      return !watch("direccion");
+    }
+
+    // Paso PDF
+    if ((tipoFlujo === "NUEVO" && activeStep === 3) ||
+        (tipoFlujo === "EXISTENTE" && activeStep === 2)) {
+      return !pdfDescargado;
+    }
+
+    return false;
+  };
 
   /* ================= PDF ================= */
   const descargarPDF = async () => {
@@ -143,88 +313,137 @@ export default function RegistroEmpleadoStepper() {
     const height = (canvas.height * width) / canvas.width;
     pdf.addImage(imgData, "PNG", 0, 0, width, height);
     pdf.save("empleado.pdf");
+
+    setPdfDescargado(true);
   };
 
   /* ================= SUBMIT ================= */
   const onSubmit = async (data: any) => {
+    console.log("🚀 INICIANDO SUBMIT");
+    console.log("   - tipoFlujo:", tipoFlujo);
+    console.log("   - personaEditada:", personaEditada);
+    console.log("   - modoEdicion:", modoEdicion);
+    
     if (!pdfFirmado || !imagenEmpleado) {
       Swal.fire("Error", "Debe subir PDF firmado e imagen", "warning");
       return;
     }
 
+    setLoading(true);
+
     const formatFecha = (f: string) => (f ? f.replace("T", " ") + ":00" : null);
 
-    // Si es EXISTENTE y se editó la persona, actualizarla
-    if (tipoFlujo === "EXISTENTE" && personaEditada) {
-      const personaPayload = {
-        idPersona: dniData.idPersona,
-        tipoDocumento: data.tipoDocumento,
-        numDocumento: data.numDocumento,
-        nombres: data.nombres,
-        apPaterno: data.apPaterno,
-        apMaterno: data.apMaterno,
-        genero: data.genero,
-        telefono: data.telefono,
-        correo: data.correo,
-        fechaNacimiento: data.fechaNacimiento,
-      };
+    try {
+      if (tipoFlujo === "EXISTENTE" && personaEditada) {
+        console.log("=".repeat(60));
+        console.log("🔄 ACTUALIZANDO DATOS DE PERSONA");
+        console.log("=".repeat(60));
+        
+        const personaPayload = {
+          nombres: data.nombres,
+          apPaterno: data.apPaterno,
+          apMaterno: data.apMaterno,
+          genero: data.genero,
+          tipoDocumento: data.tipoDocumento,
+          numDocumento: data.numDocumento,
+          telefono: data.telefono,
+          correo: data.correo,
+          fechaNacimiento: data.fechaNacimiento,
+        };
+        
+        console.log("🆔 ID de Persona:", dniData.idPersona);
+        console.log("🌐 URL:", `rest-restaurant-api/api/empleado/actualizar/${dniData.idPersona}`);
+        console.log("📦 JSON QUE SE ENVÍA EN EL BODY:");
+        console.log(JSON.stringify(personaPayload, null, 2));
+        console.table(personaPayload);
+        
+        // Estructura correcta según tu service: { id, data }
+        const resultadoActualizacion = await actualizarPersonaMutation.mutateAsync({
+          id: dniData.idPersona,
+          data: personaPayload
+        });
+        
+        console.log("✅ PERSONA ACTUALIZADA EXITOSAMENTE");
+        console.log("📥 RESPUESTA DEL SERVIDOR:");
+        console.log(JSON.stringify(resultadoActualizacion, null, 2));
+        console.log("=".repeat(60));
+      } else {
+        console.log("ℹ️ No se requiere actualizar persona");
+        console.log("   - Flujo:", tipoFlujo);
+        console.log("   - personaEditada:", personaEditada);
+      }
 
-      await actualizarPersonaMutation.mutateAsync(personaPayload);
+      const jsonFinal =
+        tipoFlujo === "EXISTENTE"
+          ? {
+              persona: { idPersona: dniData.idPersona, numDocumento: dniData.numDocumento },
+              empleado: { direccion: data.direccion, imagenConductor_url: "" },
+              contrato: {
+                idSucursal: Number(data.idSucursal),
+                idTipoContrato: Number(data.idTipoContrato),
+                idRol: Number(data.idRol),
+                fechaInicio: formatFecha(data.fechaInicio),
+                salario: Number(data.salario),
+              },
+            }
+          : {
+              credenciales: { usuario: data.usuario, contrasena: data.contrasena },
+              persona: {
+                tipoDocumento: data.tipoDocumento,
+                numDocumento: data.numDocumento,
+                nombres: data.nombres,
+                apPaterno: data.apPaterno,
+                apMaterno: data.apMaterno,
+                genero: data.genero,
+                telefono: data.telefono,
+                correo: data.correo,
+                fechaNacimiento: data.fechaNacimiento,
+              },
+              empleado: { direccion: data.direccion, imagenConductor_url: "" },
+              contrato: {
+                idSucursal: Number(data.idSucursal),
+                idTipoContrato: Number(data.idTipoContrato),
+                idRol: Number(data.idRol),
+                fechaInicio: formatFecha(data.fechaInicio),
+                salario: Number(data.salario),
+              },
+            };
+
+      const payload = { data: jsonFinal, pdfFirmado, imagenEmpleado };
+      const mutation = tipoFlujo === "EXISTENTE" ? crearExistenteFD : crearNuevoFD;
+
+      mutation.mutate(payload, {
+        onSuccess: () => {
+          setLoading(false);
+          Swal.fire("Éxito", "Empleado registrado correctamente", "success");
+          reset();
+          setTipoFlujo(null);
+          setActiveStep(0);
+          setDniBusqueda("");
+          setPdfFirmado(null);
+          setImagenEmpleado(null);
+          setEmpleadoData({});
+          setModoEdicion(false);
+          setPersonaEditada(false);
+          setPdfDescargado(false);
+        },
+        onError: (error: any) => {
+          setLoading(false);
+          Swal.fire(
+            "Error", 
+            error?.response?.data?.message || "Ocurrió un error al registrar el empleado", 
+            "error"
+          );
+        },
+      });
+    } catch (error: any) {
+      setLoading(false);
+      Swal.fire(
+        "Error", 
+        error?.response?.data?.message || "Ocurrió un error inesperado", 
+        "error"
+      );
     }
-
-    const jsonFinal =
-      tipoFlujo === "EXISTENTE"
-        ? {
-            persona: { idPersona: dniData.idPersona, numDocumento: dniData.numDocumento },
-            empleado: { direccion: data.direccion, imagenConductor_url: "" },
-            contrato: {
-              idSucursal: Number(data.idSucursal),
-              idTipoContrato: Number(data.idTipoContrato),
-              idRol: Number(data.idRol),
-              fechaInicio: formatFecha(data.fechaInicio),
-              salario: Number(data.salario),
-            },
-          }
-        : {
-            credenciales: { usuario: data.usuario, contrasena: data.contrasena },
-            persona: {
-              tipoDocumento: data.tipoDocumento,
-              numDocumento: data.numDocumento,
-              nombres: data.nombres,
-              apPaterno: data.apPaterno,
-              apMaterno: data.apMaterno,
-              genero: data.genero,
-              telefono: data.telefono,
-              correo: data.correo,
-              fechaNacimiento: data.fechaNacimiento,
-            },
-            empleado: { direccion: data.direccion, imagenConductor_url: "" },
-            contrato: {
-              idSucursal: Number(data.idSucursal),
-              idTipoContrato: Number(data.idTipoContrato),
-              idRol: Number(data.idRol),
-              fechaInicio: formatFecha(data.fechaInicio),
-              salario: Number(data.salario),
-            },
-          };
-
-    const payload = { data: jsonFinal, pdfFirmado, imagenEmpleado };
-    const mutation = tipoFlujo === "EXISTENTE" ? crearExistenteFD : crearNuevoFD;
-
-    mutation.mutate(payload, {
-      onSuccess: () => {
-        Swal.fire("Éxito", "Empleado registrado", "success");
-        reset();
-        setTipoFlujo(null);
-        setActiveStep(0);
-        setDniBusqueda("");
-        setPdfFirmado(null);
-        setImagenEmpleado(null);
-        setEmpleadoData({});
-        setModoEdicion(false);
-        setPersonaEditada(false);
-      },
-    });
   };
 
   /* ================= UI ================= */
@@ -269,6 +488,18 @@ export default function RegistroEmpleadoStepper() {
 
   return (
     <Box sx={{ mt: 4 }}>
+      {/* ================= LOADING BACKDROP ================= */}
+      <Backdrop
+        sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={loading}
+      >
+        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+          <CircularProgress color="inherit" size={60} />
+          <Typography variant="h6">Procesando registro...</Typography>
+          <Typography variant="body2">Por favor espere</Typography>
+        </Box>
+      </Backdrop>
+
       <Button
         variant="outlined"
         color="secondary"
@@ -282,8 +513,10 @@ export default function RegistroEmpleadoStepper() {
           setEmpleadoData({});
           setModoEdicion(false);
           setPersonaEditada(false);
+          setPdfDescargado(false);
         }}
         sx={{ mb: 2 }}
+        disabled={loading}
       >
         Regresar al Buscador
       </Button>
@@ -301,12 +534,15 @@ export default function RegistroEmpleadoStepper() {
         onSubmit={handleSubmit(onSubmit)}
         sx={{ mt: 3, display: "flex", flexDirection: "column", gap: 2 }}
       >
-        {/* STEP Credenciales */}
+        {/* ================== STEP: Credenciales ================== */}
         {tipoFlujo === "NUEVO" && activeStep === 0 && (
           <>
             <TextField
               label="Usuario"
-              {...register("usuario", { required: "Usuario obligatorio" })}
+              {...register("usuario", { 
+                required: "Usuario obligatorio",
+                validate: validarUsuarioSinEspacios
+              })}
               error={!!errors.usuario}
               helperText={errors.usuario?.message}
               fullWidth
@@ -314,7 +550,10 @@ export default function RegistroEmpleadoStepper() {
             <TextField
               label="Contraseña"
               type="password"
-              {...register("contrasena", { required: "Contraseña obligatoria" })}
+              {...register("contrasena", { 
+                required: "Contraseña obligatoria",
+                validate: validarContrasenaSinEspacios
+              })}
               error={!!errors.contrasena}
               helperText={errors.contrasena?.message}
               fullWidth
@@ -322,17 +561,27 @@ export default function RegistroEmpleadoStepper() {
           </>
         )}
 
-        {/* STEP Datos Personales */}
+        {/* ================== STEP: Datos Personales ================== */}
         {activeStep === (tipoFlujo === "NUEVO" ? 1 : 0) && (
           <>
             {tipoFlujo === "EXISTENTE" && !modoEdicion && (
               <Button
                 variant="contained"
-                onClick={() => setModoEdicion(true)}
+                onClick={() => {
+                  console.log("✏️ Modo edición activado");
+                  setModoEdicion(true);
+                  setPersonaEditada(false); // Reset al entrar en modo edición
+                }}
                 sx={{ mb: 2 }}
               >
                 Editar Datos
               </Button>
+            )}
+
+            {tipoFlujo === "EXISTENTE" && modoEdicion && (
+              <Typography variant="caption" color="info.main" sx={{ mb: 2, display: 'block' }}>
+                ℹ️ Modo edición activo - personaEditada: {personaEditada ? "✅ true" : "❌ false"}
+              </Typography>
             )}
 
             <Controller
@@ -361,6 +610,7 @@ export default function RegistroEmpleadoStepper() {
               {...register("numDocumento", {
                 required: "DNI obligatorio",
                 pattern: { value: /^[0-9]{8}$/, message: "DNI debe tener 8 dígitos" },
+                validate: validarSinEspacios
               })}
               error={!!errors.numDocumento}
               helperText={errors.numDocumento?.message}
@@ -369,7 +619,10 @@ export default function RegistroEmpleadoStepper() {
             />
             <TextField
               label="Nombres"
-              {...register("nombres", { required: "Nombre obligatorio" })}
+              {...register("nombres", { 
+                required: "Nombre obligatorio",
+                validate: validarSinEspacios
+              })}
               error={!!errors.nombres}
               helperText={errors.nombres?.message}
               fullWidth
@@ -377,7 +630,10 @@ export default function RegistroEmpleadoStepper() {
             />
             <TextField
               label="Apellido Paterno"
-              {...register("apPaterno", { required: "Apellido Paterno obligatorio" })}
+              {...register("apPaterno", { 
+                required: "Apellido Paterno obligatorio",
+                validate: validarSinEspacios
+              })}
               error={!!errors.apPaterno}
               helperText={errors.apPaterno?.message}
               fullWidth
@@ -385,7 +641,10 @@ export default function RegistroEmpleadoStepper() {
             />
             <TextField
               label="Apellido Materno"
-              {...register("apMaterno", { required: "Apellido Materno obligatorio" })}
+              {...register("apMaterno", { 
+                required: "Apellido Materno obligatorio",
+                validate: validarSinEspacios
+              })}
               error={!!errors.apMaterno}
               helperText={errors.apMaterno?.message}
               fullWidth
@@ -415,6 +674,7 @@ export default function RegistroEmpleadoStepper() {
               {...register("telefono", {
                 required: "Teléfono obligatorio",
                 pattern: { value: /^[0-9]{9}$/, message: "Debe tener 9 dígitos" },
+                validate: validarSinEspacios
               })}
               error={!!errors.telefono}
               helperText={errors.telefono?.message}
@@ -429,6 +689,7 @@ export default function RegistroEmpleadoStepper() {
                   value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
                   message: "Correo no válido",
                 },
+                validate: validarSinEspacios
               })}
               error={!!errors.correo}
               helperText={errors.correo?.message}
@@ -437,7 +698,10 @@ export default function RegistroEmpleadoStepper() {
             />
             <TextField
               label="Dirección"
-              {...register("direccion", { required: "Dirección obligatoria" })}
+              {...register("direccion", { 
+                required: "Dirección obligatoria",
+                validate: validarSinEspacios
+              })}
               error={!!errors.direccion}
               helperText={errors.direccion?.message}
               fullWidth
@@ -445,13 +709,13 @@ export default function RegistroEmpleadoStepper() {
           </>
         )}
 
-        {/* STEP Contrato */}
+        {/* ================== STEP: Datos Empleado ================== */}
         {activeStep === (tipoFlujo === "NUEVO" ? 2 : 1) && (
           <>
             <Controller
               name="idSucursal"
               control={control}
-              rules={{ required: "Seleccione una sucursal" }}
+              rules={{ required: "Seleccione sucursal" }}
               render={({ field }) => (
                 <TextField
                   select
@@ -470,30 +734,9 @@ export default function RegistroEmpleadoStepper() {
               )}
             />
             <Controller
-              name="idTipoContrato"
-              control={control}
-              rules={{ required: "Seleccione un tipo de contrato" }}
-              render={({ field }) => (
-                <TextField
-                  select
-                  label="Tipo Contrato"
-                  {...field}
-                  fullWidth
-                  error={!!errors.idTipoContrato}
-                  helperText={errors.idTipoContrato?.message}
-                >
-                  {tiposContrato?.data?.map((t: any) => (
-                    <MenuItem key={t.idTipoContrato} value={t.idTipoContrato}>
-                      {t.descripcion}
-                    </MenuItem>
-                  ))}
-                </TextField>
-              )}
-            />
-            <Controller
               name="idRol"
               control={control}
-              rules={{ required: "Seleccione un rol" }}
+              rules={{ required: "Seleccione rol" }}
               render={({ field }) => (
                 <TextField
                   select
@@ -511,75 +754,93 @@ export default function RegistroEmpleadoStepper() {
                 </TextField>
               )}
             />
+            <Controller
+              name="idTipoContrato"
+              control={control}
+              rules={{ required: "Seleccione tipo contrato" }}
+              render={({ field }) => (
+                <TextField
+                  select
+                  label="Tipo Contrato"
+                  {...field}
+                  fullWidth
+                  error={!!errors.idTipoContrato}
+                  helperText={errors.idTipoContrato?.message}
+                >
+                  {tiposContrato?.data?.map((c: any) => (
+                    <MenuItem key={c.idTipoContrato} value={c.idTipoContrato}>
+                      {c.descripcion}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              )}
+            />
             <TextField
               type="datetime-local"
               label="Fecha Inicio"
-              InputLabelProps={{ shrink: true }}
               {...register("fechaInicio", { required: "Fecha inicio obligatoria" })}
               error={!!errors.fechaInicio}
               helperText={errors.fechaInicio?.message}
               fullWidth
             />
-            <FormControl fullWidth>
-              <OutlinedInput
-                type="number"
-                {...register("salario", { required: "Salario obligatorio" })}
-                startAdornment={<InputAdornment position="start">S/.</InputAdornment>}
-                error={!!errors.salario}
-              />
-              <FormHelperText>{errors.salario?.message || "Salario"}</FormHelperText>
-            </FormControl>
+            <TextField
+              type="number"
+              label="Salario"
+              {...register("salario", { required: "Salario obligatorio" })}
+              error={!!errors.salario}
+              helperText={errors.salario?.message}
+              fullWidth
+            />
           </>
         )}
 
-        {/* STEP PDF */}
-        {activeStep === (tipoFlujo === "NUEVO" ? 3 : 2) && (
-          <>
-            <EmpleadoPdf data={empleadoPdfData} />
-            <Button onClick={descargarPDF}>Descargar PDF</Button>
-          </>
+        {/* ================== STEP: PDF Preview ================== */}
+        {(tipoFlujo === "NUEVO" ? 3 : 2) === activeStep && (
+          <Box>
+            <EmpleadoPdf data={empleadoPdfData} id="empleado-pdf" />
+            <Button variant="contained" onClick={descargarPDF} sx={{ mt: 2 }}>
+              Descargar PDF
+            </Button>
+          </Box>
         )}
 
-        {/* STEP Subir PDF */}
-        {activeStep === (tipoFlujo === "NUEVO" ? 4 : 3) && (
-          <Button component="label">
-            Subir PDF Firmado
-            <input
-              hidden
-              type="file"
-              accept="application/pdf"
-              onChange={(e) => setPdfFirmado(e.target.files?.[0] || null)}
-            />
-          </Button>
+        {/* ================== STEP: Subir PDF firmado ================== */}
+        {(tipoFlujo === "NUEVO" ? 4 : 3) === activeStep && (
+          <input
+            type="file"
+            accept="application/pdf"
+            onChange={(e) => setPdfFirmado(e.target.files?.[0] || null)}
+          />
         )}
 
-        {/* STEP Subir Imagen */}
-        {activeStep === (tipoFlujo === "NUEVO" ? 5 : 4) && (
-          <Button component="label">
-            Subir Imagen
-            <input
-              hidden
-              type="file"
-              accept="image/*"
-              onChange={(e) => setImagenEmpleado(e.target.files?.[0] || null)}
-            />
-          </Button>
+        {/* ================== STEP: Subir Imagen ================== */}
+        {(tipoFlujo === "NUEVO" ? 5 : 4) === activeStep && (
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => setImagenEmpleado(e.target.files?.[0] || null)}
+          />
         )}
 
-        {/* STEP Confirmar */}
-        {activeStep === (tipoFlujo === "NUEVO" ? 6 : 5) && (
-          <Button type="submit" variant="contained" color="success" disabled={!isValid}>
-            Registrar Empleado
-          </Button>
+        {/* ================== STEP: Confirmar ================== */}
+        {(tipoFlujo === "NUEVO" ? 6 : 5) === activeStep && (
+          <Typography>Revisar todos los datos antes de enviar</Typography>
         )}
 
         <Box sx={{ display: "flex", justifyContent: "space-between", mt: 3 }}>
           <Button disabled={activeStep === 0} onClick={handleBack}>
             Volver
           </Button>
+
           {activeStep < steps.length - 1 && (
-            <Button onClick={handleNext} disabled={!isValid}>
+            <Button onClick={handleNext} disabled={siguienteDisabled()}>
               Siguiente
+            </Button>
+          )}
+
+          {activeStep === steps.length - 1 && (
+            <Button type="submit" variant="contained">
+              Finalizar
             </Button>
           )}
         </Box>

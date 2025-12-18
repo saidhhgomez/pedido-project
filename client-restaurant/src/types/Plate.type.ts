@@ -1,17 +1,26 @@
-// types/Plate.type.ts
+// Lo que VIENE del backend
 export interface Plate {
-  idCatalogo: number;        // ID asignado por el backend
+  idCatalogo: number;
   nombre: string;
   categoria: string;
   precio: number;
   stock: number;
-  estadoplato: boolean;
   imagenPlatoUrl: string;
 }
 
-// Para crear un nuevo plato (sin idCatalogo)
-export type PlateEit
- = Omit<Plate, 'idCatalogo'>;
+// FORM (crear / editar)
+export interface PlateForm {
+  nombre: string;
+  categoria: string;
+  precio: number;
+  stock: number;
+  imagenPlato: FileList;
+}
 
-
- export type PlateUpdate = Omit<Plate, "idCatalogo">;
+// JSON que va en "data"
+export interface PlateDTO {
+  nombre: string;
+  categoria: string;
+  precio: number;
+  stock: number;
+}
