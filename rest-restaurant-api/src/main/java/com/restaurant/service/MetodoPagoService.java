@@ -4,10 +4,12 @@ import java.util.List;
 import com.restaurant.model.MetodoPago;
 
 public interface MetodoPagoService {
+
     List<MetodoPago> obtenerTodos();
+    List<MetodoPago> obtenerActivos();
     MetodoPago obtenerPorId(int id);
-    boolean agregar(MetodoPago pago);
+    String agregar(MetodoPago pago);
     boolean actualizar(int id, MetodoPago pago);
-    boolean eliminar(int id);
-	
+    boolean cambiarEstado(int id, String estado);
+    boolean eliminarLogico(int id);
 }

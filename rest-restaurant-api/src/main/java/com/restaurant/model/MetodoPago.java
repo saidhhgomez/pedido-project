@@ -1,8 +1,11 @@
 package com.restaurant.model;
 
 public class MetodoPago {
+
     private int idFormaPago;
     private String nombre;
+    private String estadoFormaPago;
+
     public int getIdFormaPago() {
         return idFormaPago;
     }
@@ -17,5 +20,13 @@ public class MetodoPago {
 
     public void setNombre(String nombre) {
         this.nombre = nombre;
+    }
+
+    public String getEstadoFormaPago() {
+        return estadoFormaPago;
+    }
+
+    public void setEstadoFormaPago(String estadoFormaPago) {
+        this.estadoFormaPago = estadoFormaPago;
     }
 }
