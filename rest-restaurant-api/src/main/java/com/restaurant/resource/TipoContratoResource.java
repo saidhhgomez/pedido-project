@@ -3,17 +3,9 @@ package com.restaurant.resource;
 import com.restaurant.model.TipoContrato;
 import com.restaurant.service.TipoContratoService;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-
 import java.util.HashMap;
 import java.util.List;
 
@@ -31,6 +23,13 @@ public class TipoContratoResource {
     }
 
     @GET
+    @Path("/activos")
+    public Response listarActivos() {
+        List<HashMap<String, Object>> lista = service.listarActivos();
+        return Response.ok(lista).build();
+    }
+
+    @GET
     @Path("/{id}")
     public Response obtener(@PathParam("id") int id) {
         HashMap<String, Object> contrato = service.obtener(id);
@@ -44,14 +43,20 @@ public class TipoContratoResource {
 
     @POST
     public Response crear(TipoContrato contrato) {
-        boolean ok = service.crear(contrato);
-
         HashMap<String, Object> resp = new HashMap<>();
-        if (ok) {
-            resp.put("mensaje", "Tipo de contrato creado correctamente");
-            return Response.ok(resp).build();
+        try {
+            boolean ok = service.crear(contrato);
+            if (ok) {
+                resp.put("status", "success");
+                resp.put("mensaje", "Tipo de contrato creado correctamente");
+                return Response.ok(resp).build();
+            }
+        } catch (IllegalArgumentException e) {
+            resp.put("status", "error");
+            resp.put("mensaje", e.getMessage());
+            return Response.status(Response.Status.BAD_REQUEST).entity(resp).build();
         }
-
+        resp.put("status", "error");
         resp.put("mensaje", "No se pudo crear el tipo de contrato");
         return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(resp).build();
     }
@@ -59,32 +64,65 @@ public class TipoContratoResource {
     @PUT
     @Path("/{id}")
     public Response actualizar(@PathParam("id") int id, TipoContrato contrato) {
-        contrato.setIdTipoContrato(id);
-
-        boolean ok = service.actualizar(contrato);
-
         HashMap<String, Object> resp = new HashMap<>();
-        if (ok) {
-            resp.put("mensaje", "Tipo de contrato actualizado correctamente");
-            return Response.ok(resp).build();
+        contrato.setIdTipoContrato(id);
+        try {
+            boolean ok = service.actualizar(contrato);
+            if (ok) {
+                resp.put("status", "success");
+                resp.put("mensaje", "Tipo de contrato actualizado correctamente");
+                return Response.ok(resp).build();
+            }
+        } catch (IllegalArgumentException e) {
+            resp.put("status", "error");
+            resp.put("mensaje", e.getMessage());
+            return Response.status(Response.Status.BAD_REQUEST).entity(resp).build();
         }
-
+        resp.put("status", "error");
         resp.put("mensaje", "No se pudo actualizar el tipo de contrato");
         return Response.status(Response.Status.BAD_REQUEST).entity(resp).build();
+    }
+
+    @PUT
+    @Path("/{id}/estado")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response cambiarEstado(@PathParam("id") int id, HashMap<String, String> body) {
+        String nuevoEstado = body.get("estado");
+        HashMap<String, Object> resp = new HashMap<>();
+
+        if (nuevoEstado == null || nuevoEstado.isEmpty()) {
+            resp.put("status", "error");
+            resp.put("mensaje", "El estado es obligatorio");
+            return Response.status(Response.Status.BAD_REQUEST).entity(resp).build();
+        }
+
+        boolean exito = service.cambiarEstado(id, nuevoEstado);
+        if (exito) {
+            resp.put("status", "success");
+            resp.put("mensaje", "Estado actualizado correctamente");
+            return Response.ok(resp).build();
+        } else {
+            resp.put("status", "error");
+            resp.put("mensaje", "No se pudo actualizar el estado");
+            return Response.status(Response.Status.BAD_REQUEST).entity(resp).build();
+        }
     }
 
     @DELETE
     @Path("/{id}")
     public Response eliminar(@PathParam("id") int id) {
-        boolean ok = service.eliminar(id);
-
+        boolean exito = service.cambiarEstado(id, "inactivo");
         HashMap<String, Object> resp = new HashMap<>();
-        if (ok) {
-            resp.put("mensaje", "Tipo de contrato eliminado correctamente");
-            return Response.ok(resp).build();
-        }
 
-        resp.put("mensaje", "No se pudo eliminar el tipo de contrato");
-        return Response.status(Response.Status.BAD_REQUEST).entity(resp).build();
+        if (exito) {
+            resp.put("status", "success");
+            resp.put("mensaje", "Tipo de contrato cambiado a inactivo");
+            return Response.ok(resp).build();
+        } else {
+            resp.put("status", "error");
+            resp.put("mensaje", "No se pudo cambiar el estado del tipo de contrato");
+            return Response.status(Response.Status.BAD_REQUEST).entity(resp).build();
+        }
     }
 }
+

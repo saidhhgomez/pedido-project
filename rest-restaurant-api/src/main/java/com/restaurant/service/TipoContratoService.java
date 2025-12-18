@@ -21,6 +21,10 @@ public class TipoContratoService {
         return dao.listar();
     }
 
+    public List<HashMap<String, Object>> listarActivos() {
+        return dao.listarActivos();
+    }
+
     public HashMap<String, Object> obtener(int id) {
         return dao.obtenerPorId(id);
     }
@@ -35,7 +39,7 @@ public class TipoContratoService {
         return dao.actualizar(contrato);
     }
 
-    public boolean eliminar(int id) {
-        return dao.eliminar(id);
+    public boolean cambiarEstado(int id, String estado) {
+        return dao.cambiarEstado(id, estado);
     }
 }
