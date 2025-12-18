@@ -13,9 +13,9 @@ import com.restaurant.util.BackblazeUtil;
 import com.restaurant.config.BackblazeConfig;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 import java.text.SimpleDateFormat;
@@ -105,4 +105,26 @@ public class ClienteService {
 	        throw e;
 	    }
 	}
+	
+	public HashMap<String, Object> obtenerPerfilCompleto(int idCliente) throws Exception {
+        HashMap<String, Object> perfil = clientDAO.obtenerPerfil(idCliente);
+        
+        if (perfil == null) {
+            throw new Exception("Cliente no encontrado.");
+        }
+
+        return transformarImagenPerfil(perfil);
+    }
+
+    private HashMap<String, Object> transformarImagenPerfil(HashMap<String, Object> perfil) {
+        String clave = (String) perfil.get("imagenUrl");
+        
+        if (clave != null && !clave.isEmpty()) {
+            final String BASE_URL = BackblazeConfig.getPublicFileEndpoint(); 
+            perfil.put("imagenUrl", BASE_URL + clave);
+        } else {
+            perfil.put("imagenUrl", "https://cdn-icons-png.flaticon.com/512/3135/3135715.png");
+        }
+        return perfil;
+    }
 }

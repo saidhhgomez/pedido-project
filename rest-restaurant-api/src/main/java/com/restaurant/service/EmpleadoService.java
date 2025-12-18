@@ -438,4 +438,21 @@ public class EmpleadoService {
         
         return lista;
     }
+    
+    public HashMap<String, Object> obtenerPerfilEmpleadoCompleto(int idEmpleado) throws Exception {
+        HashMap<String, Object> perfil = empleadoDAO.obtenerPerfilBasico(idEmpleado);
+        if (perfil == null) throw new Exception("Empleado no encontrado.");
+
+        List<HashMap<String, Object>> historial = empleDAO.obtenerHistorialContratos(idEmpleado);
+
+        transformarKeysAUrls(perfil); 
+
+        for (HashMap<String, Object> contrato : historial) {
+            transformarKeysAUrls(contrato);
+        }
+
+        perfil.put("historialContratos", historial);
+        
+        return perfil;
+    }
 }

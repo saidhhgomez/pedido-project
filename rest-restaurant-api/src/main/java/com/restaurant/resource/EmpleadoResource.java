@@ -303,4 +303,15 @@ public class EmpleadoResource {
             return Response.status(404).entity("{\"error\": \"" + e.getMessage() + "\"}").build();
         }
     }
+    
+    @GET
+    @Path("/perfil/{idEmpleado}")
+    public Response getPerfilEmpleado(@PathParam("idEmpleado") int idEmpleado) {
+        try {
+            HashMap<String, Object> resultado = empleadoService.obtenerPerfilEmpleadoCompleto(idEmpleado);
+            return Response.ok(resultado).build();
+        } catch (Exception e) {
+            return Response.status(404).entity("{\"error\": \"" + e.getMessage() + "\"}").build();
+        }
+    }
 }

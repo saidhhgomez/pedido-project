@@ -45,6 +45,7 @@ CREATE TABLE DireccionCliente (
 	distrito VARCHAR(100),
 	direccion VARCHAR(255) NOT NULL,
 	referencia VARCHAR(255),
+    estado BOOLEAN DEFAULT TRUE,
 	FOREIGN KEY (idCliente) REFERENCES Cliente(idCliente)
 );
 
@@ -125,7 +126,8 @@ CREATE TABLE storage_file (
   uploaded_by INT, -- idEmpleado u otro usuario
   related_table VARCHAR(100),     -- Ej: Contrato
   related_id INT,                 -- Ej: idContrato
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  estado BOOLEAN DEFAULT TRUE NULL
 );
 
 -- Tabla: Proveedor (Tipo Producto, Servicio)
