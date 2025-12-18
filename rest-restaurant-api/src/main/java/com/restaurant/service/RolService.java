@@ -8,37 +8,35 @@ import java.util.List;
 
 public class RolService {
 
-    private final RolDAO rolDAO = new RolDAO();
+    private final RolDAO dao = new RolDAO();
 
     public boolean crearRol(Rol rol) {
         if (rol.getNombre() == null || rol.getNombre().isEmpty()) {
             throw new IllegalArgumentException("El nombre del rol es obligatorio");
         }
-        return rolDAO.crearRol(rol);
+        return dao.crearRol(rol);
     }
 
     public List<HashMap<String, Object>> listarRoles() {
-        return rolDAO.listarRoles();
+        return dao.listarRoles();
+    }
+
+    public List<HashMap<String, Object>> listarActivos() {
+        return dao.listarActivos();
     }
 
     public HashMap<String, Object> obtenerRolPorId(int idRol) {
-        return rolDAO.obtenerPorId(idRol);
+        return dao.obtenerPorId(idRol);
     }
 
     public boolean actualizarRol(Rol rol) {
-        if (rol.getIdRol() <= 0) {
-            throw new IllegalArgumentException("El ID del rol es obligatorio");
-        }
-        if (rol.getNombre() == null || rol.getNombre().isEmpty()) {
+        if (rol.getIdRol() <= 0) throw new IllegalArgumentException("El ID del rol es obligatorio");
+        if (rol.getNombre() == null || rol.getNombre().isEmpty())
             throw new IllegalArgumentException("El nombre del rol es obligatorio");
-        }
-        return rolDAO.actualizarRol(rol);
+        return dao.actualizarRol(rol);
     }
 
-    public boolean eliminarRol(int idRol) {
-        if (idRol <= 0) {
-            throw new IllegalArgumentException("El ID del rol es obligatorio");
-        }
-        return rolDAO.eliminarRol(idRol);
+    public boolean cambiarEstado(int id, String estado) {
+        return dao.cambiarEstado(id, estado);
     }
 }

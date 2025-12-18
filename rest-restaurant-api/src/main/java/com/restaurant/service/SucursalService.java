@@ -16,6 +16,10 @@ public class SucursalService {
         }
         return sucursalDAO.crearSucursal(s);
     }
+    
+    public List<HashMap<String, Object>> listarSucursalesActivas() {
+        return sucursalDAO.listarSucursalesActivas();
+    }
 
     public List<HashMap<String, Object>> listarSucursales() {
         return sucursalDAO.listarSucursales();
@@ -27,7 +31,7 @@ public class SucursalService {
 
     public boolean actualizarSucursal(Sucursal s) {
         if (s.getIdSucursal() <= 0) {
-            throw new IllegalArgumentException("El ID de la sucursal es obligatorio");
+            throw new IllegalArgumentException("El ID es obligatorio");
         }
         if (s.getNombre() == null || s.getNombre().isEmpty()) {
             throw new IllegalArgumentException("El nombre es obligatorio");
@@ -35,10 +39,12 @@ public class SucursalService {
         return sucursalDAO.actualizarSucursal(s);
     }
 
-    public boolean eliminarSucursal(int id) {
-        if (id <= 0) {
-            throw new IllegalArgumentException("El ID de la sucursal es obligatorio");
-        }
-        return sucursalDAO.eliminarSucursal(id);
+    public boolean cambiarEstado(int id, String estado) {
+        return sucursalDAO.cambiarEstado(id, estado);
+    }
+
+    public boolean eliminarLogico(int id) {
+        return sucursalDAO.cambiarEstado(id, "inactivo");
     }
 }
+

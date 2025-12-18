@@ -11,7 +11,7 @@ import com.restaurant.config.DBConnection;
 import com.restaurant.model.Sucursal;
 
 public class SucursalDAO {
-    // CREATE
+
     public boolean crearSucursal(Sucursal sucursal) {
         String sql = "INSERT INTO Sucursal (nombre, direccion, telefono) VALUES (?, ?, ?)";
         try (Connection cn = DBConnection.getConnection();
@@ -20,16 +20,14 @@ public class SucursalDAO {
             ps.setString(1, sucursal.getNombre());
             ps.setString(2, sucursal.getDireccion());
             ps.setString(3, sucursal.getTelefono());
-
             return ps.executeUpdate() > 0;
 
         } catch (Exception e) {
-            System.out.println("Error al crear sucursal: " + e.getMessage());
             return false;
         }
     }
 
-    // READ ALL
+   
     public List<HashMap<String, Object>> listarSucursales() {
         List<HashMap<String, Object>> lista = new ArrayList<>();
         String sql = "SELECT * FROM Sucursal";
@@ -46,14 +44,37 @@ public class SucursalDAO {
                 s.put("estado", rs.getString("estadoSucursal"));
                 lista.add(s);
             }
-
-        } catch (Exception e) {
-            System.out.println("Error al listar sucursales: " + e.getMessage());
-        }
+        } catch (Exception e) {}
         return lista;
     }
 
-    // READ BY ID
+    public List<HashMap<String, Object>> listarSucursalesActivas() {
+
+        List<HashMap<String, Object>> lista = new ArrayList<>();
+        String sql = "SELECT * FROM Sucursal WHERE estadoSucursal = 'activo'";
+
+        try (Connection cn = DBConnection.getConnection();
+             PreparedStatement ps = cn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                HashMap<String, Object> map = new HashMap<>();
+                map.put("idSucursal", rs.getInt("idSucursal"));
+                map.put("nombre", rs.getString("nombre"));
+                map.put("direccion", rs.getString("direccion"));
+                map.put("telefono", rs.getString("telefono"));
+                map.put("estado", rs.getString("estadoSucursal"));
+                lista.add(map);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return lista;
+    }
+
+    
     public HashMap<String, Object> obtenerPorId(int idSucursal) {
         String sql = "SELECT * FROM Sucursal WHERE idSucursal=?";
         try (Connection cn = DBConnection.getConnection();
@@ -71,14 +92,11 @@ public class SucursalDAO {
                 s.put("estado", rs.getString("estadoSucursal"));
                 return s;
             }
-
-        } catch (Exception e) {
-            System.out.println("Error al obtener sucursal por ID: " + e.getMessage());
-        }
+        } catch (Exception e) {}
         return null;
     }
 
-    // UPDATE
+    
     public boolean actualizarSucursal(Sucursal sucursal) {
         String sql = "UPDATE Sucursal SET nombre=?, direccion=?, telefono=?, estadoSucursal=? WHERE idSucursal=?";
         try (Connection cn = DBConnection.getConnection();
@@ -89,26 +107,24 @@ public class SucursalDAO {
             ps.setString(3, sucursal.getTelefono());
             ps.setString(4, sucursal.getEstado());
             ps.setInt(5, sucursal.getIdSucursal());
-
             return ps.executeUpdate() > 0;
 
         } catch (Exception e) {
-            System.out.println("Error al actualizar sucursal: " + e.getMessage());
             return false;
         }
     }
 
-    // DELETE
-    public boolean eliminarSucursal(int idSucursal) {
-        String sql = "DELETE FROM Sucursal WHERE idSucursal=?";
+   
+    public boolean cambiarEstado(int idSucursal, String nuevoEstado) {
+        String sql = "UPDATE Sucursal SET estadoSucursal = ? WHERE idSucursal = ?";
         try (Connection cn = DBConnection.getConnection();
              PreparedStatement ps = cn.prepareStatement(sql)) {
 
-            ps.setInt(1, idSucursal);
+            ps.setString(1, nuevoEstado);
+            ps.setInt(2, idSucursal);
             return ps.executeUpdate() > 0;
 
         } catch (Exception e) {
-            System.out.println("Error al eliminar sucursal: " + e.getMessage());
             return false;
         }
     }

@@ -32,6 +32,15 @@ public class CatalogoComidaService {
         return plato;
     }
     
+    public CatalogoComida obtenerPorId(int id) {
+    
+        CatalogoComida plato = dao.obtenerPorId(id);
+        if (plato != null) {
+            plato = transformarAUrlPublica(plato);
+        }
+        return plato;
+    }
+
     public List<CatalogoComida> listar() {
         List<CatalogoComida> listaConKeys = dao.obtenerTodos();
         
@@ -58,6 +67,13 @@ public class CatalogoComidaService {
         storageFile.setUploadedBy(uploadedBy); 
         return storageFile;
     }
+    
+    public List<CatalogoComida> listarDisponibles() {
+        List<CatalogoComida> listaConKeys = dao.obtenerPlatosActivos();
+        return listaConKeys.stream()
+                           .map(this::transformarAUrlPublica)
+                           .collect(Collectors.toList());
+    }
 
     public int agregarPlatoCompleto(
             CatalogoComida plato, 
@@ -76,7 +92,12 @@ public class CatalogoComidaService {
     	if (plato.getPrecio() <= 0 || plato.getStock() < 0) {
     		throw new Exception("Precio debe ser positivo y Stock no puede ser negativo.");
     	}
-        
+    	
+    	// VALIDACIÓN: no permitir plato duplicado activo
+    	if (dao.existePlatoActivo(plato.getNombre(), plato.getCategoria())) {
+    	    throw new Exception("Ya existe un plato ACTIVO con el mismo nombre y categoría.");
+    	}
+
         String imagenOriginalName = imagenFileDetail.getFileName();
         String imagenExtension = imagenOriginalName.substring(imagenOriginalName.lastIndexOf('.') + 1).toLowerCase();
         
@@ -119,6 +140,13 @@ public class CatalogoComidaService {
 	    }
     }
     
+    public boolean cambiarEstado(int id, boolean nuevoEstado) {
+        CatalogoComida plato = dao.obtenerPorId(id);
+        if (plato == null) return false;
+        plato.setEstadoPlato(nuevoEstado);
+        return dao.actualizar(id, plato);
+    }
+
     public boolean actualizar(int id, CatalogoComida d) {
         return dao.actualizar(id, d );
     }

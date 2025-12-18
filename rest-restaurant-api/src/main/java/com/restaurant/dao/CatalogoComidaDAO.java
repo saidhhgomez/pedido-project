@@ -41,7 +41,32 @@ public class CatalogoComidaDAO {
 
         return lista;
     }
-    
+    public CatalogoComida obtenerPorId(int id) {
+        String sql = "SELECT * FROM CatalogoComida WHERE idCatalogo = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, id);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                CatalogoComida comida = new CatalogoComida();
+                comida.setIdCatalogo(rs.getInt("idCatalogo"));
+                comida.setNombre(rs.getString("nombre"));
+                comida.setCategoria(rs.getString("categoria"));
+                comida.setPrecio(rs.getDouble("precio"));
+                comida.setStock(rs.getInt("stock"));
+                comida.setEstadoPlato(rs.getBoolean("estadoPlato"));
+                comida.setImagenPlatoUrl(rs.getString("imagenPlato_url"));
+                return comida;
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     public int agregarPlatoCompleto(CatalogoComida d, List<StorageFile> storageFiles) throws Exception {
         Connection conn = null;
         int idPlatoGenerado = 0;
@@ -97,7 +122,33 @@ public class CatalogoComidaDAO {
         }
         return idPlatoGenerado;
     }
-    
+    public List<CatalogoComida> obtenerPlatosActivos() {
+        List<CatalogoComida> lista = new ArrayList<>();
+        String sql = "SELECT * FROM CatalogoComida WHERE estadoPlato = true";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                CatalogoComida comida = new CatalogoComida();
+                comida.setIdCatalogo(rs.getInt("idCatalogo"));
+                comida.setNombre(rs.getString("nombre"));
+                comida.setCategoria(rs.getString("categoria"));
+                comida.setPrecio(rs.getDouble("precio"));
+                comida.setStock(rs.getInt("stock"));
+                comida.setEstadoPlato(rs.getBoolean("estadoPlato"));
+                comida.setImagenPlatoUrl(rs.getString("imagenPlato_url"));
+                lista.add(comida);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return lista;
+    }
+
     public boolean actualizar(int id, CatalogoComida d ) {
         String sql = "UPDATE CatalogoComida SET nombre = ?,precio = ?, stock = ?, estadoPlato = ? WHERE idCatalogo = ?";
         	
@@ -118,14 +169,55 @@ public class CatalogoComidaDAO {
             return false;
         }
     }
+    
+    public boolean existePlatoActivo(String nombre, String categoria) {
+        String sql = "SELECT COUNT(*) FROM CatalogoComida " +
+                     "WHERE LOWER(nombre)=LOWER(?) " +
+                     "AND LOWER(categoria)=LOWER(?) " +
+                     "AND estadoPlato = true";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, nombre);
+            stmt.setString(2, categoria);
+
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1) > 0;
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+    
+    public boolean actualizarEstado(int idCatalogo, boolean estado) {
+        String sql = "UPDATE CatalogoComida SET estadoPlato = ? WHERE idCatalogo = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setBoolean(1, estado);
+            stmt.setInt(2, idCatalogo);
+
+            return stmt.executeUpdate() > 0;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+
     public boolean eliminar(int idCatalogo) {
-        String sql = "DELETE FROM CatalogoComida WHERE idCatalogo = ?";
+        String sql = "UPDATE CatalogoComida SET estadoPlato = false WHERE idCatalogo = ?";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setInt(1, idCatalogo);
-           
+
             int rows = stmt.executeUpdate();
             return rows > 0;
 

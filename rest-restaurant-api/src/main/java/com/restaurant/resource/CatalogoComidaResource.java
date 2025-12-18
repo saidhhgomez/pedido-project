@@ -50,6 +50,27 @@ public class CatalogoComidaResource {
         return service.listar();
     }
     
+    @GET
+    @Path("/disponibles")
+    @Produces(MediaType.APPLICATION_JSON)
+    public List<CatalogoComida> listarDisponibles() {
+        return service.listarDisponibles();
+    }
+
+    @GET
+    @Path("/{idCatalogo}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response obtenerPorId(@PathParam("idCatalogo") int id) {
+        CatalogoComida plato = service.obtenerPorId(id);
+        if (plato == null) {
+            return Response.status(Response.Status.NOT_FOUND)
+                           .entity("{\"mensaje\":\"Plato no encontrado\"}")
+                           .build();
+        }
+        return Response.ok(plato).build();
+    }
+	
+    
     @POST
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(MediaType.APPLICATION_JSON)
@@ -121,6 +142,23 @@ public class CatalogoComidaResource {
             return Response.status(Response.Status.NOT_FOUND).entity("{\"error\":\"El plato no encontrado o no se pudo actualizar\"}").build();
         }
     }
+    @PUT
+    @Path("/{idCatalogo}/estado")
+    public Response cambiarEstado(@PathParam("idCatalogo") int id, @QueryParam("activo") boolean activo) {
+
+        boolean ok = service.cambiarEstado(id, activo); // usa el método general del service
+
+        if (!ok) {
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity("{\"mensaje\":\"Plato no encontrado\"}")
+                    .build();
+        }
+
+        String mensaje = activo ? "Plato activado correctamente" : "Plato desactivado correctamente";
+        return Response.ok("{\"mensaje\":\"" + mensaje + "\"}").build();
+    }
+
+
     @DELETE
     @Path("/{idCatalogo}")
     @Produces(MediaType.APPLICATION_JSON)

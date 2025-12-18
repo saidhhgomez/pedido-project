@@ -8,9 +8,14 @@ import java.util.*;
 
 public class TipoContratoDAO {
 
+    // CREATE
     public boolean crear(TipoContrato contrato) {
-        String sql = "INSERT INTO tipocontrato (nombre, descripcion) VALUES (?, ?)";
+        // Validar que no exista nombre duplicado
+        if (existeNombre(contrato.getNombre())) {
+            throw new IllegalArgumentException("Ya existe un tipo de contrato con ese nombre");
+        }
 
+        String sql = "INSERT INTO TipoContrato (nombre, descripcion, estadoTipoContrato) VALUES (?, ?, 'activo')";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
@@ -25,9 +30,10 @@ public class TipoContratoDAO {
         }
     }
 
+    // READ ALL
     public List<HashMap<String, Object>> listar() {
         List<HashMap<String, Object>> lista = new ArrayList<>();
-        String sql = "SELECT * FROM tipocontrato";
+        String sql = "SELECT * FROM TipoContrato";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);
@@ -38,7 +44,7 @@ public class TipoContratoDAO {
                 fila.put("idTipoContrato", rs.getInt("idTipoContrato"));
                 fila.put("nombre", rs.getString("nombre"));
                 fila.put("descripcion", rs.getString("descripcion"));
-
+                fila.put("estadoTipoContrato", rs.getString("estadoTipoContrato"));
                 lista.add(fila);
             }
         } catch (SQLException e) {
@@ -48,8 +54,33 @@ public class TipoContratoDAO {
         return lista;
     }
 
+    // GET SOLO ACTIVOS
+    public List<HashMap<String, Object>> listarActivos() {
+        List<HashMap<String, Object>> lista = new ArrayList<>();
+        String sql = "SELECT * FROM TipoContrato WHERE estadoTipoContrato = 'activo'";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                HashMap<String, Object> fila = new HashMap<>();
+                fila.put("idTipoContrato", rs.getInt("idTipoContrato"));
+                fila.put("nombre", rs.getString("nombre"));
+                fila.put("descripcion", rs.getString("descripcion"));
+                fila.put("estadoTipoContrato", rs.getString("estadoTipoContrato"));
+                lista.add(fila);
+            }
+        } catch (SQLException e) {
+            System.out.println("Error al listar tipos de contrato activos: " + e.getMessage());
+        }
+
+        return lista;
+    }
+
+    // READ BY ID
     public HashMap<String, Object> obtenerPorId(int id) {
-        String sql = "SELECT * FROM tipocontrato WHERE idTipoContrato = ?";
+        String sql = "SELECT * FROM TipoContrato WHERE idTipoContrato = ?";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -62,7 +93,7 @@ public class TipoContratoDAO {
                 fila.put("idTipoContrato", rs.getInt("idTipoContrato"));
                 fila.put("nombre", rs.getString("nombre"));
                 fila.put("descripcion", rs.getString("descripcion"));
-
+                fila.put("estadoTipoContrato", rs.getString("estadoTipoContrato"));
                 return fila;
             }
 
@@ -73,8 +104,14 @@ public class TipoContratoDAO {
         return null;
     }
 
+    // UPDATE
     public boolean actualizar(TipoContrato contrato) {
-        String sql = "UPDATE tipocontrato SET nombre = ?, descripcion = ? WHERE idTipoContrato = ?";
+        // Validar duplicado
+        if (existeNombreActualizar(contrato.getNombre(), contrato.getIdTipoContrato())) {
+            throw new IllegalArgumentException("Ya existe un tipo de contrato con ese nombre");
+        }
+
+        String sql = "UPDATE TipoContrato SET nombre = ?, descripcion = ? WHERE idTipoContrato = ?";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -91,18 +128,53 @@ public class TipoContratoDAO {
         }
     }
 
-    public boolean eliminar(int id) {
-        String sql = "DELETE FROM tipocontrato WHERE idTipoContrato = ?";
+    // DELETE LOGICO / CAMBIAR ESTADO
+    public boolean cambiarEstado(int idTipoContrato, String nuevoEstado) {
+        String sql = "UPDATE TipoContrato SET estadoTipoContrato = ? WHERE idTipoContrato = ?";
+        try (Connection cn = DBConnection.getConnection();
+             PreparedStatement ps = cn.prepareStatement(sql)) {
 
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            ps.setString(1, nuevoEstado);
+            ps.setInt(2, idTipoContrato);
+            return ps.executeUpdate() > 0;
 
-            stmt.setInt(1, id);
-            return stmt.executeUpdate() > 0;
-
-        } catch (SQLException e) {
-            System.out.println("Error al eliminar tipo de contrato: " + e.getMessage());
+        } catch (Exception e) {
+            System.out.println("Error al cambiar estado TipoContrato: " + e.getMessage());
             return false;
         }
     }
+
+    // VALIDACIONES DE DUPLICADO
+    private boolean existeNombre(String nombre) {
+        String sql = "SELECT COUNT(*) FROM TipoContrato WHERE nombre = ?";
+        try (Connection cn = DBConnection.getConnection();
+             PreparedStatement ps = cn.prepareStatement(sql)) {
+
+            ps.setString(1, nombre);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1) > 0;
+            }
+
+        } catch (Exception e) { return false; }
+        return false;
+    }
+
+    private boolean existeNombreActualizar(String nombre, int id) {
+        String sql = "SELECT COUNT(*) FROM TipoContrato WHERE nombre = ? AND idTipoContrato != ?";
+        try (Connection cn = DBConnection.getConnection();
+             PreparedStatement ps = cn.prepareStatement(sql)) {
+
+            ps.setString(1, nombre);
+            ps.setInt(2, id);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1) > 0;
+            }
+
+        } catch (Exception e) { return false; }
+        return false;
+    }
 }
+
+
