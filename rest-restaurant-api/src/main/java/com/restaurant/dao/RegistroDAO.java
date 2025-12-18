@@ -406,4 +406,96 @@ public class RegistroDAO {
             return rs.next() ? rs.getInt(1) : 0;
         }
     }
+    
+    public HashMap<String, Object> obtenerPerfil(int idCliente) throws SQLException {
+        HashMap<String, Object> perfil = null;
+        String sql = "SELECT c.idCliente, c.fechaRegistro, c.categoria, c.imagenCliente_url, " +
+                     "p.nombres, p.apPaterno, p.apMaterno, p.genero, p.tipoDocumento, " +
+                     "p.numDocumento, p.telefono, p.correo, p.fechaNacimiento " +
+                     "FROM Cliente c " +
+                     "JOIN Persona p ON c.idPersona = p.idPersona " +
+                     "WHERE c.idCliente = ?";
+
+        try (Connection cn = DBConnection.getConnection();
+             PreparedStatement ps = cn.prepareStatement(sql)) {
+            ps.setInt(1, idCliente);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    perfil = new HashMap<>();
+                    perfil.put("idCliente", rs.getInt("idCliente"));
+                    perfil.put("nombres", rs.getString("nombres"));
+                    perfil.put("apPaterno", rs.getString("apPaterno"));
+                    perfil.put("apMaterno", rs.getString("apMaterno"));
+                    perfil.put("genero", rs.getString("genero"));
+                    perfil.put("tipoDocumento", rs.getString("tipoDocumento"));
+                    perfil.put("numDocumento", rs.getString("numDocumento"));
+                    perfil.put("telefono", rs.getString("telefono"));
+                    perfil.put("correo", rs.getString("correo"));
+                    perfil.put("fechaNacimiento", rs.getString("fechaNacimiento"));
+                    perfil.put("fechaRegistro", rs.getString("fechaRegistro"));
+                    perfil.put("categoria", rs.getString("categoria"));
+                    perfil.put("imagenUrl", rs.getString("imagenCliente_url"));
+                }
+            }
+        }
+        return perfil;
+    }
+    
+    public HashMap<String, Object> obtenerPerfilBasico(int idEmpleado) throws SQLException {
+        HashMap<String, Object> perfil = null;
+        String sql = "SELECT e.idEmpleado, e.direccion, e.estadoEmpleado, e.fechaRegistro, e.imagenEmpleado_url, " +
+                     "p.nombres, p.apPaterno, p.apMaterno, p.numDocumento, p.telefono, p.correo " +
+                     "FROM Empleado e " +
+                     "JOIN Persona p ON e.idPersona = p.idPersona " +
+                     "WHERE e.idEmpleado = ?";
+        try (Connection cn = DBConnection.getConnection();
+             PreparedStatement ps = cn.prepareStatement(sql)) {
+            ps.setInt(1, idEmpleado);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    perfil = new HashMap<>();
+                    perfil.put("idEmpleado", rs.getInt("idEmpleado"));
+                    perfil.put("nombres", rs.getString("nombres") + " " + rs.getString("apPaterno"));
+                    perfil.put("correo", rs.getString("correo"));
+                    perfil.put("telefono", rs.getString("telefono"));
+                    perfil.put("fotoUrl", rs.getString("imagenEmpleado_url"));
+                    perfil.put("estado", rs.getString("estadoEmpleado"));
+                }
+            }
+        }
+        return perfil;
+    }
+    
+    public boolean existeUsuario(String usuario) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM Credenciales WHERE usuario = ?";
+        try (Connection cn = DBConnection.getConnection();
+             PreparedStatement ps = cn.prepareStatement(sql)) {
+            ps.setString(1, usuario);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() && rs.getInt(1) > 0;
+            }
+        }
+    }
+
+    public boolean existeDocumento(String numDocumento) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM Persona WHERE numDocumento = ?";
+        try (Connection cn = DBConnection.getConnection();
+             PreparedStatement ps = cn.prepareStatement(sql)) {
+            ps.setString(1, numDocumento);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() && rs.getInt(1) > 0;
+            }
+        }
+    }
+
+    public boolean existeCorreo(String correo) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM Persona WHERE correo = ?";
+        try (Connection cn = DBConnection.getConnection();
+             PreparedStatement ps = cn.prepareStatement(sql)) {
+            ps.setString(1, correo);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() && rs.getInt(1) > 0;
+            }
+        }
+    }
 }

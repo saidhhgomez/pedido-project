@@ -298,4 +298,44 @@ public class PedidoService {
         }
         return lista;
     }
+    
+    public List<HashMap<String, Object>> obtenerPendientesCocina(int idSucursal) throws Exception {
+        return pedidoDAO.listarPlatosPendientesCocina(idSucursal);
+    }
+
+    public void tomarPlatoParaPreparar(int idDetallePedido, int idEmpleado) throws Exception {
+        int idPedido = pedidoDAO.obtenerIdPedidoDeDetalle(idDetallePedido);
+        if (idPedido == 0) throw new Exception("Plato no encontrado.");
+
+        HashMap<String, Object> info = pedidoDAO.obtenerInfoBasicaPedido(idPedido);
+        int idSucursalPedido = (int) info.get("idSucursal");
+        String estado = (String) info.get("estado");
+
+        if (estado.equalsIgnoreCase("finalizado") || estado.equalsIgnoreCase("cancelado")) {
+            throw new Exception("No puedes tomar un plato de un pedido " + estado);
+        }
+
+        if (!pedidoDAO.esCocineroDeSucursal(idEmpleado, idSucursalPedido)) {
+            throw new Exception("Error de seguridad: No eres cocinero activo en esta sucursal.");
+        }
+
+        pedidoDAO.asignarCocineroADetalle(idDetallePedido, idEmpleado);
+    }
+    
+    public List<HashMap<String, Object>> obtenerHistorialCocinero(int idEmpleado) throws Exception {
+        List<HashMap<String, Object>> lista = pedidoDAO.listarHistorialPlatosCocinero(idEmpleado);
+        
+        if (lista.isEmpty()) {
+            throw new Exception("El cocinero aún no tiene platos registrados en su historial.");
+        }
+        return lista;
+    }
+    
+    public List<HashMap<String, Object>> obtenerHistorialCliente(int idCliente) throws Exception {
+        List<HashMap<String, Object>> historial = pedidoDAO.listarPedidosPorCliente(idCliente);
+        if (historial.isEmpty()) {
+            throw new Exception("Aún no has realizado ningún pedido.");
+        }
+        return historial;
+    }
 }

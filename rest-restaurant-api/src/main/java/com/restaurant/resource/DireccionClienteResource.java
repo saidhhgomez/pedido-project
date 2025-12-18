@@ -27,27 +27,26 @@ public class DireccionClienteResource {
     @POST
     @Path("/registrar")
     public Response registrar(DireccionCliente d) {
-        Map<String, Object> resp = new HashMap<>();
-
-        boolean ok = service.registrar(d);
-
-        resp.put("status", ok ? "ok" : "error");
-        resp.put("mensaje", ok ? "Dirección registrada correctamente" : "No se pudo registrar la dirección");
-
-        return Response.ok(resp).build();
+        try {
+            service.registrar(d);
+            return Response.status(Response.Status.CREATED)
+                           .entity("{\"mensaje\": \"Dirección guardada con éxito\"}").build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                           .entity("{\"error\": \"" + e.getMessage() + "\"}").build();
+        }
     }
 
     @DELETE
     @Path("/eliminar/{id}")
     public Response eliminar(@PathParam("id") int id) {
-        Map<String, Object> resp = new HashMap<>();
-
-        boolean ok = service.eliminar(id);
-
-        resp.put("status", ok ? "ok" : "error");
-        resp.put("mensaje", ok ? "Dirección eliminada" : "No se pudo eliminar");
-
-        return Response.ok(resp).build();
+        try {
+            service.eliminar(id);
+            return Response.ok("{\"mensaje\": \"Dirección eliminada correctamente (Lógico)\"}").build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.NOT_FOUND)
+                           .entity("{\"error\": \"" + e.getMessage() + "\"}").build();
+        }
     }
 
     @GET
@@ -72,12 +71,22 @@ public class DireccionClienteResource {
     @Path("/cliente/{idCliente}")
     public Response listarPorCliente(@PathParam("idCliente") int idCliente) {
         Map<String, Object> resp = new HashMap<>();
+        try {
+            List<DireccionCliente> lista = service.listarPorCliente(idCliente);
+            
+            resp.put("status", "ok");
+            resp.put("count", lista.size());
+            resp.put("data", lista);
+            
+            if (lista.isEmpty()) {
+                resp.put("mensaje", "El cliente no tiene direcciones registradas.");
+            }
 
-        List<DireccionCliente> lista = service.listarPorCliente(idCliente);
-
-        resp.put("status", "ok");
-        resp.put("data", lista);
-
-        return Response.ok(resp).build();
+            return Response.ok(resp).build();
+        } catch (Exception e) {
+            resp.put("status", "error");
+            resp.put("mensaje", e.getMessage());
+            return Response.status(Response.Status.BAD_REQUEST).entity(resp).build();
+        }
     }
 }

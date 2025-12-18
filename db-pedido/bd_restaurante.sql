@@ -45,6 +45,7 @@ CREATE TABLE DireccionCliente (
 	distrito VARCHAR(100),
 	direccion VARCHAR(255) NOT NULL,
 	referencia VARCHAR(255),
+    estado BOOLEAN DEFAULT TRUE,
 	FOREIGN KEY (idCliente) REFERENCES Cliente(idCliente)
 );
 
@@ -125,7 +126,8 @@ CREATE TABLE storage_file (
   uploaded_by INT, -- idEmpleado u otro usuario
   related_table VARCHAR(100),     -- Ej: Contrato
   related_id INT,                 -- Ej: idContrato
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  estado BOOLEAN DEFAULT TRUE NULL
 );
 
 -- Tabla: Proveedor (Tipo Producto, Servicio)
@@ -208,3 +210,20 @@ CREATE TABLE DetallePedido (
 	FOREIGN KEY (idCatalogo) REFERENCES CatalogoComida(idCatalogo),
 	FOREIGN KEY (idEmpleado) REFERENCES Empleado(idEmpleado)
 );
+
+INSERT INTO Persona (nombres, apPaterno, dni) VALUES ('CLIENTE', 'GENERICO', '00000000');
+INSERT INTO Cliente (idCliente, idPersona) VALUES (1, LAST_INSERT_ID());
+
+INSERT INTO DireccionCliente (idDireccion, idCliente, direccion) VALUES (1, 1, 'CONSUMO EN LOCAL');
+
+INSERT INTO Sucursal (nombre, direccion, telefono, estadoSucursal)
+VALUES ("Chavo Villa el Salvador", "Auxiliar Av. Mariano Pastor Sevilla, Villa EL Salvador, Lima", "2853408", "activo");
+
+INSERT INTO Mesa (idMesa, idSucursal, numeroMesa, capacidad, ubicacion, estado) 
+VALUES (1, 1, 'ONLINE', 0, 'Virtual', 'ocupada');
+
+INSERT INTO Roles (nombre, descripcion)
+VALUES ("Admin", "Dueño del Local");
+
+INSERT INTO tipocontrato (nombre, descripcion)
+VALUES ("Full Time", "Medio tiempo, 6 dias a la semana");

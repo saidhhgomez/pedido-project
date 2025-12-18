@@ -13,6 +13,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
 
 @Path("/cliente")
 @Produces(MediaType.APPLICATION_JSON)
@@ -83,6 +84,18 @@ public class ClienteResource {
             if (imagenTempFile != null && imagenTempFile.exists()) {
                 imagenTempFile.delete();
             }
+        }
+    }
+    
+    @GET
+    @Path("/perfil/{idCliente}")
+    public Response getPerfil(@PathParam("idCliente") int idCliente) {
+        try {
+            HashMap<String, Object> perfil = service.obtenerPerfilCompleto(idCliente);
+            return Response.ok(perfil).build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.NOT_FOUND)
+                           .entity("{\"error\": \"" + e.getMessage() + "\"}").build();
         }
     }
 }

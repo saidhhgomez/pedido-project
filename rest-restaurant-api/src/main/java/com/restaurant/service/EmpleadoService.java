@@ -114,6 +114,18 @@ public class EmpleadoService {
             
             throw new Exception("Datos de registro o contrato incompletos/inválidos.");
         }
+
+        validarFechasContrato(contrato.getFechaInicio(), contrato.getFechaFin());
+        
+        if (empleadoDAO.existeUsuario(cred.getUsuario())) {
+            throw new Exception("El usuario '" + cred.getUsuario() + "' ya está en uso.");
+        }
+        if (empleadoDAO.existeDocumento(persona.getNumDocumento())) {
+            throw new Exception("El documento '" + persona.getNumDocumento() + "' ya está registrado.");
+        }
+        if (persona.getCorreo() != null && empleadoDAO.existeCorreo(persona.getCorreo())) {
+            throw new Exception("El correo '" + persona.getCorreo() + "' ya pertenece a otra persona.");
+        }
         
         String numDocumento = persona.getNumDocumento();
         if (numDocumento == null || numDocumento.isEmpty()) {
@@ -230,6 +242,8 @@ public class EmpleadoService {
             File imagenTempFile,
             FormDataContentDisposition imagenFileDetail,
             int idAdmin) throws Exception {
+    	
+    	Contrato contrato = request.getContrato();
 
         int idPersona = request.getPersona().getIdPersona();
         String numDoc = request.getPersona().getNumDocumento();
@@ -237,7 +251,9 @@ public class EmpleadoService {
         if (numDoc == null || numDoc.isEmpty()) {
             throw new Exception("El número de documento es obligatorio para procesar los archivos.");
         }
-
+        
+        validarFechasContrato(contrato.getFechaInicio(), contrato.getFechaFin());
+        
         if (empleadoDAO.tieneContratoActivo(idPersona)) {
             throw new Exception("BLOQUEO: Esta persona ya cuenta con un contrato vigente activo.");
         }
@@ -415,6 +431,19 @@ public class EmpleadoService {
         }
     }
     
+    private void validarFechasContrato(Date fechaInicio, Date fechaFin) throws Exception {
+        long ahora = System.currentTimeMillis();
+        long haceUnMes = ahora - (30L * 24 * 60 * 60 * 1000);
+
+        if (fechaInicio.getTime() < haceUnMes) {
+            throw new Exception("La fecha de inicio es demasiado antigua. No puede ser mayor a 30 días atrás.");
+        }
+
+        if (fechaFin != null && fechaFin.before(fechaInicio)) {
+            throw new Exception("La fecha de fin no puede ser anterior a la fecha de inicio.");
+        }
+    }
+    
     public List<HashMap<String, Object>> listarHistorialContratos(int idEmpleado) throws Exception {
         List<HashMap<String, Object>> lista = empleDAO.obtenerHistorialContratos(idEmpleado);
         
@@ -437,5 +466,22 @@ public class EmpleadoService {
         }
         
         return lista;
+    }
+    
+    public HashMap<String, Object> obtenerPerfilEmpleadoCompleto(int idEmpleado) throws Exception {
+        HashMap<String, Object> perfil = empleadoDAO.obtenerPerfilBasico(idEmpleado);
+        if (perfil == null) throw new Exception("Empleado no encontrado.");
+
+        List<HashMap<String, Object>> historial = empleDAO.obtenerHistorialContratos(idEmpleado);
+
+        transformarKeysAUrls(perfil); 
+
+        for (HashMap<String, Object> contrato : historial) {
+            transformarKeysAUrls(contrato);
+        }
+
+        perfil.put("historialContratos", historial);
+        
+        return perfil;
     }
 }
