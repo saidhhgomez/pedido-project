@@ -1,11 +1,6 @@
 package com.restaurant.service;
 
-<<<<<<< HEAD
-import com.restaurant.model.Pedido;
 
-public interface PedidoService {
-    int crearPedido(Pedido pedido);
-=======
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -344,5 +339,4 @@ public class PedidoService {
         }
         return historial;
     }
->>>>>>> develop
 }

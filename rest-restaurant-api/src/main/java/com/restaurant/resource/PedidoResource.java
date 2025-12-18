@@ -1,14 +1,9 @@
 package com.restaurant.resource;
 
-<<<<<<< HEAD
-import com.restaurant.model.Pedido;
-import com.restaurant.service.PedidoServiceImpl;
-=======
 import com.restaurant.service.PedidoService;
 
 import java.util.HashMap;
 import java.util.List;
->>>>>>> develop
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -19,28 +14,6 @@ import javax.ws.rs.core.Response;
 @Produces(MediaType.APPLICATION_JSON)
 public class PedidoResource {
 
-<<<<<<< HEAD
-    private PedidoServiceImpl service = new PedidoServiceImpl();
-
-    @POST
-    public Response crearPedido(Pedido pedido) {
-
-        if (pedido.getDetalles() == null || pedido.getDetalles().isEmpty()) {
-            return Response.status(Response.Status.BAD_REQUEST)
-                    .entity("{\"error\":\"El pedido debe incluir al menos un detalle\"}")
-                    .build();
-        }
-
-        int idPedido = service.crearPedido(pedido);
-
-        if (idPedido > 0) {
-            return Response.ok("{\"mensaje\":\"Pedido registrado correctamente\", \"idPedido\":" + idPedido + "}")
-                    .build();
-        } else {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("{\"error\":\"Error al registrar el pedido\"}")
-                    .build();
-=======
     private PedidoService service = new PedidoService();
 
     @POST
@@ -264,7 +237,6 @@ public class PedidoResource {
             return Response.ok(service.obtenerHistorialCliente(idCliente)).build();
         } catch (Exception e) {
             return Response.status(404).entity("{\"error\": \"" + e.getMessage() + "\"}").build();
->>>>>>> develop
         }
     }
 }

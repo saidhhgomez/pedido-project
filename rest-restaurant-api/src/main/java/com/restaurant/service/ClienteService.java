@@ -13,15 +13,10 @@ import com.restaurant.util.BackblazeUtil;
 import com.restaurant.config.BackblazeConfig;
 
 import java.io.File;
-<<<<<<< HEAD
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-=======
+
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
->>>>>>> develop
 import java.util.List;
 import java.util.UUID;
 import java.text.SimpleDateFormat;
@@ -62,8 +57,7 @@ public class ClienteService {
 	        
 	        throw new Exception("Datos de registro incompletos o inválidos.");
 	    }
-<<<<<<< HEAD
-=======
+
 	    
 	    if (clientDAO.existeUsuario(cred.getUsuario())) {
 	        throw new Exception("El nombre de usuario '" + cred.getUsuario() + "' ya existe.");
@@ -74,7 +68,6 @@ public class ClienteService {
 	    if (persona.getCorreo() != null && clientDAO.existeCorreo(persona.getCorreo())) {
 	        throw new Exception("El correo '" + persona.getCorreo() + "' ya está registrado por otro usuario.");
 	    }
->>>>>>> develop
         
         String numDocumento = persona.getNumDocumento();
         if (numDocumento == null || numDocumento.isEmpty()) {
@@ -124,10 +117,7 @@ public class ClienteService {
 	        throw e;
 	    }
 	}
-<<<<<<< HEAD
-}
-=======
-	
+
 	public HashMap<String, Object> obtenerPerfilCompleto(int idCliente) throws Exception {
         HashMap<String, Object> perfil = clientDAO.obtenerPerfil(idCliente);
         
@@ -150,4 +140,3 @@ public class ClienteService {
         return perfil;
     }
 }
->>>>>>> develop

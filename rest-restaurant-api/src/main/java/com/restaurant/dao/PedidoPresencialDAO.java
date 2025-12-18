@@ -201,12 +201,7 @@ public class PedidoPresencialDAO {
             e.printStackTrace();
             return false;
         }
-    }
+    }}
 
 
-<<<<<<< HEAD
-}
-=======
-}
 
->>>>>>> develop

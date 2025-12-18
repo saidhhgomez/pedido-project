@@ -194,10 +194,7 @@ public class RegistroDAO {
 	            psPersona.setString(8, persona.getTelefono());
 	            psPersona.setString(9, persona.getCorreo());
 
-<<<<<<< HEAD
 
-=======
->>>>>>> develop
 	            if (persona.getFechaNacimiento() != null) {
 	                java.time.LocalDate localDate = persona.getFechaNacimiento()
 	                    .toInstant()
@@ -304,7 +301,6 @@ public class RegistroDAO {
 
         return null;
     }
-<<<<<<< HEAD
 
     public int registrarEmpleadoExisteCompleto(
             Empleado empleado, 
@@ -418,8 +414,7 @@ public class RegistroDAO {
             }
         }
     }
-}
-=======
+
     
     public boolean actualizarPersona(int idPersona, Persona persona) {
         String sql = "UPDATE Persona SET nombres=?, apPaterno=?, apMaterno=?, genero=?, tipoDocumento=?, numDocumento=?, telefono=?, correo=?, fechaNacimiento=? WHERE idPersona=?";
@@ -619,4 +614,3 @@ public class RegistroDAO {
         }
     }
 }
->>>>>>> develop

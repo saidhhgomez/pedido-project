@@ -51,34 +51,6 @@ public class LoginDAO {
 	                data.put("nombreSucursal", rs.getString("nombreSucursal"));
 	                data.put("rol", rs.getString("rolNombre") != null ? rs.getString("rolNombre").toLowerCase() : "cliente");
 
-<<<<<<< HEAD
-            if (rs.next()) {
-                data.put("contrasena", rs.getString("contrasena"));
-
-                String nombre = rs.getString("nombres") + " " +
-                                rs.getString("apPaterno") + " " +
-                                rs.getString("apMaterno");
-                data.put("nombre", nombre.trim());
-                
-                int idCliente = rs.getInt("idCliente");
-                int idEmpleado = rs.getInt("idEmpleado");
-                
-                data.put("idCliente", idCliente > 0 ? idCliente : null);
-                data.put("idEmpleado", idEmpleado > 0 ? idEmpleado : null);
-                
-                String rolNombre = rs.getString("rolNombre");
-                data.put("rol", rolNombre != null ? rolNombre.toLowerCase() : "cliente");
-
-                return data;
-            }
-
-        } catch (Exception e) {
-            System.out.println("Error en login DAO: " + e.getMessage());
-        }
-
-        return null; // USER NO EXISTE
-    }
-=======
 	                return data;
 	            }
 	        }
@@ -87,5 +59,4 @@ public class LoginDAO {
 	    }
 	    return null;
 	}
->>>>>>> develop
 }

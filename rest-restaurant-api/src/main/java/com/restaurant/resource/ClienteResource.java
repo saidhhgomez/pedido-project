@@ -13,10 +13,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-<<<<<<< HEAD
-=======
 import java.util.HashMap;
->>>>>>> develop
+
 
 @Path("/cliente")
 @Produces(MediaType.APPLICATION_JSON)
@@ -89,8 +87,6 @@ public class ClienteResource {
             }
         }
     }
-<<<<<<< HEAD
-=======
     
     @GET
     @Path("/perfil/{idCliente}")
@@ -103,5 +99,5 @@ public class ClienteResource {
                            .entity("{\"error\": \"" + e.getMessage() + "\"}").build();
         }
     }
->>>>>>> develop
+
 }

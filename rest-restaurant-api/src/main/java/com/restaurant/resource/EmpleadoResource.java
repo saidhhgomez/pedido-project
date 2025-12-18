@@ -1,18 +1,12 @@
 package com.restaurant.resource;
 
 import java.util.HashMap;
-<<<<<<< HEAD
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import javax.ws.rs.Consumes;
-=======
 import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
->>>>>>> develop
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -30,10 +24,7 @@ import java.io.IOException;
 import com.restaurant.dao.RegistroDAO;
 import com.restaurant.model.EmpleadoCompletoRequest;
 import com.restaurant.model.EmpleadoExisteCompletoRequest;
-<<<<<<< HEAD
-=======
 import com.restaurant.model.Persona;
->>>>>>> develop
 import com.restaurant.service.EmpleadoService;
 
 import org.glassfish.jersey.media.multipart.FormDataParam;
@@ -45,10 +36,7 @@ import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 public class EmpleadoResource {
 	
 	private final EmpleadoService empleadoService = new EmpleadoService();
-<<<<<<< HEAD
-=======
 	private final RegistroDAO empleadoDAO = new RegistroDAO();
->>>>>>> develop
 	private final ObjectMapper objectMapper = new ObjectMapper();
 	private static final long MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;
 	
@@ -61,9 +49,6 @@ public class EmpleadoResource {
             }
         }
     }
-<<<<<<< HEAD
-
-=======
 	
 	@PUT
 	@Path("/actualizar/{idPersona}")
@@ -89,7 +74,6 @@ public class EmpleadoResource {
 	    }
 	}
 
->>>>>>> develop
 	@POST
     @Path("/registrar")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
@@ -163,30 +147,6 @@ public class EmpleadoResource {
         }
     }
     
-<<<<<<< HEAD
-    @GET
-    @Path("/dni/{dni}")
-    public Response buscarPorDni(@PathParam("dni") String dni) {
-
-        try {
-            HashMap<String, Object> persona = empleadoService.buscarPorDni(dni);
-            return Response.ok(persona).build();
-
-        } catch (IllegalArgumentException e) {
-            return Response.status(Response.Status.BAD_REQUEST)
-                    .entity("{\"error\":\"" + e.getMessage() + "\"}")
-                    .build();
-
-        } catch (RuntimeException e) {
-            return Response.status(Response.Status.NOT_FOUND)
-                    .entity("{\"error\":\"" + e.getMessage() + "\"}")
-                    .build();
-
-        } catch (Exception e) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("{\"error\":\"Error interno del servidor\"}")
-                    .build();
-=======
 	@GET
 	@Path("/dni/{dni}")
 	public Response buscarPorDni(@PathParam("dni") String dni) {
@@ -352,98 +312,6 @@ public class EmpleadoResource {
             return Response.ok(resultado).build();
         } catch (Exception e) {
             return Response.status(404).entity("{\"error\": \"" + e.getMessage() + "\"}").build();
->>>>>>> develop
-        }
-    }
-    
-    @POST
-    @Path("/contrato-existente")
-    @Consumes(MediaType.MULTIPART_FORM_DATA) 
-    public Response registrarEmpleadoExisteCompleto(
-            @QueryParam("idAdmin") int idAdmin, 
-            @FormDataParam("data") String requestJsonString,
-            @FormDataParam("pdfFirmado") InputStream pdfInputStream,
-            @FormDataParam("pdfFirmado") FormDataContentDisposition pdfFileDetail,
-            @FormDataParam("imagenEmpleado") InputStream imagenInputStream,
-            @FormDataParam("imagenEmpleado") FormDataContentDisposition imagenFileDetail
-    ) {
-        
-        File pdfTempFile = null;
-        File imagenTempFile = null;
-        EmpleadoExisteCompletoRequest request = null; 
-
-        try {
-            if (requestJsonString == null || requestJsonString.trim().isEmpty()) {
-                return Response.status(Response.Status.BAD_REQUEST).entity("{\"message\":\"Datos JSON del empleado obligatorios.\"}").build();
-            }
-            if (idAdmin <= 0) {
-                return Response.status(Response.Status.BAD_REQUEST).entity("{\"message\":\"El ID del administrador (idAdmin) es obligatorio y debe ser mayor a cero.\"}").build();
-            }
-            
-            request = objectMapper.readValue(requestJsonString, EmpleadoExisteCompletoRequest.class);
-            
-            if (pdfInputStream == null || pdfFileDetail == null) {
-                return Response.status(Response.Status.BAD_REQUEST).entity("{\"message\":\"El archivo PDF firmado es obligatorio.\"}").build();
-            }
-            String pdfFileName = pdfFileDetail.getFileName();
-            if (pdfFileName == null || pdfFileName.isEmpty() || !pdfFileName.toLowerCase().endsWith(".pdf")) {
-                return Response.status(Response.Status.BAD_REQUEST).entity("{\"message\":\"El archivo debe ser de tipo PDF válido.\"}").build();
-            }
-            long pdfFileSize = pdfFileDetail.getSize();
-            if (pdfFileSize > MAX_FILE_SIZE_BYTES) {
-                 String errorMessage = String.format("El PDF excede el tamaño máximo permitido de 10 MB. Tamaño actual: %.2f MB", 
-                                                    pdfFileSize / (1024.0 * 1024.0));
-                 return Response.status(Response.Status.BAD_REQUEST).entity("{\"message\":\"" + errorMessage + "\"}").build();
-            }
-            
-            if (imagenInputStream == null || imagenFileDetail == null) {
-                return Response.status(Response.Status.BAD_REQUEST).entity("{\"message\":\"La imagen del empleado es obligatoria.\"}").build();
-            }
-            String imagenFileName = imagenFileDetail.getFileName();
-            if (imagenFileName == null || imagenFileName.isEmpty()) {
-                 return Response.status(Response.Status.BAD_REQUEST).entity("{\"message\":\"La imagen del empleado debe tener un nombre de archivo.\"}").build();
-            }
-            long imagenFileSize = imagenFileDetail.getSize();
-            if (imagenFileSize > MAX_FILE_SIZE_BYTES) {
-                 String errorMessage = String.format("La Imagen excede el tamaño máximo permitido de 10 MB. Tamaño actual: %.2f MB", 
-                                                    imagenFileSize / (1024.0 * 1024.0));
-                 return Response.status(Response.Status.BAD_REQUEST).entity("{\"message\":\"" + errorMessage + "\"}").build();
-            }
-            
-            pdfTempFile = File.createTempFile("pdf_contrato_", "_" + pdfFileName);
-            copyStreamToFile(pdfInputStream, pdfTempFile);
-            
-            imagenTempFile = File.createTempFile("img_empleado_", "_" + imagenFileName);
-            copyStreamToFile(imagenInputStream, imagenTempFile);
-
-            int idEmpleadoGenerado = empleadoService.registrarEmpleadoExisteCompleto(
-                    request, 
-                    pdfTempFile, 
-                    pdfFileDetail,
-                    imagenTempFile,
-                    imagenFileDetail,
-                    idAdmin
-            );
-
-            if (idEmpleadoGenerado > 0) {
-                 return Response.ok().entity("{\"message\":\"Empleado y contrato registrados correctamente. ID Empleado: " + idEmpleadoGenerado + "\"}").build();
-            } else {
-                 return Response.status(Response.Status.BAD_REQUEST).entity("{\"message\":\"No se pudo registrar el empleado y contrato. Verifique logs para detalles.\"}")
-                                .build();
-            }
-
-        } catch (Exception e) {
-            System.err.println("Error en EmpleadoResource: " + e.getMessage());
-
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("{\"message\":\"Error interno del servidor durante el registro: " + e.getMessage() + "\"}").build();
-        } finally {
-            if (pdfTempFile != null && pdfTempFile.exists()) {
-                pdfTempFile.delete();
-            }
-            if (imagenTempFile != null && imagenTempFile.exists()) {
-                imagenTempFile.delete();
-            }
         }
     }
 }

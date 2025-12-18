@@ -65,8 +65,5 @@ public class PedidoPresencial {
     public void setEstado(String estado) {
         this.estado = estado;
     }
-<<<<<<< HEAD
+
 }
-=======
-}
->>>>>>> develop
