@@ -2,7 +2,7 @@
 import { Box, Button, Card, CardActions, CardContent, Typography } from "@mui/material";
 import type { TipoContrato } from "../types/contrato.type";
 import { useState } from "react";
-import { useRemoveContrato, useUpdateContrato, useGetAllContrato } from "../services/contrato.service";
+import { useRemoveContrato, useUpdateContrato, useGetAllContrato, useUpdateContratoEstado } from "../services/contrato.service";
 import EditModalContrato from "./Modals/EditModalContrato";
 
 interface Props {
@@ -15,8 +15,12 @@ export default function CardContrato({ contrato }: Props) {
   const { mutate: removeContrato } = useRemoveContrato();
   const { mutate: updateContrato } = useUpdateContrato();
   const { refetch } = useGetAllContrato();
+  const { mutate: toggleEstadoMutate } = useUpdateContratoEstado();
+  
 
   const handleRemove = () => {
+        if (!contrato.idTipoContrato) return;
+
     removeContrato(contrato.idTipoContrato, {
       onSuccess: () => {
         refetch();
@@ -25,6 +29,24 @@ export default function CardContrato({ contrato }: Props) {
       onError: () => alert("Error al eliminar contrato"),
     });
   };
+
+
+
+  const toggleEstado = () => {
+  const nuevoEstado = contrato.estadoTipoContrato === "activo" ? "inactivo" : "activo";
+
+  toggleEstadoMutate(
+    { id: contrato.idTipoContrato!, estado: nuevoEstado },
+    {
+      onSuccess: () =>{   
+        refetch();
+        alert(`Sucursal ${nuevoEstado === "activo" ? "activada" : "desactivada"}`);
+    }
+      ,
+      onError: () => alert("Error al actualizar el estado"),
+    }
+  );
+};
 
   const handleEditSubmit = (data: TipoContrato) => {
     const { idTipoContrato, ...updateData } = data;
@@ -53,12 +75,26 @@ export default function CardContrato({ contrato }: Props) {
 
         <CardActions>
           <Box sx={{ display: "flex", gap: 1 }}>
-            <Button size="small" color="error" variant="contained" onClick={handleRemove}>
+
+
+            { contrato.estadoTipoContrato==="activo" &&(
+              <Button size="small" color="error" variant="contained" onClick={handleRemove}>
               Eliminar
             </Button>
+            )
+          }
+              <Button variant="contained" color={contrato.estadoTipoContrato === "activo" ? "warning" : "success"} onClick={toggleEstado}>
+              {contrato.estadoTipoContrato === "activo" ? "Desactivar" : "Activar"}
+            </Button> 
+
+            { contrato.estadoTipoContrato==="activo" &&(
             <Button size="small" color="primary" variant="contained" onClick={() => setOpenEdit(true)}>
               Editar
             </Button>
+            )
+          }
+
+
           </Box>
         </CardActions>
       </Card>

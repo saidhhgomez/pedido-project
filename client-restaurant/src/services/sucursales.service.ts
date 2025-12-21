@@ -8,6 +8,12 @@ function getAllSucursales() {
   return axiosClient.get(PATH);
 }
 
+
+
+function getAllSucursalesActivas() {
+  return axiosClient.get(`${PATH}/activas`);
+}
+
 function getSucursalId(id: number) {
   return axiosClient.get(`${PATH}/${id}`);
 }
@@ -24,10 +30,26 @@ function deleteSucursal(id: number) {
   return axiosClient.delete(`${PATH}/${id}`);
 }
 
+
+
+// Función que hace PATCH al backend
+function updateSucursalEstado  ({ id, estado }: { id: number; estado: "activo" | "inactivo" }){
+  return axiosClient.put(`${PATH}/${id}/estado`, { estado });
+
+}
+
+
+
 // Hooks
 export function useGetAllSucursales() {
   return useQuery({ queryKey: ["getAllSucursales"], queryFn: getAllSucursales });
 }
+
+export function useGetAllSucursalesActivas() {
+  return useQuery({ queryKey: ["getAllSucursalesActivas"], queryFn: getAllSucursalesActivas });
+}
+
+
 
 export function useGetSucursalId(id?: number | null) {
   return useQuery({
@@ -36,6 +58,9 @@ export function useGetSucursalId(id?: number | null) {
     enabled: !!id,
   });
 }
+
+
+
 
 export function useCreateSucursal() {
   return useMutation({ mutationFn: createSucursal, mutationKey: ["createSucursal"] });
@@ -47,4 +72,12 @@ export function useUpdateSucursal() {
 
 export function useRemoveSucursal() {
   return useMutation({ mutationFn: deleteSucursal, mutationKey: ["deleteSucursal"] });
+}
+
+
+export function useUpdateSucursalEstado() {
+  return useMutation({
+    mutationFn: updateSucursalEstado,
+    mutationKey: ["updateSucursalEstado"],
+  });
 }

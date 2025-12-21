@@ -1,100 +1,137 @@
-import React, { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import {
-  Box,
-  Typography,
-  Button,
-  Card,
-  CardContent,
-  Divider,
-  TextField,
-  CircularProgress,
-} from "@mui/material";
+import { useState } from "react";
+import { Box, Grid, Button, Avatar, Typography, Card, CardContent, CardActions } from "@mui/material";
+import { useGetEmpleadoHistorialCompleto, useGetEmpleadoActivosVencimiento, useRemoveEmpleado } from "../../services/empleado.service";
+import DeleteIcon from "@mui/icons-material/Delete";
+import Swal from "sweetalert2";
 
-export default function Historial() {
-  const [idUsuario, setIdUsuario] = useState<number | "">("");
+export default function HistorialAdmin() {
+  const [mostrarActivosVencidos, setMostrarActivosVencidos] = useState(false);
 
-  // 1️⃣ Traer todos los pedidos automáticamente
-  const { data: pedidos, isLoading: loadingAll } = useQuery(["historial"], getHistorial);
+  // Queries
+  const historialCompletoQuery = useGetEmpleadoHistorialCompleto();
+  const activosVencidosQuery = useGetEmpleadoActivosVencimiento();
+  const eliminarBajaEmpleado=useRemoveEmpleado();
 
-  // 2️⃣ Buscar pedido por ID usando useQuery
-  const {
-    data: pedido,
-    isLoading: loadingId,
-    refetch: buscarPorId,
-  } = useQuery(
-    ["pedido", idUsuario],
-    () => getPedidoById(Number(idUsuario)),
-    {
-      enabled: false, // no se ejecuta automáticamente
-      retry: false,   // no reintenta automáticamente
+  const empleados = mostrarActivosVencidos
+    ? activosVencidosQuery.data?.data || []
+    : historialCompletoQuery.data?.data || [];
+
+  const isLoading = mostrarActivosVencidos
+    ? activosVencidosQuery.isLoading
+    : historialCompletoQuery.isLoading;
+
+
+
+      // -------------------- Eliminar mesa --------------------
+const handleEliminar = (idEmpleado: number) => {
+  Swal.fire({
+    title: "¿Eliminar empleado?",
+    text: "Esta acción no se puede deshacer",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#d33",
+    cancelButtonColor: "#3085d6",
+    confirmButtonText: "Sí, eliminar",
+    cancelButtonText: "Cancelar",
+  }).then((result) => {
+    if (result.isConfirmed) {
+      // Aquí usamos .mutate()
+      eliminarBajaEmpleado.mutate(idEmpleado, {
+        onSuccess: () => {
+          // Refrescar los datos después de eliminar
+          historialCompletoQuery.refetch();
+          activosVencidosQuery.refetch();
+
+          Swal.fire({
+            icon: "success",
+            title: "Empleado eliminado",
+            showConfirmButton: false,
+            timer: 1200,
+          });
+        },
+        onError: () => {
+          Swal.fire({
+            icon: "error",
+            title: "Error al eliminar empleado",
+            showConfirmButton: false,
+            timer: 1200,
+          });
+        },
+      });
     }
-  );
+  });
+};
+
+
+  if (isLoading) return <Typography>Cargando empleados...</Typography>;
 
   return (
-    <Box sx={{ p: 4 }}>
-      <Typography variant="h4" gutterBottom>
-        Historial de Pedidos
-      </Typography>
+    <Box p={2}>
+      <Typography variant="h4" mb={2}>Historial de Empleados</Typography>
 
-      {/* Input y botón para buscar por ID */}
-      <Box sx={{ display: "flex", gap: 2, mb: 3 }}>
-        <TextField
-          label="Buscar Pedido por ID"
-          value={idUsuario}
-          onChange={(e) => setIdUsuario(e.target.value === "" ? "" : Number(e.target.value))}
-          type="number"
-        />
+      <Box mb={2}>
         <Button
           variant="contained"
-          color="primary"
-          onClick={() => buscarPorId()} // dispara la query
+          onClick={() => setMostrarActivosVencidos(!mostrarActivosVencidos)}
         >
-          Buscar
+          {mostrarActivosVencidos ? "Mostrar Historial Completo" : "Mostrar Activos/Vencidos"}
         </Button>
       </Box>
 
-      {/* Resultado de la búsqueda */}
-      <Box sx={{ mb: 4 }}>
-        <Typography variant="h5" gutterBottom>
-          Resultado de la búsqueda
-        </Typography>
-        {loadingId ? (
-          <CircularProgress />
-        ) : pedido ? (
-          <Card variant="outlined">
-            <CardContent>
-              <Typography variant="subtitle1">Pedido ID: {pedido.id}</Typography>
-              <Divider sx={{ my: 1 }} />
-              <Typography variant="body2">Fecha: {pedido.fecha}</Typography>
-              <Typography variant="body2">Total: S/ {pedido.total}</Typography>
-            </CardContent>
-          </Card>
-        ) : (
-          <Typography variant="body2">No se ha buscado ningún pedido aún.</Typography>
-        )}
-      </Box>
-
-      {/* Historial general */}
-      <Typography variant="h5" gutterBottom>
-        Todos los Pedidos
-      </Typography>
-      {loadingAll ? (
-        <CircularProgress />
-      ) : (
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-          {pedidos?.map((p: any) => (
-            <Card key={p.id} variant="outlined">
+      <Grid container spacing={2}>
+        {empleados.map((emp: any) => (
+          <Grid item xs={12} sm={6} md={4} key={emp.idEmpleado}>
+            <Card>
               <CardContent>
-                <Typography variant="subtitle1">Pedido #{p.id}</Typography>
-                <Divider sx={{ my: 1 }} />
-                <Typography variant="body2">Fecha: {p.fecha}</Typography>
-                <Typography variant="body2">Total: S/ {p.total}</Typography>
+                <Grid container spacing={1} alignItems="center">
+                  <Grid item>
+                    <Avatar src={emp.fotoUrl} alt={emp.nombre} sx={{ width: 56, height: 56 }} />
+                  </Grid>
+                  <Grid item>
+                    <Typography variant="h6">{emp.nombre}</Typography>
+                    <Typography variant="body2">DNI: {emp.dni}</Typography>
+                    <Typography variant="body2">Rol: {emp.rol}</Typography>
+                    <Typography variant="body2">Sucursal: {emp.sucursal}</Typography>
+                    <Typography variant="body2">Estado Empleado: {emp.estadoEmpleado}</Typography>
+                    <Typography variant="body2">Estado Contrato: {emp.estadoContrato}</Typography>
+                    <Typography variant="body2">Inicio: {emp.fechaInicio}</Typography>
+                    <Typography variant="body2">Fin: {emp.fechaFin}</Typography>
+                  </Grid>
+                </Grid>
               </CardContent>
+              <CardActions>
+                {emp.pdfDownloadUrl && (
+                  <Button
+                    variant="outlined"
+                    color="primary"
+                    href={emp.pdfDownloadUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Descargar PDF
+                  </Button>
+                )}
+
+                {emp.estadoEmpleado==="activo"&&
+
+                   <Button
+                      variant="contained"
+                      color="error"
+                      size="small"
+                      startIcon={<DeleteIcon />}
+                      onClick={() => handleEliminar(emp.idEmpleado)}
+                    >
+                      Eliminar
+                    </Button>
+
+
+                }
+
+              </CardActions>
             </Card>
-          ))}
-        </Box>
-      )}
+          </Grid>
+        ))}
+      </Grid>
     </Box>
   );
 }

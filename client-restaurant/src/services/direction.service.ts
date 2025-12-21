@@ -12,10 +12,10 @@ function deleteDireccion(id:string){
 return axiosClient.delete(`${PATH}/eliminar/${id}`);
 }
 
- function createDireccion(payload:DireccionPayload ) {
+ function createDireccion(direccioncrear:DireccionPayload ) {
   return axiosClient.post(
     "rest-restaurant-api/api/direccion/registrar",
-    payload
+    direccioncrear
   );
 }
 

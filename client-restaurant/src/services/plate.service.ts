@@ -24,6 +24,16 @@ export const createPlate = (formData: FormData) => {
     return axiosClient.put(`${PATH}/${id}`, data);
   }
 
+async function actualizarEstadoCatalogo(id: number, activo: boolean) {
+  // enviamos el estado como query param
+  const response = await axiosClient.put(
+    `${PATH}/${id}/estado`, 
+    {}, 
+    { params: { activo } }
+  );
+  return response.data; // { message: "Plato desactivado correctamente" }
+}
+
 
 function deletePlate(id:number){
 return axiosClient.delete(`${PATH}/${id}`);
@@ -34,6 +44,19 @@ export const useCreatePlate = () =>
   useMutation({
     mutationFn: (formData: FormData) => createPlate(formData),
   });
+
+
+  function getAllPlateDisponible(){
+    return axiosClient.get(`${PATH}/disponibles`);
+
+  }
+
+export function useGetPlateDisponible(){
+  return useQuery({
+        queryFn:getAllPlateDisponible,
+    queryKey:["getAllPlateDisponible"],
+  });
+}
 
 
 
@@ -55,6 +78,17 @@ export function useRemovePlate(){
   );
 }
 
+// hooks/useCatalogo.ts
+
+
+  export function useActualizarEstadoCatalogo() {
+
+    return useMutation({
+      mutationFn: ({ id, activo }: { id: number; activo: boolean }) =>
+        actualizarEstadoCatalogo(id, activo),
+
+    });
+  }
 
 export function useUpdatePlate() {
   return useMutation({

@@ -1,6 +1,7 @@
 export interface MesaForm {
-  idSucursal: number;
-  numeroMesa: string;
   capacidad: number;
   ubicacion: string;
+  estado: string;
+  numeroMesa: string;
+  idSucursal: number;
 }

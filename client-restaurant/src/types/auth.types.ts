@@ -1,25 +1,37 @@
-// Roles permitidos según backend
-export type Rol = "cliente" | "empleado";
-
-// Usuario que viene del backend
+// auth.types.ts
 export interface Usuario {
-  idCliente: number | null;
-  idEmpleado: number | null;
+  idPersona: number;
   nombre: string;
-  rol: Rol;
+  correo: string;
+  fotoUrl: string;
+  rolPrincipal: string; // 👈 AQUÍ vive el rol
 }
 
-// Respuesta del login
+export interface PerfilCliente {
+  idCliente: number;
+  categoria: string;
+}
+
+export interface PerfilEmpleado {
+  idEmpleado: number;
+  idSucursal: number;
+  estado: string;
+  nombreSucursal: string | null;
+}
+
 export interface LoginResponse {
+  status: string;
   token: string;
   usuario: Usuario;
+  perfilCliente?: PerfilCliente;
+  perfilEmpleado?: PerfilEmpleado;
 }
 
-// Estado global de autenticación (Redux)
 export interface AuthState {
   token: string | null;
-  rol: Rol | null;
-  nombre: string | null;
-  idCliente: number | null;
-  idEmpleado: number | null;
+  status: string | null;
+
+  usuario: Usuario | null;
+  perfilCliente: PerfilCliente | null;
+  perfilEmpleado: PerfilEmpleado | null;
 }

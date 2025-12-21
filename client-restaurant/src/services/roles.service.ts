@@ -28,6 +28,15 @@ function deleteRol(id: number) {
   return axiosClient.delete(`${PATH}/${id}`);
 }
 
+
+// Función que hace PATCH al backend
+function updateRolesEstado  ({ id, estado }: { id: number; estado: "activo" | "inactivo" }){
+  return axiosClient.put(`${PATH}/${id}/estado`, { estado });
+
+}
+
+
+
 /* Hooks */
 export function useGetAllRoles() {
   return useQuery({ queryKey: ["getAllRoles"], queryFn: getAllRoles });
@@ -46,4 +55,12 @@ export function useUpdateRol() {
 
 export function useRemoveRol() {
   return useMutation({ mutationFn: deleteRol });
+}
+
+
+export function useUpdateRolesEstado() {
+  return useMutation({
+    mutationFn: updateRolesEstado,
+    mutationKey: ["updateRolesEstado"],
+  });
 }

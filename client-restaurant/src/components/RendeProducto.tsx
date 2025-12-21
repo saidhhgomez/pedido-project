@@ -1,27 +1,46 @@
-import { useState } from 'react'; // ← AGREGAR ESTE IMPORT
+import { useState } from 'react';
 import Card from '@mui/material/Card';
 import CardActions from '@mui/material/CardActions';
 import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
 import { Box, Button, CardActionArea, CardMedia } from '@mui/material';
 import { useSelector, useDispatch } from 'react-redux';
-import { selectIdCliente, selectIdEmpleado } from '../store/slices/auth.slice';
 import { selectCart, addItem, decreaseItem } from '../store/slices/cart.slice';
 import type { Plate } from '../types/Plate.type';
-import { useGetPlate, useRemovePlate } from '../services/plate.service';
-import FormModalPlate from './Modals/ModalProducto'; // ← AGREGAR ESTE IMPORT (ajusta la ruta según tu estructura)
+import { useActualizarEstadoCatalogo, useGetPlate, useRemovePlate } from '../services/plate.service';
+import FormModalPlate from './Modals/ModalProducto';
+import { selectPerfilCliente, selectPerfilEmpleado, selectUsuario } from '../store/slices/auth.slice';
 
 export default function CardPlate({ Plate }: { Plate: Plate }) {
-  const [openEdit, setOpenEdit] = useState(false); // ← AGREGAR ESTE ESTADO
+  const [openEdit, setOpenEdit] = useState(false);
   
-  const idEmpleado = useSelector(selectIdEmpleado);
-  const idCliente = useSelector(selectIdCliente);
+  const idEmpleado = useSelector(selectPerfilEmpleado);
+  const idCliente = useSelector(selectPerfilCliente);
+  
+  const { mutate: actualizarEstadoMutate, isPending: isUpdating } = useActualizarEstadoCatalogo();
+  const { mutate: removePlate } = useRemovePlate();
+  const { refetch } = useGetPlate();
+  const usuario=useSelector(selectUsuario);
 
   const cart = useSelector(selectCart);
   const dispatch = useDispatch();
 
-  const { mutate: removePlate } = useRemovePlate();
-  const { refetch } = useGetPlate();
+  // Toggle estado del plato
+  const toggleEstado = () => {
+    actualizarEstadoMutate(
+      { id: Plate.idCatalogo, activo: !Plate.estadoplato },
+      {
+        onSuccess: () => {
+          refetch();
+          alert(`Catálogo ${!Plate.estadoplato ? "activado" : "desactivado"}`);
+        },
+        onError: (error) => {
+          console.error(error);
+          alert("Error al actualizar el estado");
+        },
+      }
+    );
+  };
 
   // Cantidad actual en el carrito
   const cartItem = cart.find(item => item.idProducto === Plate.idCatalogo);
@@ -62,8 +81,12 @@ export default function CardPlate({ Plate }: { Plate: Plate }) {
   };
 
   return (
+
+    
     <>
-      <Card sx={{ maxWidth:250 }}>
+
+    
+      <Card sx={{ maxWidth: 250 }}>
         <CardActionArea>
           <CardMedia
             component="img"
@@ -81,49 +104,90 @@ export default function CardPlate({ Plate }: { Plate: Plate }) {
             <Typography variant="body2" color="text.secondary">{Plate.categoria}</Typography>
             <Typography variant="body2" color="text.secondary">S/ {Plate.precio}</Typography>
             <Typography variant="body2" color="text.secondary">Stock: {Plate.stock}</Typography>
+            {idEmpleado != null &&
+
+                          <Typography variant="body2" color="text.secondary">
+              Estado: {Plate.estadoplato ? "Activo" : "Inactivo"}
+            </Typography>
+            }
+
           </CardContent>
         </CardActionArea>
 
-        <Box sx={{ display: "flex", gap: 1, p: 1, alignItems: "center" }}>
+        <Box sx={{ display: "flex", gap: 1, p: 1, alignItems: "center", flexWrap: "wrap" }}>
           {/* Botones para empleado */}
-          {idEmpleado != null && (
+          {idEmpleado != null  && usuario?.rolPrincipal.toLowerCase() === "admin" &&(
             <>
-              <Button size="small" variant="contained" color="error" onClick={handleRemove}>
-                Eliminar
-              </Button>
-              <Button 
-                size="small" 
-                variant="contained" 
-                color="primary" 
-                onClick={() => setOpenEdit(true)} // ← YA FUNCIONARÁ
-              >
-                Editar
-              </Button>
-            </>
-          )}
-
-          {/* Botones para cliente */}
-          {idCliente != null && (
-            <>
-              {cantidad === 0 ? (
-                <Button size="small" variant="contained" onClick={handleAdd}>
-                  Agregar
-                </Button>
-              ) : (
+              {/* Botones Eliminar y Editar: solo si está ACTIVO */}
+              {Plate.estadoplato && (
                 <>
-                  <Button size="small" variant="contained" onClick={handleDecrease}>-</Button>
-                  <Typography sx={{ minWidth: 20, textAlign: "center" }}>{cantidad}</Typography>
-                  <Button size="small" variant="contained" onClick={handleIncrease}>+</Button>
+                  <Button 
+                    size="small" 
+                    variant="contained" 
+                    color="error" 
+                    onClick={handleRemove}
+                  >
+                    Eliminar
+                  </Button>
+                  
+                  <Button 
+                    size="small" 
+                    variant="contained" 
+                    color="primary" 
+                    onClick={() => setOpenEdit(true)}
+                  >
+                    Editar
+                  </Button>
                 </>
               )}
+
+              {/* Botón de Activar/Desactivar: siempre visible */}
+{/* Botón solo visible si el plato está inactivo */}
+{!Plate.estadoplato && (
+  <Button
+    size="small"
+    variant="contained"
+    color="success"
+    onClick={toggleEstado}
+    disabled={isUpdating}
+  >
+    {isUpdating ? "..." : "Activar"}
+  </Button>
+)}
+
             </>
           )}
+
+
+
+          {/* Botones para cliente: solo si el plato está ACTIVO */}
+            {(idCliente !=null || usuario?.rolPrincipal.toLowerCase()==="mesero" ) &&(
+              <>
+                {cantidad === 0 ? (
+                  <Button size="small" variant="contained" onClick={handleAdd}>
+                    Agregar
+                  </Button>
+                ) : (
+                  <>
+                    <Button size="small" variant="contained" onClick={handleDecrease}>
+                      -
+                    </Button>
+                    <Typography sx={{ minWidth: 20, textAlign: "center" }}>
+                      {cantidad}
+                    </Typography>
+                    <Button size="small" variant="contained" onClick={handleIncrease}>
+                      +
+                    </Button>
+                  </>
+                )}
+              </>
+            )}
         </Box>
 
-        <CardActions></CardActions>
+        <CardActions />
       </Card>
 
-      {/* ← AGREGAR EL MODAL DE EDICIÓN */}
+      {/* Modal de edición */}
       <FormModalPlate
         open={openEdit}
         onClose={() => setOpenEdit(false)}

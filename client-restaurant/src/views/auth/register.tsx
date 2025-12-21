@@ -50,19 +50,22 @@ export default function Register() {
 
   const doRegister = (data: RegistrarClienteDTO) => {
     mutate(data, {
-      onSuccess: () => {
+      onSuccess: (reponse) => {
         Swal.fire({
           icon: "success",
-          title: "Cliente registrado",
+          title: reponse.data.message,
           timer: 1500,
           showConfirmButton: false,
         });
         navigate("/");
       },
-      onError: () => {
+      onError: (err) => {
+
+
+        console.log(err);
         Swal.fire({
           icon: "error",
-          title: "Error al registrar",
+          title: err.message,
           timer: 1500,
           showConfirmButton: false,
         });

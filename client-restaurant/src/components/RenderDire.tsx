@@ -7,7 +7,7 @@ import CardActions from '@mui/material/CardActions';
 import { useGetDirecciones, useRemoveDireccion } from '../services/direction.service';
 import type { Direccion } from '../views/client/direction';
 import { useSelector } from 'react-redux';
-import { selectIdCliente } from '../store/slices/auth.slice';
+import { selectPerfilCliente } from '../store/slices/auth.slice';
 
 
 
@@ -15,16 +15,17 @@ import { selectIdCliente } from '../store/slices/auth.slice';
 
 export default function MediaCard({Direccion}: {Direccion : Direccion}) {
   const { mutate} =useRemoveDireccion();
-  const idcliente=useSelector(selectIdCliente);
-  const {refetch}=useGetDirecciones(idcliente);
+  const idcliente=useSelector(selectPerfilCliente);
+  const {refetch}=useGetDirecciones(idcliente?.idCliente);
   
   const DoRemoveDireccion= ()=>{
     mutate(Direccion.idDireccion, {
       onSuccess: ()=>{
         refetch();
         alert("Se elimino exitosamente")
-      },onError:()=>{
-        alert("Error en eliminar")
+      },onError:(err)=>{
+        console.log(err.message)
+        alert(err.message)
       }
   
 

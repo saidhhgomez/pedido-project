@@ -1,4 +1,3 @@
-// FormModalMesa.tsx
 import React from "react";
 import { Box, Button, Modal, TextField, Typography } from "@mui/material";
 import { useForm } from "react-hook-form";
@@ -10,7 +9,7 @@ export interface MesaForm {
   numeroMesa: string;
   capacidad: number;
   ubicacion: string;
-  idSucursal?: number; // se agrega internamente, no se muestra en el form
+  idSucursal?: number; // se agrega internamente
 }
 
 // -------------------- PROPS --------------------
@@ -21,32 +20,52 @@ interface Props {
 }
 
 // -------------------- VALIDACIÓN --------------------
+
+// función reutilizable para NO permitir solo espacios
+const noSoloEspacios = (mensaje: string) =>
+  yup
+    .string()
+    .transform((value) => value?.trim())
+    .required(mensaje)
+    .test(
+      "no-solo-espacios",
+      mensaje,
+      (value) => !!value && value.length > 0
+    );
+
 const mesaSchema = yup.object({
   numeroMesa: yup
-    .string()
+    .number()
+    .typeError("Ingrese solo números")
     .required("Ingrese el número de mesa")
-    .trim()
-    .min(1, "No puede estar vacío"),
+    .integer("El número de mesa debe ser entero")
+    .positive("El número de mesa debe ser positivo"),
   capacidad: yup
     .number()
     .typeError("Ingrese un número válido")
     .required("Ingrese la capacidad")
     .min(1, "La capacidad debe ser al menos 1"),
-  ubicacion: yup
-    .string()
-    .required("Ingrese la ubicación")
-    .trim()
-    .min(1, "No puede estar vacía"),
+
+  ubicacion: noSoloEspacios("Ingrese la ubicación"),
 });
 
+// -------------------- COMPONENTE --------------------
 export default function FormModalMesa({ open, onClose, onSubmit }: Props) {
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<MesaForm>({
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<MesaForm>({
     resolver: yupResolver(mesaSchema),
-    defaultValues: { numeroMesa: "", capacidad: 1, ubicacion: "" },
+    defaultValues: {
+      numeroMesa: "",
+      capacidad: 1,
+      ubicacion: "",
+    },
   });
 
   const enviar = (data: MesaForm) => {
-    // agregamos idSucursal desde localStorage
     const idSucursal = Number(localStorage.getItem("idSucursal") || 0);
     onSubmit({ ...data, idSucursal });
     reset();
@@ -68,17 +87,23 @@ export default function FormModalMesa({ open, onClose, onSubmit }: Props) {
   return (
     <Modal open={open} onClose={onClose}>
       <Box sx={style}>
-        <Typography variant="h6" mb={2}>Crear Mesa</Typography>
+        <Typography variant="h6" mb={2}>
+          Crear Mesa
+        </Typography>
 
-        <form onSubmit={handleSubmit(enviar)}>
+        <form onSubmit={handleSubmit(enviar)} noValidate>
           {/* Número de Mesa */}
           <TextField
+
             label="Número de Mesa"
             fullWidth
             {...register("numeroMesa")}
             error={!!errors.numeroMesa}
             helperText={errors.numeroMesa?.message}
-            sx={{ mb: 2 }}
+sx={{
+  mb: 2,
+}}
+
           />
 
           {/* Capacidad */}
@@ -89,7 +114,22 @@ export default function FormModalMesa({ open, onClose, onSubmit }: Props) {
             {...register("capacidad", { valueAsNumber: true })}
             error={!!errors.capacidad}
             helperText={errors.capacidad?.message}
-            sx={{ mb: 2 }}
+sx={{
+  mb: 2,
+
+  "& input[type=number]": {
+    MozAppearance: "textfield", // Firefox
+  },
+  "& input[type=number]::-webkit-outer-spin-button": {
+    WebkitAppearance: "none",
+    margin: 0,
+  },
+  "& input[type=number]::-webkit-inner-spin-button": {
+    WebkitAppearance: "none",
+    margin: 0,
+  },
+}}
+
           />
 
           {/* Ubicación */}
@@ -103,9 +143,13 @@ export default function FormModalMesa({ open, onClose, onSubmit }: Props) {
           />
 
           {/* Botones */}
-          <Box sx={{ display: "flex", justifyContent: "end", gap: 1 }}>
-            <Button onClick={onClose} color="error">Cancelar</Button>
-            <Button type="submit" variant="contained">Guardar</Button>
+          <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1 }}>
+            <Button onClick={onClose} color="error">
+              Cancelar
+            </Button>
+            <Button type="submit" variant="contained">
+              Guardar
+            </Button>
           </Box>
         </form>
       </Box>

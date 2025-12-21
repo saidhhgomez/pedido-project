@@ -32,12 +32,48 @@ export interface ActualizarPersonaPayload {
 }
 
 // Función que llama al endpoint PUT /empleado/actualizar/{id}
-export function actualizarPersona(id: number, payload: ActualizarPersonaPayload) {
+ function actualizarPersona(id: number, payload: ActualizarPersonaPayload) {
   return axiosClient.put(
     `rest-restaurant-api/api/empleado/actualizar/${id}`,
     payload
   );
 }
+
+ function getEmpleadoActivosVencimiento() {
+  return axiosClient.get(
+    `rest-restaurant-api/api/empleado/activos-vencimiento`,
+    
+  );
+}
+
+
+export function useGetEmpleadoActivosVencimiento() {
+  return useQuery({
+    queryKey: ["getEmpleadoActivosVencimiento"],
+    queryFn: getEmpleadoActivosVencimiento,
+  });
+}
+
+
+// Función que llama al endpoint PUT /empleado/actualizar/{id}
+ function getEmpleadoHistorialCompleto() {
+  return axiosClient.get(
+    `rest-restaurant-api/api/empleado/historial-completo`,
+    
+  );
+}
+
+
+export function useGetEmpleadoHistorialCompleto() {
+  return useQuery({
+    queryKey: ["getEmpleadoHistorialCompleto"],
+    queryFn: getEmpleadoHistorialCompleto,
+  });
+}
+
+
+
+
 
 // Hook para usar la mutación en React
 export function useActualizarPersona() {
@@ -45,4 +81,21 @@ export function useActualizarPersona() {
     mutationFn: ({ id, data }: { id: number; data: ActualizarPersonaPayload }) =>
       actualizarPersona(id, data),
   });
+}
+
+
+
+function deleteEmpleado(id:number){
+return axiosClient.delete(`rest-restaurant-api/api/empleado/baja/${id}`);
+}
+
+
+
+export function useRemoveEmpleado(){
+  return useMutation(
+  {
+    mutationFn: deleteEmpleado,
+    mutationKey:["deleteEmpleado"]
+  }
+  );
 }

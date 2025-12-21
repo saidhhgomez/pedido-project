@@ -33,6 +33,8 @@ import { useGetAllRoles } from "../../services/roles.service";
 import { useGetAllContrato } from "../../services/contrato.service";
 
 import EmpleadoPdf from "../../pdf/EmpleadoPdf";
+import { selectPerfilEmpleado } from "../../store/slices/auth.slice";
+import { useSelector } from "react-redux";
 
 /* ================= STEPS ================= */
 const stepsNuevo = [
@@ -60,6 +62,7 @@ export default function RegistroEmpleadoStepper() {
   const [dniBusqueda, setDniBusqueda] = useState("");
   const [modoEdicion, setModoEdicion] = useState(false);
   const [personaEditada, setPersonaEditada] = useState(false);
+  const [alertaMostrada, setAlertaMostrada] = useState(false);
 
   const [empleadoData, setEmpleadoData] = useState<any>({});
   const [pdfFirmado, setPdfFirmado] = useState<File | null>(null);
@@ -84,6 +87,7 @@ export default function RegistroEmpleadoStepper() {
   const { data: sucursales } = useGetAllSucursales();
   const { data: roles } = useGetAllRoles();
   const { data: tiposContrato } = useGetAllContrato();
+  const idEmpleado = useSelector(selectPerfilEmpleado);
 
   const crearNuevoFD = useCrearEmpleadoNuevoFormData();
   const crearExistenteFD = useCrearEmpleadoContratoExistenteFormData();
@@ -176,6 +180,10 @@ export default function RegistroEmpleadoStepper() {
       console.log("   - dniData?.idPersona:", dniData?.idPersona);
     }
   }, [watch, tipoFlujo, modoEdicion, dniData]);
+
+
+
+  
 
   /* ================= HELPERS ================= */
   const textoPorId = (lista: any[], id: number, idKey: string, textKey: string) =>
@@ -409,7 +417,7 @@ export default function RegistroEmpleadoStepper() {
               },
             };
 
-      const payload = { data: jsonFinal, pdfFirmado, imagenEmpleado };
+      const payload = { idAdmin:idEmpleado?.idEmpleado  ,data: jsonFinal, pdfFirmado, imagenEmpleado };
       const mutation = tipoFlujo === "EXISTENTE" ? crearExistenteFD : crearNuevoFD;
 
       mutation.mutate(payload, {
@@ -460,7 +468,7 @@ export default function RegistroEmpleadoStepper() {
           <Box sx={{ mt: 2 }}>
             {dniData?.idPersona ? (
               <>
-                <Typography>Persona encontrada</Typography>
+                <Typography variant="h5" >Persona encontrada</Typography>
                 <Button
                   variant="contained"
                   onClick={() => setTipoFlujo("EXISTENTE")}

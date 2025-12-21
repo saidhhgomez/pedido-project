@@ -1,14 +1,16 @@
 import { Box, Button, Modal, TextField, Typography, MenuItem } from "@mui/material";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { useEffect } from "react";
+
 import type { Sucursal } from "../../types/sucursales.type";
 import { sucursalSchema } from "../../validators/sucursal.schema";
 
 interface Props {
   open: boolean;
   onClose: () => void;
-  onSubmit: (data: Sucursal) => void;
-  initialData?: Sucursal; // opcional para editar
+  onSubmit: (data: Partial<Sucursal>) => void; // 👈 IMPORTANTE
+  initialData?: Sucursal;
 }
 
 const style = {
@@ -23,22 +25,52 @@ const style = {
   p: 4,
 };
 
-export default function FormModalSucursal({ open, onClose, onSubmit, initialData }: Props) {
-  const { control, register, handleSubmit, reset, formState: { errors } } = useForm<Sucursal>({
-    defaultValues: initialData || { estado: "activo" },
+export default function FormModalSucursal({
+  open,
+  onClose,
+  onSubmit,
+  initialData,
+}: Props) {
+  const {
+    control,
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<Sucursal>({
     resolver: yupResolver(sucursalSchema),
   });
 
+  // 🔹 SINCRONIZA CON API
+  useEffect(() => {
+    if (initialData) {
+      reset(initialData); // edición
+    } else {
+      reset({}); // creación (sin estado)
+    }
+  }, [initialData, reset]);
+
   const enviar = (data: Sucursal) => {
-    onSubmit(data);
-    reset();
+    if (!initialData) {
+      // 🟢 CREAR → eliminar estado
+      const { estado, ...dataSinEstado } = data;
+      onSubmit(dataSinEstado);
+    } else {
+      // 🟢 EDITAR → enviar completo
+      onSubmit(data);
+    }
+
+    reset({});
     onClose();
   };
 
   return (
     <Modal open={open} onClose={onClose}>
       <Box sx={style}>
-        <Typography variant="h6">{initialData ? "Editar Sucursal" : "Registrar Sucursal"}</Typography>
+        <Typography variant="h6" mb={2}>
+          {initialData ? "Editar Sucursal" : "Registrar Sucursal"}
+        </Typography>
+
         <form onSubmit={handleSubmit(enviar)}>
           <TextField
             label="Nombre"
@@ -46,48 +78,56 @@ export default function FormModalSucursal({ open, onClose, onSubmit, initialData
             {...register("nombre")}
             error={!!errors.nombre}
             helperText={errors.nombre?.message}
-            sx={{ mt: 2 }}
+            sx={{ mb: 2 }}
           />
+
           <TextField
             label="Dirección"
             fullWidth
             {...register("direccion")}
             error={!!errors.direccion}
             helperText={errors.direccion?.message}
-            sx={{ mt: 2 }}
+            sx={{ mb: 2 }}
           />
+
           <TextField
             label="Teléfono"
             fullWidth
             {...register("telefono")}
             error={!!errors.telefono}
             helperText={errors.telefono?.message}
-            sx={{ mt: 2 }}
+            sx={{ mb: 2 }}
           />
+          {/* SOLO EN EDICIÓN 
+          {initialData && (
+            <Controller
+              name="estado"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  select
+                  label="Estado"
+                  fullWidth
+                  {...field}
+                  error={!!errors.estado}
+                  helperText={errors.estado?.message}
+                  sx={{ mb: 2 }}
+                >
+                  <MenuItem value="activo">Activo</MenuItem>
+                  <MenuItem value="inactivo">Inactivo</MenuItem>
+                </TextField>
+              )}
+            />
+          )}
+            */}
 
-          <Controller
-            name="estado"
-            control={control}
-            defaultValue={initialData?.estado || "activo"}
-            render={({ field }) => (
-              <TextField
-                select
-                label="Estado"
-                fullWidth
-                {...field}
-                error={!!errors.estado}
-                helperText={errors.estado?.message}
-                sx={{ mt: 2 }}
-              >
-                <MenuItem value="activo">Activo</MenuItem>
-                <MenuItem value="inactivo">Inactivo</MenuItem>
-              </TextField>
-            )}
-          />
-
-          <Box sx={{ mt: 3, display: "flex", justifyContent: "end", gap: 1 }}>
-            <Button onClick={onClose} color="error">Cancelar</Button>
-            <Button type="submit" variant="contained">{initialData ? "Actualizar" : "Guardar"}</Button>
+          <Box display="flex" justifyContent="flex-end" gap={1} mt={2}>
+            <Button onClick={onClose} color="error">
+              Cancelar
+            </Button>
+            <Button type="submit" variant="contained">
+              {initialData ? "Actualizar" : "Guardar"}
+            </Button>
           </Box>
         </form>
       </Box>

@@ -28,6 +28,13 @@ function getAllContrato() {
 }
 
 
+// Función que hace PATCH al backend
+function updateContratoEstado  ({ id, estado }: { id: number; estado: "activo" | "inactivo" }){
+  return axiosClient.put(`${PATH}/${id}/estado`, { estado });
+
+}
+
+
 
 export function useGetAllContrato(){
   return useQuery({
@@ -68,5 +75,13 @@ export function useUpdateContrato() {
   return useMutation({
     mutationFn: updateContrato,
     mutationKey: ["updateContrato"],
+  });
+}
+
+
+export function useUpdateContratoEstado() {
+  return useMutation({
+    mutationFn: updateContratoEstado,
+    mutationKey: ["updateContratoEstado"],
   });
 }

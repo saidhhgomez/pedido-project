@@ -6,34 +6,34 @@ import axiosFormData from "./api.service.file";
 // ==============================
 
 export interface CrearEmpleadoNuevoFD {
-  data: any; // JSON COMPLETO (credenciales + persona + empleado + contrato)
+  data: any;
   pdfFirmado: File;
   imagenEmpleado: File;
+  idAdmin: number;
 }
 
+
 export interface CrearEmpleadoExistenteFD {
-  data: any; // JSON (persona.idPersona + empleado + contrato)
+  data: any;
   pdfFirmado: File;
   imagenEmpleado: File;
+  idAdmin: number;
 }
+
 
 // ==============================
 // EMPLEADO NUEVO (FormData)
 // POST /api/empleado/registrar?idAdmin=1
 // ==============================
-
-export function crearEmpleadoNuevoFormData(payload: CrearEmpleadoNuevoFD) {
+function crearEmpleadoNuevoFormData(payload: CrearEmpleadoNuevoFD) {
   const formData = new FormData();
 
-  // JSON
   formData.append("data", JSON.stringify(payload.data));
-
-  // Archivos
   formData.append("pdfFirmado", payload.pdfFirmado);
   formData.append("imagenEmpleado", payload.imagenEmpleado);
 
   return axiosFormData.post(
-    "rest-restaurant-api/api/empleado/registrar?idAdmin=1",
+    `rest-restaurant-api/api/empleado/registrar?idAdmin=${payload.idAdmin}`,
     formData
   );
 }
@@ -49,20 +49,17 @@ export function useCrearEmpleadoNuevoFormData() {
 // POST /api/empleado/contrato-existente?idAdmin=1
 // ==============================
 
-export function crearEmpleadoContratoExistenteFormData(
+function crearEmpleadoContratoExistenteFormData(
   payload: CrearEmpleadoExistenteFD
 ) {
   const formData = new FormData();
 
-  // JSON
   formData.append("data", JSON.stringify(payload.data));
-
-  // Archivos
   formData.append("pdfFirmado", payload.pdfFirmado);
   formData.append("imagenEmpleado", payload.imagenEmpleado);
 
   return axiosFormData.post(
-    "rest-restaurant-api/api/empleado/contrato-existente?idAdmin=1",
+    `rest-restaurant-api/api/empleado/contrato-existente?idAdmin=${payload.idAdmin}`,
     formData
   );
 }

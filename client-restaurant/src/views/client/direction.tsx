@@ -5,8 +5,8 @@ import FormModal from "../../components/Modals/ModalDirection";
 import { useState } from "react";
 import type { DireccionForm } from "../../types/direction.type";
 import Swal from "sweetalert2";
-import { selectIdCliente } from "../../store/slices/auth.slice";
 import { useSelector } from "react-redux";
+import { selectPerfilCliente } from "../../store/slices/auth.slice";
 
   export interface Direccion {
     idDireccion:string,
@@ -19,17 +19,17 @@ import { useSelector } from "react-redux";
 
 
   export default function MyDirection() {
-    const idcliente=useSelector(selectIdCliente);
+    const idcliente=useSelector(selectPerfilCliente);
     const [open, setOpen] = useState(false);
     const {mutate}=useCreateDirection();
 
-      const {data,refetch}=useGetDirecciones(idcliente);
+      const {data,refetch}=useGetDirecciones(idcliente?.idCliente);
 
 
 
         const Submit = (data: DireccionForm) => {
       mutate({...data,
-        idCliente:idcliente,
+        idCliente:idcliente?.idCliente,
       },{
         onSuccess: ()=>{
           refetch();

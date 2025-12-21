@@ -64,23 +64,6 @@ export default function FormModalEditRol({ open, onClose, onSubmit, initialData 
             sx={{ mt: 2 }}
           />
 
-          <Controller
-            name="estadoRol"
-            control={control}
-            render={({ field }) => (
-              <TextField
-                select
-                fullWidth
-                label="Estado"
-                {...field}
-                sx={{ mt: 2 }}
-              >
-                <MenuItem value="activo">Activo</MenuItem>
-                <MenuItem value="inactivo">Inactivo</MenuItem>
-              </TextField>
-            )}
-          />
-
           <Box sx={{ mt: 3, display: "flex", justifyContent: "end", gap: 1 }}>
             <Button color="error" onClick={onClose}>Cancelar</Button>
             <Button type="submit" variant="contained">Actualizar</Button>

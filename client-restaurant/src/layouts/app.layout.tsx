@@ -18,13 +18,13 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import MailIcon from '@mui/icons-material/Mail';
 import { Link, Outlet } from 'react-router';
-import { selectNombre } from '../store/slices/auth.slice';
 import { useDispatch, useSelector } from 'react-redux';
 import IconLogout from '@mui/icons-material/Logout';
 import HomeIcon from '@mui/icons-material/Home';
-import {logout}  from "../../src/store/slices/auth.slice";
+import {logout, selectUsuario}  from "../../src/store/slices/auth.slice";
 import EditSquareIcon from '@mui/icons-material/EditSquare';
 import letras from "../assets/letra.png"; // 👈 TU LOGO
+import { Avatar } from '@mui/material';
 
 
 const drawerWidth = 240;
@@ -90,7 +90,8 @@ const DrawerHeader = styled('div')(({ theme }) => ({
 
 export default function PersistentDrawerLeft() {
 
-  const nombres=useSelector(selectNombre);
+  const nombres=useSelector(selectUsuario);
+  
 
 
   const theme = useTheme();
@@ -131,20 +132,44 @@ export default function PersistentDrawerLeft() {
             <MenuIcon />
           </IconButton>
                     {/* LOGO + NOMBRE */}
-          <Box sx={{ display: "flex", alignItems: "center", flexGrow: 1, gap: 1 }}>
-            <Box
-              component="img"
-              src={letras}
-              alt="logo"
-              sx={{
-                width: 120,
-                height: 50,
-              }}
-            />
-            <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-              Cliente {nombres}
-            </Typography>
-          </Box>
+<Box
+  sx={{
+    display: "flex",
+    alignItems: "center",
+    flexGrow: 1,
+    justifyContent: "space-between", // 🔹 separa logo de avatar
+  }}
+>
+  {/* Logo */}
+  <Box
+    component="img"
+    src={letras}
+    alt="logo"
+    sx={{
+      width: 120,
+      height: 50,
+    }}
+  />
+
+{/* Avatar con nombre */}
+<Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+  <Link to={"/Perfil"} style={{ display: "flex", alignItems: "center", textDecoration: "none", color: "inherit" }}>
+    <Avatar
+      alt={nombres?.nombre}
+      src={nombres?.fotoUrl} // URL de la imagen
+    >
+      {nombres?.nombre?.[0]} {/* Si no hay imagen, muestra la primera letra */}
+    </Avatar>
+    <Typography variant="h6" sx={{ fontWeight: "bold", ml: 1 }}>
+      {nombres?.nombre}
+    </Typography>
+  </Link>
+</Box>
+
+</Box>
+
+
+
 
         </Toolbar>
       </AppBar>
@@ -189,16 +214,7 @@ export default function PersistentDrawerLeft() {
               </ListItemButton>
             </ListItem>
           </Link>
-          <Link to={"/catalogo"}>
-                                <ListItem  disablePadding>
-              <ListItemButton>
-                <ListItemIcon>
-                  <EditSquareIcon />
-                </ListItemIcon>
-                <ListItemText primary={"Catalogo"} />
-              </ListItemButton>
-            </ListItem>
-            </Link>
+
         </List>
 
 

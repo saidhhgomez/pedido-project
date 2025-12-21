@@ -33,6 +33,8 @@ Swal.fire({
   };
 
   return (
+
+    
     <Box>
       <Button variant="contained" onClick={() => setOpenCreate(true)}>Nuevo Método de Pago</Button>
 

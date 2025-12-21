@@ -4,6 +4,7 @@ import Direction from "../views/client/direction";
 import Page404 from "../views/404";
 import ClientLayout from "../layouts/cliente.layout";
 import ResumenPedido from "../views/client/resumenPedido";
+import PerfilCliente from "../views/client/PerfilCliente";
 
 
 export default function AppRoutes() {
@@ -11,6 +12,8 @@ export default function AppRoutes() {
     <Routes>
       <Route path="/" element={<ClientLayout />}>
         <Route path="/" element={<Home />} />
+        <Route path="/perfil" element={<PerfilCliente />} />
+
         <Route path="/resumenPedido" element={<ResumenPedido />} />
         <Route path="/direction" element={<Direction />} />
         <Route path="*" element={<Page404 />} />

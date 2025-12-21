@@ -6,6 +6,7 @@ export interface Plate {
   precio: number;
   stock: number;
   imagenPlatoUrl: string;
+  estadoplato:boolean
 }
 
 // FORM (crear / editar)

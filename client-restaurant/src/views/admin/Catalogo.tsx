@@ -12,7 +12,7 @@ export default function Catalogo() {
       const [open, setOpen] = useState(false);
     const {mutate} =useCreatePlate();
       
-            const Submit = (data: PlateEit) => {
+            const Submit = (data: any) => {
           mutate(data
           ,{
             onSuccess: ()=>{
@@ -41,6 +41,7 @@ Swal.fire({
   return (
     <>
       <h1>Catalgo De Platos</h1>
+
 
     <Button variant="contained" onClick={() => setOpen(true)}>
         Agregar plato

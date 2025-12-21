@@ -3,7 +3,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 
 
 
-const PATH="/rest-restaurant-api/api/mesas/"
+const PATH="/rest-restaurant-api/api/mesas"
 
  function createMesa(data:any ) {
   return axiosClient.post(
@@ -22,27 +22,76 @@ export function useCreateMesa(){
 }
 
 
- function getAllMesa () {
+function deleteMesa(id:number){
+return axiosClient.delete(`${PATH}/${id}`);
+}
+
+ function getAllMesaAdmin (idMesa: number) {
   return axiosClient.get(
-    `${PATH}gestion`,
+    `${PATH}/admin/${idMesa}`,
   );
 }
 
 
-export function useGetMesa() {
+
+ function getAllMesaMesero (idSucursal: any) {
+  return axiosClient.get(
+    `${PATH}/mesero/${idSucursal}`,
+  );
+}
+
+
+
+export function useGetMesaMesero(idSucursal: any) {
   return useQuery({
-    queryKey: ["getAllMesa"], 
-    queryFn: getAllMesa,
+    queryKey: ["mesas-mesero", idSucursal],
+    queryFn: () => getAllMesaMesero(idSucursal).then(res => res.data),
+    refetchInterval: 5000, // se actualiza solo cada 5s
   });
 }
 
 
 
-export const updateMesa = async (id: number, data: any) => {
-  return axiosClient.put(`${PATH}/admin/${id}`, data);
-};
+
+
+
+export function useDeleteMesa(){
+  return useMutation(
+  {
+    mutationFn: deleteMesa,
+    mutationKey:["deleteMesa"]
+  }
+  );
+}
+
+
+
+
+export function useGetMesaById(idMesa?: number) {
+  return useQuery({
+    queryKey: ["getMesaById", idMesa],
+    queryFn: () => getAllMesaAdmin(idMesa!),
+    enabled: !!idMesa,
+  });
+}
+
+
+
+
+function updateMesa({
+  id,
+  data,
+}: {
+  id: number;
+  data: any;
+}) {
+  return axiosClient.put(`${PATH}/${id}`, data);
+}
+
 
 
 export const useUpdateMesa = () => {
-  return useMutation(updateMesa);
+  return useMutation({
+    mutationFn: updateMesa,
+  });
 };

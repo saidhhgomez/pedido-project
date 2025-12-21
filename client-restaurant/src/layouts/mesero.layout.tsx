@@ -26,7 +26,7 @@ const StyledBadge = styled(Badge)<BadgeProps>(({ theme }) => ({
   },
 }));
 
-export default function ButtonAppBar() {
+export default function MeseroLayout() {
   const dispatch = useDispatch();
   const nombres = useSelector(selectUsuario);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -54,13 +54,14 @@ export default function ButtonAppBar() {
                 height: 50,
               }}
             />
+            <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+              Mesero {nombres?.nombre}
+            </Typography>
           </Box>
-
-
 
           {/* Avatar con nombre */}
 <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-  <Link to={"/Perfil"} style={{ display: "flex", alignItems: "center", textDecoration: "none", color: "inherit" }}>
+  <Link to={"/perfil"} style={{ display: "flex", alignItems: "center", textDecoration: "none", color: "inherit" }}>
     <Avatar
       alt={nombres?.nombre}
       src={nombres?.fotoUrl} // URL de la imagen
@@ -74,18 +75,10 @@ export default function ButtonAppBar() {
 </Box>
 
 
-          <IconButton onClick={() => setDrawerOpen(true)} aria-label="cart">
-            <StyledBadge badgeContent={totalItems} color="secondary">
-              <ShoppingCartIcon />
-            </StyledBadge>
-          </IconButton>
 
-          <Link to={"/"}>
-            <Button color="inherit">Home</Button>
-          </Link>
-          <Link to={"/direction"}>
-            <Button color="inherit">Direccion</Button>
-          </Link>
+
+
+          
 
           <Button onClick={doLogout} color="inherit">Cerrar Session</Button>
         </Toolbar>
