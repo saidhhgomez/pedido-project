@@ -12,7 +12,6 @@ import Mesa from "../views/admin/Mesa";
 import MesaSucusales from "../views/admin/MesaSucursal";
 import Historial from "../views/admin/Historial";
 import PerfilAdmin from "../views/admin/PerfilAdmin";
-import PedidoPresencial from "../views/admin/PedidoPresencial";
 
 export default function AdminRoutes() {
   return (
@@ -28,8 +27,6 @@ export default function AdminRoutes() {
         <Route path="/MetodoPago" element={<MetodoPagoAdmin />} />
         <Route path="/AdminEmp" element={<AdminEmp/>} />
         <Route path="/Perfil" element={<PerfilAdmin/>} />
-        <Route path="/pedidoPresencial" element={<PedidoPresencial/>} />
-
         <Route path="*" element={<Page404 />} />
       </Route>
     </Routes>
