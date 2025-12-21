@@ -9,6 +9,16 @@ function getAllRoles() {
   return axiosClient.get<Rol[]>(PATH);
 }
 
+/* Requests */
+function getAllRolesActivos() {
+  return axiosClient.get<Rol[]>(`${PATH}/activos`);
+}
+
+export function useGetAllRolesActivos() {
+  return useQuery({ queryKey: ["getAllRolesActivos"], queryFn: getAllRolesActivos });
+}
+
+
 function createRol(payload: Rol) {
   return axiosClient.post(PATH, {
     nombre: payload.nombre,

@@ -1,6 +1,5 @@
   import { useState, useEffect } from "react";
   import { useNavigate, useParams } from "react-router";
-  import DeleteIcon from "@mui/icons-material/Delete";
 
   import {
     Box,

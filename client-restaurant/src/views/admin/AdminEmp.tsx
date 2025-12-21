@@ -34,7 +34,7 @@ import {
   useCrearEmpleadoContratoExistenteFormData,
 } from "../../services/empleado.formdata.service";
 import { useGetAllSucursales } from "../../services/sucursales.service";
-import { useGetAllRoles } from "../../services/roles.service";
+import { useGetAllRolesActivos } from "../../services/roles.service";
 import { useGetAllContrato } from "../../services/contrato.service";
 
 import EmpleadoPdf from "../../pdf/EmpleadoPdf";
@@ -91,7 +91,7 @@ export default function RegistroEmpleadoStepper() {
 
   const { data: dniData } = useBuscarPorDni(dniBusqueda);
   const { data: sucursales } = useGetAllSucursales();
-  const { data: roles } = useGetAllRoles();
+  const { data: roles } = useGetAllRolesActivos();
   const { data: tiposContrato } = useGetAllContrato();
   const idEmpleado = useSelector(selectPerfilEmpleado);
 
