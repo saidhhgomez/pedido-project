@@ -5,3 +5,9 @@ export interface Sucursal {
   telefono: string;
   estado: "activo" | "inactivo";
 }
+
+export interface SucursalForm{
+  nombre: string;
+  direccion: string;
+  telefono: string;
+}

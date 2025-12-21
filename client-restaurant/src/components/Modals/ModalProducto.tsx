@@ -8,6 +8,7 @@ import { useEffect } from "react";
 import { plateSchemaCreate, plateSchemaEdit } from "../../validators/plate.schema"; // ← CAMBIAR ESTE IMPORT
 import type { PlateForm, PlateDTO, Plate } from "../../types/Plate.type";
 import { useCreatePlate, useUpdatePlate, useGetPlate } from "../../services/plate.service";
+import Swal from "sweetalert2";
 
 interface Props {
   open: boolean;
@@ -162,18 +163,30 @@ export default function FormModalPlate({ open, onClose, plateToEdit = null }: Pr
       console.log("🔍 Imagen:", data.imagenPlato[0]?.name);
 
       createMutate(formData, {
-        onSuccess: (response) => {
-          console.log("✅ Plato creado - Response:", response);
-          toast.success("✅ Plato registrado correctamente");
+        onSuccess: (responses) => {
+  
+
           refetch();
           reset();
           onClose();
+
+
+          Swal.fire({
+  position: "center",
+  icon: "success",
+  title: "Plato exitoso",
+  showConfirmButton: false,
+  timer: 1500
+});
         },
-        onError: (error: any) => {
-          console.error("❌ Error al crear:", error);
-          const mensaje =
-            error?.response?.data?.message || "❌ Error al registrar el plato";
-          toast.error(mensaje);
+        onError: (error) => {
+Swal.fire({
+  position: "center",
+  icon: "error",
+  title: error.message,
+  showConfirmButton: false,
+  timer: 1500
+});
         },
       });
     }

@@ -3,6 +3,7 @@ import { useState } from "react";
 import type { Sucursal } from "../types/sucursales.type";
 import { useRemoveSucursal, useUpdateSucursal, useGetAllSucursales, useUpdateSucursalEstado } from "../services/sucursales.service";
 import FormModalSucursal from "./Modals/FormModalSucursal";
+import Swal from "sweetalert2";
 
 export default function CardSucursal({ sucursal }: { sucursal: Sucursal }) {
   const [openEdit, setOpenEdit] = useState(false);
@@ -25,8 +26,22 @@ const { mutate: toggleEstadoMutate } = useUpdateSucursalEstado();
         onSuccess: () => {
           refetch();
           setOpenEdit(false);
-          alert("Sucursal editada");
-        }
+       Swal.fire({
+  position: "center",
+  icon: "success",
+  title: "Sucursal Editada",
+  showConfirmButton: false,
+  timer: 1500
+});        },onError:(err)=>{
+         Swal.fire({
+    position: "center",
+    icon: "success",
+    title: err
+    .message,
+    showConfirmButton: false,
+    timer: 1500
+  });
+}
       }
     );
   };
@@ -40,10 +55,9 @@ const toggleEstado = () => {
     {
       onSuccess: () =>{   
         refetch();
-        alert(`Sucursal ${nuevoEstado === "activo" ? "activada" : "desactivada"}`);
     }
       ,
-      onError: () => alert("Error al actualizar el estado"),
+      onError: () => {}
     }
   );
 };

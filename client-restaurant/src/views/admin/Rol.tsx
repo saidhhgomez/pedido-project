@@ -16,19 +16,22 @@ export default function RenderRol() {
 
   const handleCreate = (data: Rol) => {
     create(data, {
-      onSuccess: () => {
+      onSuccess: (suss) => {
         refetch();
 Swal.fire({
   position: "center",
   icon: "success",
-  title: "Rol registrado",
+  title: suss.data?.mensaje,
   showConfirmButton: false,
   timer: 1500
-});      },onError: ()=>{
+});      },onError: (err)=>{
+
+
+  console.log(err)
   Swal.fire({
   position: "center",
   icon: "error",
-  title: "Rol No Registrado",
+  title: err.response.data.mensaje,
   showConfirmButton: false,
   timer: 1500
 });

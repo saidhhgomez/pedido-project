@@ -19,6 +19,11 @@ import { useForm, Controller } from "react-hook-form";
 import Swal from "sweetalert2";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
+import dayjs from 'dayjs';
+import 'dayjs/locale/es';
 
 import {
   useBuscarPorDni,
@@ -36,6 +41,9 @@ import EmpleadoPdf from "../../pdf/EmpleadoPdf";
 import { selectPerfilEmpleado } from "../../store/slices/auth.slice";
 import { useSelector } from "react-redux";
 
+// Configurar dayjs en español
+dayjs.locale('es');
+
 /* ================= STEPS ================= */
 const stepsNuevo = [
   "Credenciales",
@@ -44,7 +52,6 @@ const stepsNuevo = [
   "Vista Previa PDF",
   "Subir PDF Firmado",
   "Subir Imagen",
-  "Confirmar",
 ];
 
 const stepsExistente = [
@@ -53,7 +60,6 @@ const stepsExistente = [
   "Vista Previa PDF",
   "Subir PDF Firmado",
   "Subir Imagen",
-  "Confirmar",
 ];
 
 export default function RegistroEmpleadoStepper() {
@@ -181,9 +187,23 @@ export default function RegistroEmpleadoStepper() {
     }
   }, [watch, tipoFlujo, modoEdicion, dniData]);
 
-
-
-  
+  /* ================= MOSTRAR ALERTA CUANDO NO PUEDE CONTRATAR ================= */
+  useEffect(() => {
+    if (dniData?.idPersona && !dniData?.puedeContratar && !alertaMostrada) {
+      Swal.fire({
+        icon: "warning",
+        title: "No se puede contratar",
+        text: dniData?.mensajeEstado || "Esta persona no puede ser contratada en este momento",
+        confirmButtonText: "Entendido"
+      });
+      setAlertaMostrada(true);
+    }
+    
+    // Resetear la alerta cuando se limpia la búsqueda
+    if (dniBusqueda.length !== 8) {
+      setAlertaMostrada(false);
+    }
+  }, [dniData, alertaMostrada, dniBusqueda]);
 
   /* ================= HELPERS ================= */
   const textoPorId = (lista: any[], id: number, idKey: string, textKey: string) =>
@@ -463,18 +483,38 @@ export default function RegistroEmpleadoStepper() {
           value={dniBusqueda}
           onChange={(e) => setDniBusqueda(e.target.value)}
           fullWidth
+          onKeyPress={(e) => {
+            if (!/[0-9]/.test(e.key)) {
+              e.preventDefault();
+            }
+          }}
+          inputProps={{
+            maxLength: 8,
+            inputMode: 'numeric',
+            pattern: '[0-9]*'
+          }}
         />
         {dniBusqueda.length === 8 && (
           <Box sx={{ mt: 2 }}>
             {dniData?.idPersona ? (
               <>
-                <Typography variant="h5" >Persona encontrada</Typography>
-                <Button
-                  variant="contained"
-                  onClick={() => setTipoFlujo("EXISTENTE")}
-                >
-                  Agregar Persona como Empleado
-                </Button>
+                <Typography variant="h5">Persona encontrada</Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ mt: 1, mb: 2 }}>
+                  {dniData.nombreCompleto}
+                </Typography>
+                
+                {dniData.puedeContratar ? (
+                  <Button
+                    variant="contained"
+                    onClick={() => setTipoFlujo("EXISTENTE")}
+                  >
+                    Agregar Persona como Empleado
+                  </Button>
+                ) : (
+                  <Typography variant="body2" color="error" sx={{ mt: 2 }}>
+                    ❌ {dniData.mensajeEstado || "No se puede contratar a esta persona"}
+                  </Typography>
+                )}
               </>
             ) : (
               <>
@@ -624,6 +664,16 @@ export default function RegistroEmpleadoStepper() {
               helperText={errors.numDocumento?.message}
               fullWidth
               disabled={tipoFlujo === "EXISTENTE" && !modoEdicion}
+              onKeyPress={(e) => {
+                if (!/[0-9]/.test(e.key)) {
+                  e.preventDefault();
+                }
+              }}
+              inputProps={{
+                maxLength: 8,
+                inputMode: 'numeric',
+                pattern: '[0-9]*'
+              }}
             />
             <TextField
               label="Nombres"
@@ -688,6 +738,16 @@ export default function RegistroEmpleadoStepper() {
               helperText={errors.telefono?.message}
               fullWidth
               disabled={tipoFlujo === "EXISTENTE" && !modoEdicion}
+              onKeyPress={(e) => {
+                if (!/[0-9]/.test(e.key)) {
+                  e.preventDefault();
+                }
+              }}
+              inputProps={{
+                maxLength: 9,
+                inputMode: 'numeric',
+                pattern: '[0-9]*'
+              }}
             />
             <TextField
               label="Correo"
@@ -783,21 +843,56 @@ export default function RegistroEmpleadoStepper() {
                 </TextField>
               )}
             />
+            <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="es">
+              <Controller
+                name="fechaInicio"
+                control={control}
+                rules={{ required: "Fecha inicio obligatoria" }}
+                render={({ field }) => (
+                  <DateTimePicker
+                    label="Fecha Inicio"
+                    value={field.value ? dayjs(field.value) : null}
+                    onChange={(newValue) => {
+                      field.onChange(newValue ? newValue.format('YYYY-MM-DDTHH:mm') : '');
+                    }}
+                    slotProps={{
+                      textField: {
+                        fullWidth: true,
+                        error: !!errors.fechaInicio,
+                        helperText: errors.fechaInicio?.message,
+                        InputProps: {
+                          readOnly: true,
+                        },
+                      },
+                      field: {
+                        readOnly: true,
+                      },
+                    }}
+                  />
+                )}
+              />
+            </LocalizationProvider>
             <TextField
-              type="datetime-local"
-              label="Fecha Inicio"
-              {...register("fechaInicio", { required: "Fecha inicio obligatoria" })}
-              error={!!errors.fechaInicio}
-              helperText={errors.fechaInicio?.message}
-              fullWidth
-            />
-            <TextField
-              type="number"
               label="Salario"
-              {...register("salario", { required: "Salario obligatorio" })}
+              {...register("salario", { 
+                required: "Salario obligatorio",
+                min: { value: 0, message: "El salario debe ser mayor a 0" }
+              })}
               error={!!errors.salario}
               helperText={errors.salario?.message}
               fullWidth
+              onKeyPress={(e) => {
+                if (!/[0-9.]/.test(e.key)) {
+                  e.preventDefault();
+                }
+              }}
+              InputProps={{
+                startAdornment: <InputAdornment position="start">S/</InputAdornment>,
+              }}
+              inputProps={{
+                inputMode: 'decimal',
+                pattern: '[0-9]*[.]?[0-9]*'
+              }}
             />
           </>
         )}
@@ -814,41 +909,118 @@ export default function RegistroEmpleadoStepper() {
 
         {/* ================== STEP: Subir PDF firmado ================== */}
         {(tipoFlujo === "NUEVO" ? 4 : 3) === activeStep && (
-          <input
-            type="file"
-            accept="application/pdf"
-            onChange={(e) => setPdfFirmado(e.target.files?.[0] || null)}
-          />
+<Box>
+  <Typography variant="h6" sx={{ mb: 2 }}>
+    Subir PDF Firmado
+  </Typography>
+
+  <TextField
+    fullWidth
+    type="file"
+    inputProps={{ accept: "application/pdf" }}
+    onChange={(e) => setPdfFirmado(e.target.files?.[0] || null)}
+    sx={{
+      height: 150,
+      "& .MuiInputBase-root": {
+        height: "100%",
+        alignItems: "center",
+      },
+      "& input": {
+        height: "100%",
+        cursor: "pointer",
+      },
+    }}
+  />
+
+  {pdfFirmado && (
+    <Box sx={{ mt: 2, p: 2, border: "1px solid #ddd", borderRadius: 1 }}>
+      <Typography variant="body2" color="success.main">
+        ✅ PDF cargado: {pdfFirmado.name}
+      </Typography>
+      <Typography variant="caption" color="text.secondary">
+        Tamaño: {(pdfFirmado.size / 1024).toFixed(2)} KB
+      </Typography>
+    </Box>
+  )}
+</Box>
+
         )}
 
         {/* ================== STEP: Subir Imagen ================== */}
         {(tipoFlujo === "NUEVO" ? 5 : 4) === activeStep && (
-          <input
-            type="file"
-            accept="image/*"
-            onChange={(e) => setImagenEmpleado(e.target.files?.[0] || null)}
-          />
-        )}
+<Box>
+  <Typography variant="h6" sx={{ mb: 2 }}>
+    Subir Imagen del Empleado
+  </Typography>
 
-        {/* ================== STEP: Confirmar ================== */}
-        {(tipoFlujo === "NUEVO" ? 6 : 5) === activeStep && (
-          <Typography>Revisar todos los datos antes de enviar</Typography>
+  <TextField
+    fullWidth
+    type="file"
+    inputProps={{ accept: "image/*" }}
+    onChange={(e) => setImagenEmpleado(e.target.files?.[0] || null)}
+    sx={{
+      height: 150,
+      "& .MuiInputBase-root": {
+        height: "100%",
+        alignItems: "center",
+      },
+      "& input": {
+        height: "100%",
+        cursor: "pointer",
+      },
+      mb: 2,
+    }}
+  />
+
+  {imagenEmpleado && (
+    <Box sx={{ mt: 2 }}>
+      <Typography variant="body2" color="success.main" sx={{ mb: 1 }}>
+        ✅ Imagen cargada: {imagenEmpleado.name}
+      </Typography>
+
+      <Box
+        component="img"
+        src={URL.createObjectURL(imagenEmpleado)}
+        alt="Vista previa"
+        sx={{
+          width: 250,
+          height: 250,
+          objectFit: "cover",
+          border: "2px solid #ddd",
+          borderRadius: 1,
+          display: "block",
+        }}
+      />
+    </Box>
+  )}
+</Box>
+
         )}
 
         <Box sx={{ display: "flex", justifyContent: "space-between", mt: 3 }}>
-          <Button disabled={activeStep === 0} onClick={handleBack}>
+          <Button disabled={activeStep === 0 || loading} onClick={handleBack}>
             Volver
           </Button>
 
+          {/* Botón Siguiente solo si NO estamos en el último paso */}
           {activeStep < steps.length - 1 && (
-            <Button onClick={handleNext} disabled={siguienteDisabled()}>
+            <Button 
+              onClick={handleNext} 
+              disabled={siguienteDisabled() || loading}
+            >
               Siguiente
             </Button>
           )}
 
+          {/* Botón Finalizar en el último paso (Subir Imagen) */}
           {activeStep === steps.length - 1 && (
-            <Button type="submit" variant="contained">
-              Finalizar
+            <Button 
+              type="submit" 
+              variant="contained" 
+              color="success"
+              disabled={!pdfFirmado || !imagenEmpleado || loading}
+            >
+              Finalizar Registro
             </Button>
           )}
         </Box>

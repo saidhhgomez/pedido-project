@@ -1,4 +1,4 @@
-import type { Sucursal } from "../types/sucursales.type";
+import type { Sucursal, SucursalForm } from "../types/sucursales.type";
 import axiosClient from "./api.service";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
@@ -18,7 +18,7 @@ function getSucursalId(id: number) {
   return axiosClient.get(`${PATH}/${id}`);
 }
 
-function createSucursal(payload: Sucursal) {
+function createSucursal(payload: SucursalForm) {
   return axiosClient.post(PATH, payload);
 }
 

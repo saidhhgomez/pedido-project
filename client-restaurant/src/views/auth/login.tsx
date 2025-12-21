@@ -33,13 +33,6 @@ const doLogin = ({
     {
       onSuccess: (response) => {
 
-                Swal.fire({
-                  icon: "success",
-                  title: "Cliente registrado",
-                  timer: 1500,
-                  showConfirmButton: false,
-                });
-        console.log(response);
 
         dispatch(login(response.data)); // ✅
       },

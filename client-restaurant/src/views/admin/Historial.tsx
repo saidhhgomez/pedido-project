@@ -44,15 +44,15 @@ const handleEliminar = (idEmpleado: number) => {
 
           Swal.fire({
             icon: "success",
-            title: "Empleado eliminado",
+            title: "Empleado De Baja",
             showConfirmButton: false,
             timer: 1200,
           });
         },
-        onError: () => {
+        onError: (err) => {
           Swal.fire({
             icon: "error",
-            title: "Error al eliminar empleado",
+            title: err.response.data.mensaje,
             showConfirmButton: false,
             timer: 1200,
           });

@@ -17,7 +17,7 @@ import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import MailIcon from '@mui/icons-material/Mail';
-import { Link, Outlet } from 'react-router';
+import { Link, Outlet, useNavigate } from 'react-router';
 import { useDispatch, useSelector } from 'react-redux';
 import IconLogout from '@mui/icons-material/Logout';
 import HomeIcon from '@mui/icons-material/Home';
@@ -91,7 +91,7 @@ const DrawerHeader = styled('div')(({ theme }) => ({
 export default function PersistentDrawerLeft() {
 
   const nombres=useSelector(selectUsuario);
-  
+  const navigate=useNavigate();
 
 
   const theme = useTheme();
@@ -102,6 +102,9 @@ export default function PersistentDrawerLeft() {
 
   const doLogout = () => {
     dispatch(logout());
+    navigate("/")
+
+
   };
 
   const handleDrawerOpen = () => {
@@ -270,7 +273,7 @@ export default function PersistentDrawerLeft() {
                 <ListItemIcon>
                   <HomeIcon />
                 </ListItemIcon>
-                <ListItemText primary={"Contrato"} />
+                <ListItemText primary={"Jornada"} />
               </ListItemButton>
             </ListItem>
           </Link>
@@ -288,7 +291,7 @@ export default function PersistentDrawerLeft() {
 
         <Divider />
         <List>
-          <Link to={""}>
+          <Link to={"/"}>
                       <ListItem onClick={doLogout}  disablePadding>
               <ListItemButton>
                 <ListItemIcon>

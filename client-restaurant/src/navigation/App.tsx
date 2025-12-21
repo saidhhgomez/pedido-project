@@ -5,6 +5,7 @@ import Page404 from "../views/404";
 import ClientLayout from "../layouts/cliente.layout";
 import ResumenPedido from "../views/client/resumenPedido";
 import PerfilCliente from "../views/client/PerfilCliente";
+import HistorialPedidosCliente from "../views/client/historialPedido";
 
 
 export default function AppRoutes() {
@@ -13,6 +14,7 @@ export default function AppRoutes() {
       <Route path="/" element={<ClientLayout />}>
         <Route path="/" element={<Home />} />
         <Route path="/perfil" element={<PerfilCliente />} />
+                <Route path="/historial" element={<HistorialPedidosCliente />} />
 
         <Route path="/resumenPedido" element={<ResumenPedido />} />
         <Route path="/direction" element={<Direction />} />

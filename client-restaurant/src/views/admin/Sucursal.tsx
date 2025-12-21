@@ -16,7 +16,6 @@ export default function RenderSucursal() {
 
   const handleSubmit = (sucursal: Sucursal) => {
     if (editingSucursal) {
-      // Editar
       updateSucursal({ id: editingSucursal.idSucursal!, data: sucursal }, {
         onSuccess: () => { refetch(); 
           setEditingSucursal(undefined); 
@@ -37,10 +36,28 @@ export default function RenderSucursal() {
 }),
       });
     } else {
+
+      console.log(sucursal)
       // Crear
       createSucursal(sucursal, {
-        onSuccess: () => { refetch(); alert("Sucursal creada correctamente"); },
-        onError: () => alert("Error al crear la sucursal"),
+        onSuccess: () => { 
+          
+          refetch(); 
+          
+       Swal.fire({
+  position: "center",
+  icon: "success",
+  title: "Sucursal Registrada",
+  showConfirmButton: false,
+  timer: 1500
+});        },
+        onError: (err) => {       Swal.fire({
+  position: "center",
+  icon: "error",
+  title: err.message,
+  showConfirmButton: false,
+  timer: 1500
+});}
       });
     }
   };

@@ -28,11 +28,11 @@ Swal.fire({
   title: "Nuva Jornada registrada",
   showConfirmButton: false,
   timer: 1500
-});            },onError: ()=>{
+});            },onError: (err)=>{
   Swal.fire({
   position: "center",
   icon: "error",
-  title: "Jornada no registrada",
+  title: err.response.data.mensaje,
   showConfirmButton: false,
   timer: 1500
 });

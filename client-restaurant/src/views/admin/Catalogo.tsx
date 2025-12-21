@@ -12,10 +12,11 @@ export default function Catalogo() {
       const [open, setOpen] = useState(false);
     const {mutate} =useCreatePlate();
       
-            const Submit = (data: any) => {
+        const Submit = (data: any) => {
           mutate(data
           ,{
-            onSuccess: ()=>{
+            onSuccess: (res)=>{
+              console.log(res)
 Swal.fire({
   position: "center",
   icon: "success",
@@ -25,11 +26,11 @@ Swal.fire({
 });
               refetch();
               alert("Registro exitosamente");
-            },onError:()=>{
+            },onError:(error)=>{
               Swal.fire({
   position: "center",
   icon: "error",
-  title: "Plato no registrado",
+  title: error.response.data.mensaje,
   showConfirmButton: false,
   timer: 1500
 });

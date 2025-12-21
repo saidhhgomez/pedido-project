@@ -26,7 +26,7 @@ import {
   useCreateDirection,
   useGetDirecciones,
 } from "../../services/direction.service";
-import { useGetAllMetodosPago, useGetAllMetodosPagoActivo } from "../../services/metodoPago.service";
+import {useGetAllMetodosPagoActivo } from "../../services/metodoPago.service";
 import Swal from "sweetalert2";
 import { selectPerfilCliente } from "../../store/slices/auth.slice";
 import { useCrearPedidoOnline } from "../../services/pedido.service";

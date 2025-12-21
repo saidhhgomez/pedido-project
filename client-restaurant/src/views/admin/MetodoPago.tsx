@@ -12,19 +12,19 @@ export default function RenderMetodoPago() {
   const [openCreate, setOpenCreate] = useState(false);
 
   const handleCreate = (data: MetodoPago) => {
-    create(data, { onSuccess: () => { 
+    create(data, { onSuccess: (success) => { 
       refetch(); 
 Swal.fire({
   position: "center",
   icon: "success",
-  title: "Metodo de Pago Registrado",
+  title: success.data.message,
   showConfirmButton: false,
   timer: 1200
-});    }, onError: ()=>{
+});    }, onError: (err)=>{
   Swal.fire({
   position: "center",
   icon: "error",
-  title: "Metodo de Pago No Registrado",
+  title: err.message,
   showConfirmButton: false,
   timer: 1500
 });
