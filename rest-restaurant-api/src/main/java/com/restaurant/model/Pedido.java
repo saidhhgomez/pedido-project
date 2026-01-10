@@ -1,5 +1,6 @@
 package com.restaurant.model;
 
+
 public class Pedido {
     private int idPedido;
     private int idCliente;

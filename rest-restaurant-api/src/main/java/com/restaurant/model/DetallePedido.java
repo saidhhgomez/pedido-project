@@ -1,5 +1,6 @@
 package com.restaurant.model;
 
+
 import java.math.BigDecimal;
 
 public class DetallePedido {

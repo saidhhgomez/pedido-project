@@ -16,7 +16,7 @@ https://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <maven.compiler.target>1.8</maven.compiler.target>
 
-    <jersey.version>2.39</jersey.version>
+    <jersey.version>2.35</jersey.version>
 
 </properties>
   
@@ -162,11 +162,7 @@ https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	    
 	</dependency>
 
-	<dependency>
-		<groupId>com.delivery.api</groupId>
-		<artifactId>delivery-api-rest</artifactId>
-		<version>0.0.1-SNAPSHOT</version>
-	</dependency>
+
 </dependencies>
   
 </project>

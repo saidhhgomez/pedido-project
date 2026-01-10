@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 
+
 @Path("/cliente")
 @Produces(MediaType.APPLICATION_JSON)
 public class ClienteResource {
@@ -98,4 +99,5 @@ public class ClienteResource {
                            .entity("{\"error\": \"" + e.getMessage() + "\"}").build();
         }
     }
+
 }

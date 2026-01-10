@@ -4,7 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter } from "react-router";
 import { persistor, store } from "./store";
 import { Provider } from "react-redux";
-import App from "./navigation";
+import App from "../src/navigation";
 import { PersistGate } from "redux-persist/integration/react";
 import "@fontsource/roboto/300.css";
 import "@fontsource/roboto/400.css";

@@ -15,14 +15,36 @@ export interface PersonaDTO {
   fechaNacimiento: string;
 }
 
-export interface EmpleadoDataDTO {
+export interface EmpleadoDTO {
   direccion: string;
-  estadoEmpleado: string;
   imagenConductor_url: string;
+  estadoEmpleado: string;
+}
+
+export interface ContratoDTO {
+  idSucursal: number;
+  idTipoContrato: number;
+  idRol: number;
+  fechaInicio: string;
+  fechaFin: string;
+  salario: number;
 }
 
 export interface RegistrarEmpleadoDTO {
   credenciales: CredencialesDTO;
   persona: PersonaDTO;
-  empleado: EmpleadoDataDTO;
+  empleado: EmpleadoDTO;
+  contrato: ContratoDTO;
+}
+
+// Respuesta del DNI
+export interface PersonaDniResponse {
+  tipoDocumento: string;
+  numDocumento: string;
+  fechaNacimiento: string;
+  genero: string;
+  correo: string;
+  nombreCompleto: string;
+  telefono: string;
+  idPersona: number;
 }

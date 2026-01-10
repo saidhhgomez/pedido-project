@@ -1,5 +1,6 @@
 import { Box, Grid } from "@mui/material";
 import { Outlet } from "react-router";
+import logo from "../assets/fondo-cliente.jpg"
 
 export default function AuthLayout() {
   return (
@@ -7,14 +8,18 @@ export default function AuthLayout() {
       <Grid size={6}>
         <Box
           sx={{
-            backgroundImage: `url(/fondo.avif)`,
+            backgroundImage: `url(${logo})`,
             backgroundRepeat: "no-repeat",
             backgroundSize: "cover",
             height: "100vh",
           }}
         />
       </Grid>
-      <Grid size={6}>
+      <Grid size={6}
+      sx={{            backgroundColor: "#e74c3c",   // ← AQUÍ LE PUSE EL COLOR ROJO
+}}
+      
+      >
         <Box
           sx={{
             display: "flex",

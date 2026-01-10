@@ -1,7 +1,7 @@
 package com.restaurant.dao;
 
-import com.restaurant.model.DireccionCliente;
 import com.restaurant.config.DBConnection;
+import com.restaurant.model.DireccionCliente;
 
 import java.sql.*;
 import java.util.ArrayList;

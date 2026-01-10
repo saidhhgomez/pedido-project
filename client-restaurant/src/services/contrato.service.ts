@@ -1,0 +1,87 @@
+import type { TipoJornada } from "../types/contrato.type";
+import axiosClient from "./api.service";
+import { useMutation, useQuery } from "@tanstack/react-query";
+
+const PATH="rest-restaurant-api/api/tipocontrato"
+
+function getAllContratoId(id: number) {
+  return axiosClient.get(`${PATH}/cliente/${id}`);
+}
+
+function deleteContrato(id:number){
+return axiosClient.delete(`${PATH}/${id}`);
+}
+
+function updateContrato({ id, data }: { id: number; data: Partial<TipoJornada> }) {
+  return axiosClient.put(`${PATH}/${id}`, data);
+}
+
+ function createContrato(payload:TipoJornada ) {
+  return axiosClient.post(
+    `${PATH}`,
+    payload
+  );
+}
+
+function getAllContrato() {
+  return axiosClient.get(`${PATH}`);
+}
+
+
+// Función que hace PATCH al backend
+function updateContratoEstado  ({ id, estado }: { id: number; estado: "activo" | "inactivo" }){
+  return axiosClient.put(`${PATH}/${id}/estado`, { estado });
+
+}
+
+
+
+export function useGetAllContrato(){
+  return useQuery({
+        queryFn:getAllContrato,
+    queryKey:["getAllContrato"],
+  });
+}
+
+
+export function useGetContratoId(id?: number | null) {
+  return useQuery({
+    queryKey: ["getAllContratoId", id], // 🔥 se vuelve a ejecutar si cambia el id
+    queryFn: () => getAllContratoId(id as number),
+    enabled: !!id, // 🔥 evita errores cuando idCliente es null
+  });
+}
+
+export function useRemoveContrato(){
+  return useMutation(
+  {
+    mutationFn: deleteContrato,
+    mutationKey:["deleteContrato"]
+  }
+  );
+}
+
+
+export function useCreateContrato(){
+  return useMutation(
+    {
+      mutationFn:createContrato,
+      mutationKey:["createContrato"],
+    }
+  )
+}
+
+export function useUpdateContrato() {
+  return useMutation({
+    mutationFn: updateContrato,
+    mutationKey: ["updateContrato"],
+  });
+}
+
+
+export function useUpdateContratoEstado() {
+  return useMutation({
+    mutationFn: updateContratoEstado,
+    mutationKey: ["updateContratoEstado"],
+  });
+}
