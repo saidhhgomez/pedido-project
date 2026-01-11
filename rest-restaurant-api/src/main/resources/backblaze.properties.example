@@ -1,0 +1,8 @@
+b2.keyId=${B2_KEY_ID}
+b2.applicationKey=${B2_APP_KEY}
+b2.bucketName=${B2_BUCKET}
+b2.region=${B2_REGION}
+b2.folder="contratos/"
+b2.prefix="contratos/"
+b2.endpoint=${B2_ENDPOINT}
+b2.publicFileEndpoint=${B2_PUBLIC_ENDPOINT}

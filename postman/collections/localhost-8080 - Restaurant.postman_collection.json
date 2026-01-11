@@ -1,0 +1,2507 @@
+{
+	"info": {
+		"_postman_id": "37769be9-f1f5-4691-998c-0896f885185f",
+		"name": "localhost:8080 | Restaurant",
+		"description": "# 🚀 Get started here\n\nThis template guides you through CRUD operations (GET, POST, PUT, DELETE), variables, and tests.\n\n## 🔖 **How to use this template**\n\n#### **Step 1: Send requests**\n\nRESTful APIs allow you to perform CRUD operations using the POST, GET, PUT, and DELETE HTTP methods.\n\nThis collection contains each of these [request](https://learning.postman.com/docs/sending-requests/requests/) types. Open each request and click \"Send\" to see what happens.\n\n#### **Step 2: View responses**\n\nObserve the response tab for status code (200 OK), response time, and size.\n\n#### **Step 3: Send new Body data**\n\nUpdate or add new data in \"Body\" in the POST request. Typically, Body data is also used in PUT request.\n\n```\n{\n    \"name\": \"Add your name in the body\"\n}\n\n ```\n\n#### **Step 4: Update the variable**\n\nVariables enable you to store and reuse values in Postman. We have created a [variable](https://learning.postman.com/docs/sending-requests/variables/) called `base_url` with the sample request [https://postman-api-learner.glitch.me](https://postman-api-learner.glitch.me). Replace it with your API endpoint to customize this collection.\n\n#### **Step 5: Add tests in the \"Scripts\" tab**\n\nAdding tests to your requests can help you confirm that your API is working as expected. You can write test scripts in JavaScript and view the output in the \"Test Results\" tab.\n\n<img src=\"https://content.pstmn.io/fa30ea0a-373d-4545-a668-e7b283cca343/aW1hZ2UucG5n\" alt=\"\" height=\"1530\" width=\"2162\">\n\n## 💪 Pro tips\n\n- Use folders to group related requests and organize the collection.\n    \n- Add more [scripts](https://learning.postman.com/docs/writing-scripts/intro-to-scripts/) to verify if the API works as expected and execute workflows.\n    \n\n## 💡Related templates\n\n[API testing basics](https://go.postman.co/redirect/workspace?type=personal&collectionTemplateId=e9a37a28-055b-49cd-8c7e-97494a21eb54&sourceTemplateId=ddb19591-3097-41cf-82af-c84273e56719)  \n[API documentation](https://go.postman.co/redirect/workspace?type=personal&collectionTemplateId=e9c28f47-1253-44af-a2f3-20dce4da1f18&sourceTemplateId=ddb19591-3097-41cf-82af-c84273e56719)  \n[Authorization methods](https://go.postman.co/redirect/workspace?type=personal&collectionTemplateId=31a9a6ed-4cdf-4ced-984c-d12c9aec1c27&sourceTemplateId=ddb19591-3097-41cf-82af-c84273e56719)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "44882036",
+		"_collection_link": "https://saidhuallanca.postman.co/workspace/My-Workspace~041542f4-43c4-4ebf-8599-401305c473a1/collection/44882036-37769be9-f1f5-4691-998c-0896f885185f?action=share&source=collection_link&creator=44882036"
+	},
+	"item": [
+		{
+			"name": "Empleado",
+			"item": [
+				{
+					"name": "Sucursales",
+					"item": [
+						{
+							"name": "sucursales",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"nombre\": \"Chavo Chiclayo\",\r\n  \"direccion\": \"Av. La Pedro\",\r\n  \"telefono\": \"7894561\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8080/rest-restaurant-api/api/sucursales",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"rest-restaurant-api",
+										"api",
+										"sucursales"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "sucursales{id}Estado",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"estado\": \"activo\"\r\n}\r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8080/rest-restaurant-api/api/sucursales/1/estado",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"rest-restaurant-api",
+										"api",
+										"sucursales",
+										"1",
+										"estado"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "sucursales/{idSucursal}",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"nombre\": \"Chavo Chiclayo\",\r\n  \"direccion\": \"Av. La Realeza 123\",\r\n  \"telefono\": \"2852009\",\r\n  \"estado\": \"inactivo\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8080/rest-restaurant-api/api/sucursales/2",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"rest-restaurant-api",
+										"api",
+										"sucursales",
+										"2"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "sucursales",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/rest-restaurant-api/api/sucursales",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"rest-restaurant-api",
+										"api",
+										"sucursales"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "activas",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "http://localhost:8080/rest-restaurant-api/api/sucursales/activas",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"rest-restaurant-api",
+										"api",
+										"sucursales",
+										"activas"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "sucursales/{idSucursal}",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/rest-restaurant-api/api/sucursales/2",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"rest-restaurant-api",
+										"api",
+										"sucursales",
+										"2"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "sucursales/{idSucursal}",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/rest-restaurant-api/api/sucursales/2",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"rest-restaurant-api",
+										"api",
+										"sucursales",
+										"2"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "TipoContrato",
+					"item": [
+						{
+							"name": "tipocontrato",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"nombre\": \"Full Time\",\r\n  \"descripcion\": \"Tiempo Completo, 6 días a la semana\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8080/rest-restaurant-api/api/tipocontrato",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"rest-restaurant-api",
+										"api",
+										"tipocontrato"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "tipocontrato/{idTipo}",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"nombre\": \"Full Time\",\r\n  \"descripcion\": \"Jornada completa, 8 horas diarias\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8080/rest-restaurant-api/api/tipocontrato/2",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"rest-restaurant-api",
+										"api",
+										"tipocontrato",
+										"2"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "{id}/estado",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"estado\": \"inactivo\"\r\n}\r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8080/rest-restaurant-api/api/tipocontrato/1/estado",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"rest-restaurant-api",
+										"api",
+										"tipocontrato",
+										"1",
+										"estado"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "activos",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/rest-restaurant-api/api/tipocontrato/activos",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"rest-restaurant-api",
+										"api",
+										"tipocontrato",
+										"activos"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "tipocontrato",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/rest-restaurant-api/api/tipocontrato",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"rest-restaurant-api",
+										"api",
+										"tipocontrato"
+									]
+								},
+								"description": "activos-inactivos."
+							},
+							"response": []
+						},
+						{
+							"name": "tipocontrato/{idTipo}",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/rest-restaurant-api/api/tipocontrato/2",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"rest-restaurant-api",
+										"api",
+										"tipocontrato",
+										"2"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "tipocontrato/{idTipo}",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/rest-restaurant-api/api/tipocontrato/2",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"rest-restaurant-api",
+										"api",
+										"tipocontrato",
+										"2"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Rol",
+					"item": [
+						{
+							"name": "roles",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"nombre\": \"Mesero\",\r\n  \"descripcion\": \"Se encarga de atender directamente a los clientes\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8080/rest-restaurant-api/api/roles",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"rest-restaurant-api",
+										"api",
+										"roles"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "roles/{idRol}",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{   \r\n    \"nombre\": \"Supervisor\",\r\n    \"descripcion\": \"Es el jefe de los empleados en el salón\"    \r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8080/rest-restaurant-api/api/roles/1",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"rest-restaurant-api",
+										"api",
+										"roles",
+										"1"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "{id}/estado",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"estado\": \"inactivo\"\r\n}\r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8080/rest-restaurant-api/api/roles/1/estado",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"rest-restaurant-api",
+										"api",
+										"roles",
+										"1",
+										"estado"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "roles",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/rest-restaurant-api/api/roles",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"rest-restaurant-api",
+										"api",
+										"roles"
+									]
+								},
+								"description": "traer todos los roles-inactivos y activos"
+							},
+							"response": []
+						},
+						{
+							"name": "activos",
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/rest-restaurant-api/api/roles/activos",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"rest-restaurant-api",
+										"api",
+										"roles",
+										"activos"
+									]
+								},
+								"description": "Para contratar"
+							},
+							"response": []
+						},
+						{
+							"name": "roles/{idRol}",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/rest-restaurant-api/api/roles/1",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"rest-restaurant-api",
+										"api",
+										"roles",
+										"1"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "roles({idRol}",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/rest-restaurant-api/api/roles/3",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"rest-restaurant-api",
+										"api",
+										"roles",
+										"3"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "MetodoPago",
+					"item": [
+						{
+							"name": "agregar",
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"nombre\":\"Plin\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8080/rest-restaurant-api/api/metodopago",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"rest-restaurant-api",
+										"api",
+										"metodopago"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "metodoPago",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8080/rest-restaurant-api/api/metodopago",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"rest-restaurant-api",
+										"api",
+										"metodopago"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "activos",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8080/rest-restaurant-api/api/metodopago/activos",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"rest-restaurant-api",
+										"api",
+										"metodopago",
+										"activos"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "{id}",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8080/rest-restaurant-api/api/metodopago/2",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"rest-restaurant-api",
+										"api",
+										"metodopago",
+										"2"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "actualizar",
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"nombre\": \"Tarjeta de Debito\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8080/rest-restaurant-api/api/metodopago/3",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"rest-restaurant-api",
+										"api",
+										"metodopago",
+										"3"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "{id}/estado",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"estado\": \"inactivo\"\r\n}\r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8080/rest-restaurant-api/api/metodopago/1/estado",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"rest-restaurant-api",
+										"api",
+										"metodopago",
+										"1",
+										"estado"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "{id}",
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/rest-restaurant-api/api/metodopago/7",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"rest-restaurant-api",
+										"api",
+										"metodopago",
+										"7"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Mesa",
+					"item": [
+						{
+							"name": "crear",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"idSucursal\": 1,\r\n    \"numeroMesa\": \"9\",\r\n    \"capacidad\": 4,\r\n    \"ubicacion\": \"Terraza\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8080/rest-restaurant-api/api/mesas",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"rest-restaurant-api",
+										"api",
+										"mesas"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "mesero/{idSucursal}",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/rest-restaurant-api/api/mesas/mesero/1",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"rest-restaurant-api",
+										"api",
+										"mesas",
+										"mesero",
+										"1"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "admin/{idSucursal}",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/rest-restaurant-api/api/mesas/admin/1",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"rest-restaurant-api",
+										"api",
+										"mesas",
+										"admin",
+										"1"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "{idMesa}",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"idSucursal\": 1,\r\n    \"numeroMesa\": \"M01\",\r\n    \"capacidad\": 6,\r\n    \"ubicacion\": \"Salón Principal\",\r\n    \"estado\": \"activo\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8080/rest-restaurant-api/api/mesas/1",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"rest-restaurant-api",
+										"api",
+										"mesas",
+										"1"
+									]
+								},
+								"description": "activos-inactivos."
+							},
+							"response": []
+						},
+						{
+							"name": "{idMesa}",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/rest-restaurant-api/api/mesas/1",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"rest-restaurant-api",
+										"api",
+										"mesas",
+										"1"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "CatalogoComida",
+					"item": [
+						{
+							"name": "catalogo",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "http://localhost:8080/rest-restaurant-api/api/catalogo",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"rest-restaurant-api",
+										"api",
+										"catalogo"
+									]
+								},
+								"description": "Me trae todos los platos disponibles"
+							},
+							"response": []
+						},
+						{
+							"name": "{id}",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "http://localhost:8080/rest-restaurant-api/api/catalogo/1",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"rest-restaurant-api",
+										"api",
+										"catalogo",
+										"1"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "disponibles",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "http://localhost:8080/rest-restaurant-api/api/catalogo/disponibles",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"rest-restaurant-api",
+										"api",
+										"catalogo",
+										"disponibles"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "registrar",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "data",
+											"value": "{\n  \"nombre\": \"Lomo Saltado Clásico\",\n  \"categoria\": \"Platos Criollos\",\n  \"precio\": 55.50,\n  \"stock\": 20\n}",
+											"type": "text"
+										},
+										{
+											"key": "imagenPlato",
+											"type": "file",
+											"src": "5HhC5BIwP/Image20251007103648.png"
+										}
+									]
+								},
+								"url": {
+									"raw": "http://localhost:8080/rest-restaurant-api/api/catalogo?idAdmin=1",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"rest-restaurant-api",
+										"api",
+										"catalogo"
+									],
+									"query": [
+										{
+											"key": "idAdmin",
+											"value": "1"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "actualizar",
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"nombre\": \"Lomo Saltado Clásico\",\r\n  \"categoria\": \"Platos Criollos\",\r\n  \"precio\": 20.50,\r\n  \"stock\": 25,\r\n  \"estadoplato\": true,\r\n  \"imagenPlatoUrl\": \"contratos/imagen_catalogo/platos_criollos/lomo_saltado_clásico_37b96277_20251212143717.png\"\r\n}\r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8080/rest-restaurant-api/api/catalogo/1",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"rest-restaurant-api",
+										"api",
+										"catalogo",
+										"1"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "actualizar/estado",
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "\r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8080/rest-restaurant-api/api/catalogo/12/estado?activo=true",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"rest-restaurant-api",
+										"api",
+										"catalogo",
+										"12",
+										"estado"
+									],
+									"query": [
+										{
+											"key": "activo",
+											"value": "true"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "{id}",
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8080/rest-restaurant-api/api/catalogo/12",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"rest-restaurant-api",
+										"api",
+										"catalogo",
+										"12"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Contrato",
+					"item": [
+						{
+							"name": "dni/{dni}",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "http://localhost:8080/rest-restaurant-api/api/empleado/dni/77889900",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"rest-restaurant-api",
+										"api",
+										"empleado",
+										"dni",
+										"77889900"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "registrar",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Successful POST request\", function () {",
+											"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+											"});",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "data",
+											"value": "{\n    \"credenciales\": {\n        \"usuario\": \"said\",\n        \"contrasena\": \"12345\"\n    },\n    \"persona\": {\n        \"nombres\": \"Said Herminio\",\n        \"apPaterno\": \"Huallanca\",\n        \"apMaterno\": \"Gomez\",\n        \"genero\": \"M\",\n        \"tipoDocumento\": \"DNI\",\n        \"numDocumento\": \"75922228\",\n        \"telefono\": \"940539879\",\n        \"correo\": \"said@example.com\",\n        \"fechaNacimiento\": \"2008-08-18\"\n    },\n    \"empleado\": {\n        \"direccion\": \"Jiron Pampa de Nazca, D11, Santiago de Surco\"\n    },\n    \"contrato\": {\n        \"idSucursal\": 1,\n        \"idTipoContrato\": 1,\n        \"idRol\": 1,\n        \"fechaInicio\": \"2025-12-20 08:30:00\",\n        \"salario\": 3500.00\n    }\n}",
+											"type": "text"
+										},
+										{
+											"key": "pdfFirmado",
+											"type": "file",
+											"src": "BQTDrFd9h/29-Contrato-de-Trabajo-de-Wendy-Lopez.pdf"
+										},
+										{
+											"key": "imagenEmpleado",
+											"type": "file",
+											"src": "jqHlrZBj8/Foto_De_Perfil_2022.jpg"
+										}
+									]
+								},
+								"url": {
+									"raw": "http://localhost:8080/rest-restaurant-api/api/empleado/registrar?idAdmin=1",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"rest-restaurant-api",
+										"api",
+										"empleado",
+										"registrar"
+									],
+									"query": [
+										{
+											"key": "idAdmin",
+											"value": "1"
+										}
+									]
+								},
+								"description": "This is a POST request, submitting data to an API via the request body. This request submits JSON data, and the data is reflected in the response.\n\nA successful POST request typically returns a `200 OK` or `201 Created` response code."
+							},
+							"response": []
+						},
+						{
+							"name": "contrato-existente",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "data",
+											"value": "{\n    \"persona\": {\n        \"idPersona\": 14,\n        \"numDocumento\": \"45231567\"\n    },\n    \"empleado\": {\n        \"direccion\": \"Av. Los Sauces 456, Surco\"\n    },\n    \"contrato\": {\n        \"idSucursal\": 1,\n        \"idTipoContrato\": 1,\n        \"idRol\": 1,\n        \"fechaInicio\": \"2025-12-20 09:00:00\",\n        \"salario\": 2800.50\n    }\n}",
+											"type": "text"
+										},
+										{
+											"key": "pdfFirmado",
+											"type": "file",
+											"src": "-3FXk5RiN/37069b44-1cfc-435a-a728-201139bd7840.pdf"
+										},
+										{
+											"key": "imagenEmpleado",
+											"type": "file",
+											"src": "CXoIKST5S/Busqueda.png"
+										}
+									]
+								},
+								"url": {
+									"raw": "http://localhost:8080/rest-restaurant-api/api/empleado/contrato-existente?idAdmin=1",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"rest-restaurant-api",
+										"api",
+										"empleado",
+										"contrato-existente"
+									],
+									"query": [
+										{
+											"key": "idAdmin",
+											"value": "1"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "actualizar/{idPersona}",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"nombres\": \"Juan Pedro\",\r\n  \"apPaterno\": \"Pérez\",\r\n  \"apMaterno\": \"Ramírez\",\r\n  \"genero\": \"M\",\r\n  \"tipoDocumento\": \"DNI\",\r\n  \"numDocumento\": \"74125896\",\r\n  \"telefono\": \"999888777\",\r\n  \"correo\": \"juan.nuevo@gmail.com\",\r\n  \"fechaNacimiento\": \"1995-04-11\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8080/rest-restaurant-api/api/empleado/actualizar/6",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"rest-restaurant-api",
+										"api",
+										"empleado",
+										"actualizar",
+										"6"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "activos-vencimiento",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/rest-restaurant-api/api/empleado/activos-vencimiento",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"rest-restaurant-api",
+										"api",
+										"empleado",
+										"activos-vencimiento"
+									]
+								},
+								"description": "empleados con fecha activos y vigente."
+							},
+							"response": []
+						},
+						{
+							"name": "historial-completo",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/rest-restaurant-api/api/empleado/historial-completo",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"rest-restaurant-api",
+										"api",
+										"empleado",
+										"historial-completo"
+									]
+								},
+								"description": "empleados vencido y activos."
+							},
+							"response": []
+						},
+						{
+							"name": "baja/{idEmpleado}",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/rest-restaurant-api/api/empleado/baja/12",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"rest-restaurant-api",
+										"api",
+										"empleado",
+										"baja",
+										"12"
+									]
+								},
+								"description": "Empleado doy de baja y inactivo"
+							},
+							"response": []
+						},
+						{
+							"name": "historial/{idEmpleado}",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/rest-restaurant-api/api/empleado/historial/13",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"rest-restaurant-api",
+										"api",
+										"empleado",
+										"historial",
+										"13"
+									]
+								},
+								"description": "Como empleado ver mis contratos"
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "PedidoPresencial",
+					"item": [
+						{
+							"name": "listar",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/rest-restaurant-api/api/pedido-presencial/listar",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"rest-restaurant-api",
+										"api",
+										"pedido-presencial",
+										"listar"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "listar/{idEmpleado}",
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/rest-restaurant-api/api/pedido-presencial/empleado/7",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"rest-restaurant-api",
+										"api",
+										"pedido-presencial",
+										"empleado",
+										"7"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "listar/{idPedido}",
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/rest-restaurant-api/api/pedido-presencial/12",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"rest-restaurant-api",
+										"api",
+										"pedido-presencial",
+										"12"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "estado/{idPedido}",
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"estado\": \"CANCELADO\"\r\n}\r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8080/rest-restaurant-api/api/pedido-presencial/estado/12",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"rest-restaurant-api",
+										"api",
+										"pedido-presencial",
+										"estado",
+										"12"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "mesa/{idPedido}",
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"idMesa\": 2\r\n}\r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8080/rest-restaurant-api/api/pedido-presencial/cambiar-mesa/12",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"rest-restaurant-api",
+										"api",
+										"pedido-presencial",
+										"cambiar-mesa",
+										"12"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "pedidoCompleto/{idPedido}",
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"idEmpleado\": 8,\r\n  \"idMesa\": 2,\r\n  \"idFormaPago\": 4,\r\n  \"estado\": \"EN PROCESO\"\r\n}\r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8080/rest-restaurant-api/api/pedido-presencial/actualizar/12",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"rest-restaurant-api",
+										"api",
+										"pedido-presencial",
+										"actualizar",
+										"12"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "formaPago/{idPedido}",
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"idFormaPago\": 2\r\n}\r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8080/rest-restaurant-api/api/pedido-presencial/cambiar-forma-pago/13",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"rest-restaurant-api",
+										"api",
+										"pedido-presencial",
+										"cambiar-forma-pago",
+										"13"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "perfil /{idEmpleado}",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/rest-restaurant-api/api/empleado/perfil/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"rest-restaurant-api",
+								"api",
+								"empleado",
+								"perfil",
+								"1"
+							]
+						},
+						"description": "Como empleado ver mis contratos"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Cliente",
+			"item": [
+				{
+					"name": "Pedido",
+					"item": [
+						{
+							"name": "Presencial",
+							"item": [
+								{
+									"name": "crear",
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"idEmpleado\": 1,\r\n    \"idSucursal\": 1,\r\n    \"idMesa\": 9,\r\n    \"idFormaPago\": 1,\r\n    \"detalles\": [\r\n        {\r\n            \"idCatalogo\": 1,\r\n            \"cantidad\": 1\r\n        }\r\n    ]\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "http://localhost:8080/rest-restaurant-api/api/pedido/presencial",
+											"protocol": "http",
+											"host": [
+												"localhost"
+											],
+											"port": "8080",
+											"path": [
+												"rest-restaurant-api",
+												"api",
+												"pedido",
+												"presencial"
+											]
+										},
+										"description": "SOLICITO"
+									},
+									"response": []
+								},
+								{
+									"name": "{idPedido}/liberar/{idMesa}",
+									"request": {
+										"method": "PUT",
+										"header": [],
+										"url": {
+											"raw": "http://localhost:8080/rest-restaurant-api/api/pedido/8/mesa/1/liberar",
+											"protocol": "http",
+											"host": [
+												"localhost"
+											],
+											"port": "8080",
+											"path": [
+												"rest-restaurant-api",
+												"api",
+												"pedido",
+												"8",
+												"mesa",
+												"1",
+												"liberar"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "habilitar/{idMesa}",
+									"request": {
+										"method": "PUT",
+										"header": [],
+										"url": {
+											"raw": "http://localhost:8080/rest-restaurant-api/api/pedido/mesa/1/habilitar",
+											"protocol": "http",
+											"host": [
+												"localhost"
+											],
+											"port": "8080",
+											"path": [
+												"rest-restaurant-api",
+												"api",
+												"pedido",
+												"mesa",
+												"1",
+												"habilitar"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "pedido/activo/{idMesa}",
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "http://localhost:8080/rest-restaurant-api/api/pedido/activo/2",
+											"protocol": "http",
+											"host": [
+												"localhost"
+											],
+											"port": "8080",
+											"path": [
+												"rest-restaurant-api",
+												"api",
+												"pedido",
+												"activo",
+												"2"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "cambio-mesa",
+									"request": {
+										"method": "PUT",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"idPedido\": 9,\r\n    \"idMesaOrigen\": 1,\r\n    \"idMesaDestino\": 2\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "http://localhost:8080/rest-restaurant-api/api/pedido/cambio-mesa",
+											"protocol": "http",
+											"host": [
+												"localhost"
+											],
+											"port": "8080",
+											"path": [
+												"rest-restaurant-api",
+												"api",
+												"pedido",
+												"cambio-mesa"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "agregar/{idPedido}",
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "[\r\n    {\r\n        \"idCatalogo\": 1,\r\n        \"cantidad\": 4\r\n    }\r\n]",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "http://localhost:8080/rest-restaurant-api/api/pedido/detalles/9",
+											"protocol": "http",
+											"host": [
+												"localhost"
+											],
+											"port": "8080",
+											"path": [
+												"rest-restaurant-api",
+												"api",
+												"pedido",
+												"detalles",
+												"9"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "cancelar/{idPedido}",
+									"request": {
+										"method": "PUT",
+										"header": [],
+										"url": {
+											"raw": "http://localhost:8080/rest-restaurant-api/api/pedido/cancelar/9",
+											"protocol": "http",
+											"host": [
+												"localhost"
+											],
+											"port": "8080",
+											"path": [
+												"rest-restaurant-api",
+												"api",
+												"pedido",
+												"cancelar",
+												"9"
+											]
+										},
+										"description": "Se solicito pero se cancela."
+									},
+									"response": []
+								},
+								{
+									"name": "{idPedido/detalle/{idDetalle}",
+									"request": {
+										"method": "DELETE",
+										"header": [],
+										"url": {
+											"raw": "http://localhost:8080/rest-restaurant-api/api/pedido/9/detalle/11",
+											"protocol": "http",
+											"host": [
+												"localhost"
+											],
+											"port": "8080",
+											"path": [
+												"rest-restaurant-api",
+												"api",
+												"pedido",
+												"9",
+												"detalle",
+												"11"
+											]
+										},
+										"description": "Solicito mi pedido, y no quiero,"
+									},
+									"response": []
+								},
+								{
+									"name": "empleado/historial",
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "http://localhost:8080/rest-restaurant-api/api/pedido/empleado/1/historial",
+											"protocol": "http",
+											"host": [
+												"localhost"
+											],
+											"port": "8080",
+											"path": [
+												"rest-restaurant-api",
+												"api",
+												"pedido",
+												"empleado",
+												"1",
+												"historial"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "mesa/historial",
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "http://localhost:8080/rest-restaurant-api/api/pedido/mesa/6/historial",
+											"protocol": "http",
+											"host": [
+												"localhost"
+											],
+											"port": "8080",
+											"path": [
+												"rest-restaurant-api",
+												"api",
+												"pedido",
+												"mesa",
+												"6",
+												"historial"
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "Online",
+							"item": [
+								{
+									"name": "crear",
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"idCliente\": 1,\r\n    \"idDireccion\": 2,\r\n    \"idSucursal\": 2,\r\n    \"idFormaPago\": 1,\r\n    \"detalles\": [\r\n        {\r\n            \"idCatalogo\": 1,\r\n            \"cantidad\": 10\r\n        }\r\n    ]\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "http://localhost:8080/rest-restaurant-api/api/pedido/online",
+											"protocol": "http",
+											"host": [
+												"localhost"
+											],
+											"port": "8080",
+											"path": [
+												"rest-restaurant-api",
+												"api",
+												"pedido",
+												"online"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "activos/{idSucursal}",
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "http://localhost:8080/rest-restaurant-api/api/pedido/online/activos/1",
+											"protocol": "http",
+											"host": [
+												"localhost"
+											],
+											"port": "8080",
+											"path": [
+												"rest-restaurant-api",
+												"api",
+												"pedido",
+												"online",
+												"activos",
+												"1"
+											]
+										},
+										"description": "Gerenteactivos{pedidos del cliente que estan en pendiente o en camino)"
+									},
+									"response": []
+								},
+								{
+									"name": "repartidores/sucursal/{idSucursal}",
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "http://localhost:8080/rest-restaurant-api/api/empleado/repartidores/sucursal/1",
+											"protocol": "http",
+											"host": [
+												"localhost"
+											],
+											"port": "8080",
+											"path": [
+												"rest-restaurant-api",
+												"api",
+												"empleado",
+												"repartidores",
+												"sucursal",
+												"1"
+											]
+										},
+										"description": "Despachar aginar :TRABAJADORES CON ROL REPARTIDOR SUCURSAL"
+									},
+									"response": []
+								},
+								{
+									"name": "{idPedido}/asignar/{idEmpleado}",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Successful PUT request\", function () {",
+													"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204]);",
+													"});",
+													""
+												],
+												"type": "text/javascript",
+												"packages": {},
+												"requests": {}
+											}
+										}
+									],
+									"request": {
+										"method": "PUT",
+										"header": [],
+										"url": {
+											"raw": "http://localhost:8080/rest-restaurant-api/api/pedido/1/asignar-repartidor/5",
+											"protocol": "http",
+											"host": [
+												"localhost"
+											],
+											"port": "8080",
+											"path": [
+												"rest-restaurant-api",
+												"api",
+												"pedido",
+												"1",
+												"asignar-repartidor",
+												"5"
+											]
+										},
+										"description": "This is a PUT request and it is used to overwrite an existing piece of data. For instance, after you create an entity with a POST request, you may want to modify that later. You can do that using a PUT request. You typically identify the entity being updated by including an identifier in the URL (eg. `id=1`).\n\nPedido- ASIGNO REPARTIDOR\n\nA successful PUT request typically returns a `200 OK`, `201 Created`, or `204 No Content` response code."
+									},
+									"response": []
+								},
+								{
+									"name": "{idPedido}/finalizar",
+									"request": {
+										"method": "PUT",
+										"header": [],
+										"url": {
+											"raw": "http://localhost:8080/rest-restaurant-api/api/pedido/online/1/finalizar",
+											"protocol": "http",
+											"host": [
+												"localhost"
+											],
+											"port": "8080",
+											"path": [
+												"rest-restaurant-api",
+												"api",
+												"pedido",
+												"online",
+												"1",
+												"finalizar"
+											]
+										},
+										"description": "Repartidor-Admin\n\nBton Finalizar Pedido"
+									},
+									"response": []
+								},
+								{
+									"name": "historial/sucursal/{idSucursal}",
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "http://localhost:8080/rest-restaurant-api/api/pedido/historial/sucursal/1",
+											"protocol": "http",
+											"host": [
+												"localhost"
+											],
+											"port": "8080",
+											"path": [
+												"rest-restaurant-api",
+												"api",
+												"pedido",
+												"historial",
+												"sucursal",
+												"1"
+											]
+										},
+										"description": "Gerente"
+									},
+									"response": []
+								},
+								{
+									"name": "historial/repartidor/{idEmpleado}",
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "http://localhost:8080/rest-restaurant-api/api/pedido/historial/repartidor/1",
+											"protocol": "http",
+											"host": [
+												"localhost"
+											],
+											"port": "8080",
+											"path": [
+												"rest-restaurant-api",
+												"api",
+												"pedido",
+												"historial",
+												"repartidor",
+												"1"
+											]
+										},
+										"description": "Gerente"
+									},
+									"response": []
+								},
+								{
+									"name": "cocina/pendientes/{idSucursal}",
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "http://localhost:8080/rest-restaurant-api/api/pedido/cocina/pendientes/1",
+											"protocol": "http",
+											"host": [
+												"localhost"
+											],
+											"port": "8080",
+											"path": [
+												"rest-restaurant-api",
+												"api",
+												"pedido",
+												"cocina",
+												"pendientes",
+												"1"
+											]
+										},
+										"description": "cocinero"
+									},
+									"response": []
+								},
+								{
+									"name": "tomar-plato/{idDetalle}/{idEmpleado}",
+									"request": {
+										"method": "PUT",
+										"header": [],
+										"url": {
+											"raw": "http://localhost:8080/rest-restaurant-api/api/pedido/cocina/tomar-plato/1/5",
+											"protocol": "http",
+											"host": [
+												"localhost"
+											],
+											"port": "8080",
+											"path": [
+												"rest-restaurant-api",
+												"api",
+												"pedido",
+												"cocina",
+												"tomar-plato",
+												"1",
+												"5"
+											]
+										},
+										"description": "Cocinero"
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "Empleados",
+							"item": [
+								{
+									"name": "cocina/historial/{idEmpleado}",
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "http://localhost:8080/rest-restaurant-api/api/pedido/cocina/historial/5",
+											"protocol": "http",
+											"host": [
+												"localhost"
+											],
+											"port": "8080",
+											"path": [
+												"rest-restaurant-api",
+												"api",
+												"pedido",
+												"cocina",
+												"historial",
+												"5"
+											]
+										},
+										"description": "Cocinero"
+									},
+									"response": []
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "registrar",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "data",
+									"value": "{\n  \"credenciales\": {\n    \"usuario\": \"ana\",\n    \"contrasena\": \"12345\"\n  },\n  \"persona\": {\n    \"nombres\": \"Ana Sofia\",\n    \"apPaterno\": \"Perez\",\n    \"apMaterno\": \"Gomez\",\n    \"genero\": \"F\",\n    \"tipoDocumento\": \"DNI\",\n    \"numDocumento\": \"98765432\", \n    \"telefono\": \"998877665\",\n    \"correo\": \"ana.perez@dominio.com\",\n    \"fechaNacimiento\": \"1995-05-15\"\n  },\n  \"cliente\": {\n    \"imagenCliente_url\": \"\"\n  }\n}",
+									"type": "text"
+								},
+								{
+									"key": "imagenCliente",
+									"type": "file",
+									"src": "AIcVC03UR/1727159873977-181af190-9d58-4c47-8e44-e6800af2fad2.webp"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:8080/rest-restaurant-api/api/cliente/registrar",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"rest-restaurant-api",
+								"api",
+								"cliente",
+								"registrar"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "direccion/registrar",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"idCliente\": 4,\r\n    \"departamento\": \"Lima\",\r\n    \"provincia\": \"Lima\",\r\n    \"distrito\": \"Miraflores\",\r\n    \"direccion\": \"Av. Bajada Balta 123\",\r\n    \"referencia\": \"Frente al parque Kennedy\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/rest-restaurant-api/api/direccion/registrar",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"rest-restaurant-api",
+								"api",
+								"direccion",
+								"registrar"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "direccion/{idCliente}",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/rest-restaurant-api/api/direccion/cliente/4",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"rest-restaurant-api",
+								"api",
+								"direccion",
+								"cliente",
+								"4"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "direccion/eliminar/{idDireccion}",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/rest-restaurant-api/api/direccion/eliminar/4",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"rest-restaurant-api",
+								"api",
+								"direccion",
+								"eliminar",
+								"4"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "mis-pedidos/{idCliente}",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/rest-restaurant-api/api/pedido/cliente/mis-pedidos/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"rest-restaurant-api",
+								"api",
+								"pedido",
+								"cliente",
+								"mis-pedidos",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "perfil/{idCliente}",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/rest-restaurant-api/api/cliente/perfil/4",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"rest-restaurant-api",
+								"api",
+								"cliente",
+								"perfil",
+								"4"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "login",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"usuario\": \"mesero\",\r\n  \"contrasena\": \"mesero\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/rest-restaurant-api/api/login",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"rest-restaurant-api",
+						"api",
+						"login"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "id",
+			"value": "1"
+		},
+		{
+			"key": "base_url",
+			"value": "https://template.postman-echo.com"
+		}
+	]
+}
